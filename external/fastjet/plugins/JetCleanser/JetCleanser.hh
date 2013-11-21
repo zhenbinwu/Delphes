@@ -102,8 +102,8 @@ public:
 
 
 private:
-  //  static constexpr double jc_zero = 1.0e-6;
-  static const double jc_zero = 1.0e-6;
+  static constexpr double jc_zero = 1.0e-6;
+  //  static const double jc_zero = 1.0e-6;
 
   double _rsub;
   double _fcut;
