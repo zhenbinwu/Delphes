@@ -43,6 +43,8 @@ set ExecutionPath {
   BTaggingLoose
   TauTagging
 
+  PileUpJetID
+  
   UniqueObjectFinderGJ
   UniqueObjectFinderEJ
   UniqueObjectFinderMJ
@@ -51,6 +53,24 @@ set ExecutionPath {
 
   TreeWriter
 }
+
+module PileUpJetID PileUpJetID {
+  set JetInputArray JetPileUpSubtractor/jets
+  
+  set OutputArray jets
+  
+  # Using constituents does not make sense with Charged hadron subtraction
+  # In 0 mode, dR cut used instead
+  set UseConstituents 0   
+
+  set TrackInputArray Calorimeter/eflowTracks
+  set NeutralInputArray Calorimeter/eflowTowers
+  set ParameterR 0.5
+  
+  set JetPTMin 10.0
+
+}
+
 
 ###############
 # PileUp Merger
@@ -710,7 +730,8 @@ module TauTagging TauTagging {
 
 module UniqueObjectFinder UniqueObjectFinderGJ {
    add InputArray PhotonIsolation/photons photons
-   add InputArray JetPileUpSubtractor/jets jets
+#   add InputArray JetPileUpSubtractor/jets jets
+   add InputArray PileUpJetID/jets jets 
 }
 
 module UniqueObjectFinder UniqueObjectFinderEJ {
@@ -732,8 +753,8 @@ module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
 #  add Branch Delphes/allParticles Particle GenParticle
   add Branch StatusPid/filteredParticles Particle GenParticle
-#  add Branch TrackMerger/tracks Track Track
-#  add Branch Calorimeter/towers Tower Tower
+  add Branch TrackMerger/tracks Track Track
+  add Branch Calorimeter/towers Tower Tower
 #  add Branch ConstituentFilter/eflowTracks EFlowTrack Track
 #  add Branch ConstituentFilter/eflowTowers EFlowTower Tower
 #  add Branch ConstituentFilter/muons EFlowMuon Muon

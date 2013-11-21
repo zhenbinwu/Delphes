@@ -36,6 +36,9 @@
 #include "modules/Weighter.h"
 #include "modules/ExampleModule.h"
 
+#include "modules/CleansedJetFinder.h"
+#include "modules/PileUpJetID.h"
+
 #ifdef __CINT__
 
 #pragma link off all globals;
@@ -66,5 +69,8 @@
 #pragma link C++ class Cloner+;
 #pragma link C++ class Weighter+;
 #pragma link C++ class ExampleModule+;
+
+#pragma link C++ class CleansedJetFinder+;
+#pragma link C++ class PileUpJetID+;
 
 #endif

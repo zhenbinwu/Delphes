@@ -111,9 +111,12 @@ void TrackPileUpSubtractor::Process()
 
       // apply pile-up subtraction
       // assume perfect pile-up subtraction for tracks outside fZVertexResolution
-      if(candidate->IsPU && TMath::Abs(z) > fZVertexResolution) continue;
-
-      array->Add(candidate);
+      if(candidate->IsPU && TMath::Abs(z) > fZVertexResolution) {
+	candidate->IsRecoPU = 1;
+      } else {
+	candidate->IsRecoPU = 0;
+	array->Add(candidate);
+      }
     }
   }
 }

@@ -96,11 +96,14 @@ Candidate::Candidate() :
   PID(0), Status(0), M1(-1), M2(-1), D1(-1), D2(-1),
   IsolationVar(0),
   Charge(0), Mass(0.0),
-  IsPU(0), IsConstituent(0),
+  IsPU(0), IsRecoPU(0), IsConstituent(0),
   BTag(0), TauTag(0), Eem(0.0), Ehad(0.0),
   WTag(0), TopTag(0), HTag(0),
   Tau1(-999), Tau2(-999), Tau3(-999),
   NSubJets(-999), MassDrop(-999), TrimmedMass(-999),
+  Beta(-999.), BetaStar(-999.), 
+  MeanSqDeltaR(-999.), PTD(-999.),
+  NCharged(-999), NNeutrals(-999),
   DeltaEta(0.0), DeltaPhi(0.0),
   Momentum(0.0, 0.0, 0.0, 0.0),
   Position(0.0, 0.0, 0.0, 0.0),
@@ -112,6 +115,9 @@ Candidate::Candidate() :
   Edges[1] = 0.0;
   Edges[2] = 0.0;
   Edges[3] = 0.0;
+  for (int i = 0 ; i < 5 ; i++) {
+    FracPt[i] = -999.;
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -186,6 +192,7 @@ void Candidate::Copy(TObject &obj) const
   object.Charge = Charge;
   object.Mass = Mass;
   object.IsPU = IsPU;
+  object.IsRecoPU = IsRecoPU;
   object.IsConstituent = IsConstituent;
   object.BTag = BTag;
   object.TauTag = TauTag;
@@ -209,6 +216,15 @@ void Candidate::Copy(TObject &obj) const
   object.Momentum = Momentum;
   object.Position = Position;
   object.Area = Area;
+  object.Beta = Beta;
+  object.BetaStar = BetaStar;
+  object.MeanSqDeltaR = MeanSqDeltaR;
+  object.PTD = PTD;
+  object.NCharged = NCharged; 
+  object.NNeutrals = NNeutrals;
+  for (int i = 0 ; i < 5 ; i++) {
+    object.FracPt[i] = FracPt[i];
+  }
 
   object.fFactory = fFactory;
   object.fArray = 0;
@@ -237,6 +253,7 @@ void Candidate::Clear(Option_t* option)
   Charge = 0;
   Mass = 0.0;
   IsPU = 0;
+  IsRecoPU = 0;
   IsConstituent = 0;
   BTag = 0;
   TauTag = 0;
@@ -260,5 +277,11 @@ void Candidate::Clear(Option_t* option)
   Momentum.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Position.SetXYZT(0.0, 0.0, 0.0, 0.0);
   Area.SetXYZT(0.0, 0.0, 0.0, 0.0);
+  Beta = -999.;
+  BetaStar = -999.;
+  MeanSqDeltaR = -999.;
+  PTD = -999.;
+  NCharged = -1;
+  NNeutrals = -1;
   fArray = 0;
 }

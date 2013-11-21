@@ -182,6 +182,7 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
     entry->Status = candidate->Status;
     entry->IsPU = candidate->IsPU;
 
+
     entry->M1 = candidate->M1;
     entry->M2 = candidate->M2;
 
@@ -206,6 +207,7 @@ void TreeWriter::ProcessParticles(ExRootTreeBranch *branch, TObjArray *array)
     entry->Y = position.Y();
     entry->Z = position.Z();
     entry->T = position.T();
+
   }
 }
 
@@ -257,6 +259,8 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->Eta = eta;
     entry->Phi = momentum.Phi();
     entry->PT = pt;
+
+    entry->IsRecoPU = candidate->IsRecoPU;
 
     particle = static_cast<Candidate*>(candidate->GetCandidates()->At(0));
     const TLorentzVector &initialPosition = particle->Position;
@@ -475,6 +479,16 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     entry->MassDrop=candidate->MassDrop;
 
     entry->Charge = candidate->Charge;
+
+    entry->Beta = candidate->Beta;
+    entry->BetaStar = candidate->BetaStar;
+    entry->MeanSqDeltaR = candidate->MeanSqDeltaR;
+    entry->NCharged = candidate->NCharged;
+    entry->NNeutrals = candidate->NNeutrals;
+    entry->PTD = candidate->PTD;
+    for (int i = 0 ; i < 5 ; i++) {
+      entry->FracPt[i] = candidate->FracPt[i];
+    }
 
     itConstituents.Reset();
     entry->Constituents.Clear();

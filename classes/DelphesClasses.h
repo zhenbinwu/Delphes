@@ -110,8 +110,8 @@ public:
 
   Int_t Status; // particle status | hepevt.isthep[number]
   Int_t IsPU; // 0 or 1 for particles from pile-up interactions
+                  // Reflects decision ncoprorating z vertex resolution  
   
-
   Int_t M1; // particle 1st mother | hepevt.jmohep[number][0] - 1
   Int_t M2; // particle 2nd mother | hepevt.jmohep[number][1] - 1
 
@@ -287,6 +287,10 @@ public:
   Float_t MassDrop;
   Float_t TrimmedMass;
 
+  Float_t Beta, BetaStar; // dZ;
+  Float_t MeanSqDeltaR, PTD;
+  Int_t NCharged, NNeutrals;
+  Float_t  FracPt[5]; // [0] <--> 0.0 < dR < 0.1,  [1] <--> 0.1 < dR < 0.2,  etc.
 
   UInt_t BTag; // 0 or 1 for a jet that has been tagged as containing a heavy quark
   UInt_t TauTag; // 0 or 1 for a jet that has been tagged as a tau
@@ -303,7 +307,7 @@ public:
 
   TLorentzVector P4();
 
-  ClassDef(Jet, 2)
+  ClassDef(Jet, 3)
 };
 
 //---------------------------------------------------------------------------
@@ -330,6 +334,9 @@ public:
   Float_t XOuter; // track position (x component) at the tracker edge
   Float_t YOuter; // track position (y component) at the tracker edge
   Float_t ZOuter; // track position (z component) at the tracker edge
+
+  Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable
+                  // Reflects decision ncoprorating z vertex resolution
 
   TRef Particle; // reference to generated particle
 
@@ -388,6 +395,8 @@ public:
 
   
   Int_t IsPU;
+  Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable
+                  // Reflects decision ncoprorating z vertex resolution
   Int_t IsConstituent;
   
   UInt_t BTag;
@@ -413,6 +422,11 @@ public:
   Float_t DeltaPhi;
 
   TLorentzVector Momentum, Position, Area;
+
+  Float_t Beta, BetaStar;
+  Float_t MeanSqDeltaR, PTD;
+  Int_t NCharged, NNeutrals;
+  Float_t  FracPt[5]; // [0] <--> 0.0 < dR < 0.1,  [1] <--> 0.1 < dR < 0.2,  etc.
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }
