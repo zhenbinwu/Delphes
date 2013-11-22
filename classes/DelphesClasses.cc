@@ -72,6 +72,12 @@ TLorentzVector Jet::P4()
   return vec;
 }
 
+TLorentzVector Jet::AreaP4()
+{
+  TLorentzVector vec(AreaX,AreaY,AreaZ,AreaT);
+  return vec;
+}
+
 //------------------------------------------------------------------------------
 
 TLorentzVector Track::P4()
@@ -89,6 +95,7 @@ TLorentzVector Tower::P4()
   vec.SetPtEtaPhiM(ET, Eta, Phi, 0.0);
   return vec;
 }
+
 
 //------------------------------------------------------------------------------
 

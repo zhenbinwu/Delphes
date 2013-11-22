@@ -490,6 +490,12 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
       entry->FracPt[i] = candidate->FracPt[i];
     }
 
+    entry->AreaX = candidate->Area.X();
+    entry->AreaY = candidate->Area.Y();
+    entry->AreaZ = candidate->Area.Z();
+    entry->AreaT = candidate->Area.T();
+
+
     itConstituents.Reset();
     entry->Constituents.Clear();
     ecalEnergy = 0.0;

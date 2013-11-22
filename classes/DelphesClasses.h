@@ -292,6 +292,8 @@ public:
   Int_t NCharged, NNeutrals;
   Float_t  FracPt[5]; // [0] <--> 0.0 < dR < 0.1,  [1] <--> 0.1 < dR < 0.2,  etc.
 
+  Float_t AreaX,AreaY,AreaZ,AreaT; // 4-vector area
+  
   UInt_t BTag; // 0 or 1 for a jet that has been tagged as containing a heavy quark
   UInt_t TauTag; // 0 or 1 for a jet that has been tagged as a tau
 
@@ -306,6 +308,7 @@ public:
   const CompBase *GetCompare() const { return fgCompare; }
 
   TLorentzVector P4();
+  TLorentzVector AreaP4();
 
   ClassDef(Jet, 3)
 };
