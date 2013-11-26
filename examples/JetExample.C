@@ -21,7 +21,8 @@ void JetExample(const char *inputFile)
   Long64_t numberOfEntries = treeReader->GetEntries();
   
   // Get pointers to branches used in this analysis
-  TClonesArray *branchJet = treeReader->UseBranch("RawJet");
+  TClonesArray *branchRawJet = treeReader->UseBranch("RawJet");
+  TClonesArray *branchGenJet = treeReader->UseBranch("GenJet");
   TClonesArray *branchRho = treeReader->UseBranch("Rho");
   
   // Book histograms
@@ -32,15 +33,30 @@ void JetExample(const char *inputFile)
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
   
-    // If event contains at least 1 jet
-    if(branchJet->GetEntries() > 0)
-    {
-      // Take first jet
-      Jet *jet = (Jet*) branchJet->At(0);
-      
-      // Print jet transverse momentum
-      cout << jet->PT << endl;
+    cout << "Event " << entry << endl;
+    ScalarHT *rho = (ScalarHT*) branchRho->At(0);
+    cout << "  Rho: " << rho->HT << endl;
+
+    // Loop over jets
+    for (int i = 0 ; i < branchRawJet->GetEntries() ; i++) {
+      Jet *jet = (Jet*) branchRawJet->At(i);
+      if (jet->PT > 100.) {
+	cout << "  Raw Jet " << i << endl;
+	cout << "    pT: " << jet->PT << endl;
+	cout << "    Eta: " << jet->Eta << endl;
+	cout << "    Area: " << jet->AreaP4().Pt() << endl;
+      }
     }
+
+    for (int i = 0 ; i < branchGenJet->GetEntries() ; i++) {
+      Jet *jet = (Jet*) branchGenJet->At(i);
+      if (jet->PT > 50.) {
+	cout << "  Gen Jet " << i << endl;
+	cout << "    pT: " << jet->PT << endl;
+	cout << "    Eta: " << jet->Eta << endl;
+      }
+    }
+
 
   }
 

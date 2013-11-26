@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
       modularDelphes->Clear();
       treeWriter->Clear();
 
-      for(event.toBegin(); !event.atEnd() && !interrupted && (maxEvents <= 0 || totEventCounter - skipEvents < maxEvents); ++event)
+      for(event.toBegin()+skipEvents; !event.atEnd() && !interrupted && (maxEvents <= 0 || totEventCounter < maxEvents); ++event)
       {
         ConvertInput(event, factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray);
         modularDelphes->ProcessTask();
