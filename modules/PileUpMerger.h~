@@ -18,7 +18,7 @@
 
 namespace CLHEP {
   class RandGaussQ;
-  class HepRandomEngine;
+  class HepRandEngine;
 }
 
 class TObjArray;

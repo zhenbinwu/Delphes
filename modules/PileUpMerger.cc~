@@ -209,7 +209,7 @@ void PileUpMerger::Process()
 
       //      candidate->Position.SetXYZT(x, y, z + dz, t);
       //      candidate->Position.SetXYZT(X,Y,Z,T);
-      candidate->Position.SetXYZT(x,y,Z,T); // Use CMSSW Z,T - keep old 
+      candidate->Position.SetXYZT(x,y,Z,T) // Use CMSSW Z,T - keep old 
       candidate->Position.RotateZ(dphi);
 
       // 0.24, 0.39
