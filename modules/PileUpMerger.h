@@ -43,6 +43,8 @@ private:
 
   TObjArray *fOutputArray; //!
 
+  TObjArray *fNPUOutputArray; //!                                                                                                                                                    
+
   ClassDef(PileUpMerger, 1)
 };
 

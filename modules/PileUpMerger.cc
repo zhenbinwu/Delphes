@@ -68,6 +68,7 @@ void PileUpMerger::Init()
 
   // create output arrays
   fOutputArray = ExportArray(GetString("OutputArray", "stableParticles"));
+  fNPUOutputArray = ExportArray(GetString("NPUOutputArray", "NPU"));
 }
 
 //------------------------------------------------------------------------------
@@ -140,6 +141,10 @@ void PileUpMerger::Process()
       fOutputArray->Add(candidate);
     }
   }
+  candidate = factory->NewCandidate();
+  candidate->Momentum.SetPtEtaPhiE((float)poisson, 0.0, 0.0, (float)poisson); // cheating and storing NPU as a float
+  fNPUOutputArray->Add(candidate);
+
 }
 
 //------------------------------------------------------------------------------
