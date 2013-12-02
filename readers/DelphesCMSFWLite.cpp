@@ -135,6 +135,7 @@ int main(int argc, char *argv[])
   DelphesFactory *factory = 0;
   TObjArray *allParticleOutputArray = 0, *stableParticleOutputArray = 0, *partonOutputArray = 0;
   Int_t i;
+  Int_t maxEvents, skipEvents;
   Long64_t eventCounter, numberOfEvents;
 
   if(argc < 4)
@@ -171,6 +172,20 @@ int main(int argc, char *argv[])
     confReader = new ExRootConfReader;
     confReader->ReadFile(argv[1]);
 
+    maxEvents = confReader->GetInt("::MaxEvents", 0);
+    skipEvents = confReader->GetInt("::SkipEvents", 0);
+
+    if(maxEvents < 0)
+      {
+	throw runtime_error("MaxEvents must be zero or positive");
+      }
+
+    if(skipEvents < 0)
+      {
+	throw runtime_error("SkipEvents must be zero or positive");
+      }
+
+
     modularDelphes = new Delphes("Delphes");
     modularDelphes->SetConfReader(confReader);
     modularDelphes->SetTreeWriter(treeWriter);
@@ -181,8 +196,10 @@ int main(int argc, char *argv[])
     partonOutputArray = modularDelphes->ExportArray("partons");
 
     modularDelphes->InitTask();
+    
+    int totEventCounter = 0;
 
-    for(i = 3; i < argc && !interrupted; ++i)
+    for(i = 3; i < argc && !interrupted && (maxEvents <= 0 || totEventCounter - skipEvents < maxEvents); ++i)
     {
       cout << "** Reading " << argv[i] << endl;
 
@@ -207,7 +224,8 @@ int main(int argc, char *argv[])
       eventCounter = 0;
       modularDelphes->Clear();
       treeWriter->Clear();
-      for(event.toBegin(); !event.atEnd() && !interrupted; ++event)
+
+      for(event.toBegin()+skipEvents; !event.atEnd() && !interrupted && (maxEvents <= 0 || totEventCounter < maxEvents); ++event)
       {
         ConvertInput(event, factory, allParticleOutputArray, stableParticleOutputArray, partonOutputArray);
         modularDelphes->ProcessTask();
@@ -219,6 +237,7 @@ int main(int argc, char *argv[])
 
         progressBar.Update(eventCounter, eventCounter);
         ++eventCounter;
+	++totEventCounter;
       }
 
       progressBar.Update(eventCounter, eventCounter, kTRUE);
