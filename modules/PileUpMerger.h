@@ -72,6 +72,7 @@ private:
 
   double BetaFunction(double z, double z0);
 
+  TObjArray *fNPUOutputArray; //!                                                                                                                                                    
   ClassDef(PileUpMerger, 2)
 };
 
