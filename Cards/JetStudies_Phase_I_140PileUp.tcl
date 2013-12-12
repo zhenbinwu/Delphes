@@ -5,6 +5,7 @@
 set ExecutionPath {
 
   PileUpMerger
+  ModifyBeamSpot
   ParticlePropagator
   StatusPid
 
@@ -21,6 +22,7 @@ set ExecutionPath {
   TrackPileUpSubtractor
   EFlowMerger
 
+  ModifyBeamSpotNoPU
   ParticlePropagatorNoPU
   ChargedHadronTrackingEfficiencyNoPU
   ElectronTrackingEfficiencyNoPU
@@ -63,6 +65,7 @@ set ExecutionPath {
 
   ScalarHT
 
+  ConstituentFilter
   TreeWriter
 }
 
@@ -94,13 +97,39 @@ module PileUpMerger PileUpMerger {
   set OutputArray stableParticles
   set NPUOutputArray NPU
 
+  # Get rid of beam spot from http://red-gridftp11.unl.edu/Snowmass/MinBias100K_14TeV.pileup ...
+  set InputBSX 2.44
+  set InputBSY 3.39
+
+  # ... and replace it with beam spot from CMSSW files  
+  set OutputBSX 0.24
+  set OutputBSY 0.39  
+
   # pre-generated minbias input file
   set PileUpFile MinBias.pileup
 
   # average expected pile up
   set MeanPileUp 140
   # spread in the beam direction in m (assumes gaussian)
-  set ZVertexSpread 0.05
+  set ZVertexSpread 0.053
+}
+
+################
+# ModifyBeamSpot
+################
+
+module ModifyBeamSpot ModifyBeamSpot {
+  set ZVertexSpread 0.053
+  set InputArray PileUpMerger/stableParticles
+  set OutputArray stableParticles
+  set PVOutputArray PV  
+}
+
+module ModifyBeamSpot ModifyBeamSpotNoPU {
+  set ZVertexSpread 0.053
+  set InputArray Delphes/stableParticles
+  set OutputArray stableParticles
+  set PVOutputArray PV
 }
 
 #################################
@@ -108,7 +137,7 @@ module PileUpMerger PileUpMerger {
 #################################
 
 module ParticlePropagator ParticlePropagator {
-  set InputArray PileUpMerger/stableParticles
+  set InputArray ModifyBeamSpot/stableParticles
 
   set OutputArray stableParticles
   set ChargedHadronOutputArray chargedHadrons
@@ -125,7 +154,7 @@ module ParticlePropagator ParticlePropagator {
 }
 
 module ParticlePropagator ParticlePropagatorNoPU {
-  set InputArray Delphes/stableParticles
+  set InputArray ModifyBeamSpotNoPU/stableParticles
 
   set OutputArray stableParticles
   set ChargedHadronOutputArray chargedHadrons
@@ -467,86 +496,6 @@ module Calorimeter Calorimeter {
 
 }
 
-#############
-# Calorimeter
-#############
-
-module Calorimeter Calorimeter {
-  set ParticleInputArray ParticlePropagator/stableParticles
-  set TrackInputArray TrackMerger/tracks
-
-  set TowerOutputArray towers
-  set PhotonOutputArray photons
-
-  set EFlowTrackOutputArray eflowTracks
-  set EFlowTowerOutputArray eflowTowers
-
-  set pi [expr {acos(-1)}]
-
-  # lists of the edges of each tower in eta and phi
-  # each list starts with the lower edge of the first tower
-  # the list ends with the higher edged of the last tower
-
-  # 5 degrees towers
-  set PhiBins {}
-  for {set i -36} {$i <= 36} {incr i} {
-    add PhiBins [expr {$i * $pi/36.0}]
-  }
-  foreach eta {-1.566 -1.479 -1.392 -1.305 -1.218 -1.131 -1.044 -0.957 -0.87 -0.783 -0.696 -0.609 -0.522 -0.435 -0.348 -0.261 -0.174 -0.087 0 0.087 0.174 0.261 0.348 0.435 0.522 0.609 0.696 0.783 0.87 0.957 1.044 1.131 1.218 1.305 1.392 1.479 1.566 1.653} {
-    add EtaPhiBins $eta $PhiBins
-  }
-
-  # 10 degrees towers
-  set PhiBins {}
-  for {set i -18} {$i <= 18} {incr i} {
-    add PhiBins [expr {$i * $pi/18.0}]
-  }
-  foreach eta {-4.35 -4.175 -4 -3.825 -3.65 -3.475 -3.3 -3.125 -2.95 -2.868 -2.65 -2.5 -2.322 -2.172 -2.043 -1.93 -1.83 -1.74 -1.653 1.74 1.83 1.93 2.043 2.172 2.322 2.5 2.65 2.868 2.95 3.125 3.3 3.475 3.65 3.825 4 4.175 4.35 4.525} {
-    add EtaPhiBins $eta $PhiBins
-  }
-
-  # 20 degrees towers
-  set PhiBins {}
-  for {set i -9} {$i <= 9} {incr i} {
-    add PhiBins [expr {$i * $pi/9.0}]
-  }
-  foreach eta {-5 -4.7 -4.525 4.7 5} {
-    add EtaPhiBins $eta $PhiBins
-  }
-
-  # default energy fractions {abs(PDG code)} {Fecal Fhcal}
-  add EnergyFraction {0} {0.0 1.0}
-  # energy fractions for e, gamma and pi0
-  add EnergyFraction {11} {1.0 0.0}
-  add EnergyFraction {22} {1.0 0.0}
-  add EnergyFraction {111} {1.0 0.0}
-  # energy fractions for muon, neutrinos and neutralinos
-  add EnergyFraction {12} {0.0 0.0}
-  add EnergyFraction {13} {0.0 0.0}
-  add EnergyFraction {14} {0.0 0.0}
-  add EnergyFraction {16} {0.0 0.0}
-  add EnergyFraction {1000022} {0.0 0.0}
-  add EnergyFraction {1000023} {0.0 0.0}
-  add EnergyFraction {1000025} {0.0 0.0}
-  add EnergyFraction {1000035} {0.0 0.0}
-  add EnergyFraction {1000045} {0.0 0.0}
-  # energy fractions for K0short and Lambda
-  add EnergyFraction {310} {0.3 0.7}
-  add EnergyFraction {3122} {0.3 0.7}
-
-  # set ECalResolutionFormula {resolution formula as a function of eta and energy}
-  set ECalResolutionFormula {                  (abs(eta) <= 3.0) * sqrt(energy^2*0.005^2 + energy*0.027^2 + 0.15^2) + \
-                             (abs(eta) > 3.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.08^2 + energy*1.97^2)}
-
-
-    # set HCalResolutionFormula {resolution formula as a function of eta and energy}
-    set HCalResolutionFormula {                  (abs(eta) <= 1.7) * sqrt(energy^2*0.0302^2 + energy*0.5205^2 + 1.59^2) + \
-                             (abs(eta) > 1.7 && abs(eta) <= 3.2) * sqrt(energy^2*0.050^2 + energy*0.706^2) + \
-                             (abs(eta) > 3.0 && abs(eta) <= 4.9) * sqrt(energy^2*0.05^2 + energy*1.00^2)}
-
-
-}
-
 module Calorimeter CalorimeterNoPU {
   set ParticleInputArray ParticlePropagatorNoPU/stableParticles
   set TrackInputArray TrackMergerNoPU/tracks
@@ -632,6 +581,8 @@ module TrackPileUpSubtractor TrackPileUpSubtractor {
   add InputArray Calorimeter/eflowTracks eflowTracks
   add InputArray ElectronEnergySmearing/electrons electrons
   add InputArray MuonMomentumSmearing/muons muons
+  
+  set PVInputArray  ModifyBeamSpot/PV 
 
   # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
   # Z vertex resolution in m
@@ -756,18 +707,19 @@ module FastJetFinder CAJetFinder {
 # Constituent filter
 ####################
 
-# module ConstituentFilter ConstituentFilter {
+module ConstituentFilter ConstituentFilter {
 
 # # add JetInputArray InputArray
-#   add JetInputArray GenJetFinder/jets
+   add JetInputArray GenJetFinder/jets
+   add JetInputArray FastJetFinder/jets
 #   add JetInputArray CAJetFinder/jets
 
   
 # # add ConstituentInputArray InputArray OutputArray
-#   add ConstituentInputArray Delphes/stableParticles stableParticles
-#   add ConstituentInputArray TrackPileUpSubtractor/eflowTracks eflowTracks
-#   add ConstituentInputArray Calorimeter/eflowTowers eflowTowers
-#   add ConstituentInputArray MuonMomentumSmearing/muons muons
+   add ConstituentInputArray Delphes/stableParticles stableParticles
+   add ConstituentInputArray TrackPileUpSubtractor/eflowTracks eflowTracks
+   add ConstituentInputArray Calorimeter/eflowTowers eflowTowers
+   add ConstituentInputArray MuonMomentumSmearing/muons muons
 # }
 
 
@@ -1073,9 +1025,14 @@ module TreeWriter TreeWriter {
 #  add Branch TrackMerger/tracks Track Track
 #  add Branch Calorimeter/towers Tower Tower
 
-#  add Branch ConstituentFilter/eflowTracks EFlowTrack Track
-#  add Branch ConstituentFilter/eflowTowers EFlowTower Tower
-#  add Branch ConstituentFilter/muons EFlowMuon Muon
+#  add Branch TrackPileUpSubtractor/eflowTracks EFlowTrack Track
+#  add Branch Calorimeter/eflowTowers EFlowTower Tower
+#  add Branch MuonMomentumSmearing/muons EFlowMuon Muon
+
+  add Branch ConstituentFilter/eflowTracks EFlowTrack Track
+  add Branch ConstituentFilter/eflowTowers EFlowTower Tower
+  add Branch ConstituentFilter/muons EFlowMuon Muon
+
   add Branch GenJetFinder/jets GenJet Jet
   add Branch CAJetPileUpSubtractor/jets CAJet Jet
   add Branch UniqueObjectFinderMJ/jets Jet Jet
