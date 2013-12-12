@@ -115,6 +115,13 @@ Candidate::Candidate() :
   Momentum(0.0, 0.0, 0.0, 0.0),
   Position(0.0, 0.0, 0.0, 0.0),
   Area(0.0, 0.0, 0.0, 0.0),
+  t0(-999999.),
+  t1(-999999.),
+  t10(-999999.),
+  t20(-999999.),
+  t30(-999999.),
+  t40(-999999.),
+  nTimes(-1),
   fFactory(0),
   fArray(0)
 {
@@ -233,6 +240,18 @@ void Candidate::Copy(TObject &obj) const
     object.FracPt[i] = FracPt[i];
   }
 
+  // Copy jet timing info
+  object.t0 = t0;
+  object.t1 = t1;
+  object.t10 = t10;
+  object.t20 = t20;
+  object.t30 = t30;
+  object.t40 = t40;
+  object.nTimes = nTimes;
+
+  // Copy cluster timing info
+  copy(ecal_E_t.begin(),ecal_E_t.end(),back_inserter(object.ecal_E_t));
+
   object.fFactory = fFactory;
   object.fArray = 0;
 
@@ -291,4 +310,6 @@ void Candidate::Clear(Option_t* option)
   NCharged = -1;
   NNeutrals = -1;
   fArray = 0;
+
+  ecal_E_t.clear();
 }

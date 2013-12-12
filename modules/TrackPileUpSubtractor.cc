@@ -69,6 +69,10 @@ void TrackPileUpSubtractor::Init()
 
     fInputMap[iterator] = ExportArray(param[i*2 + 1].GetString());;
   }
+
+  fPVInputArray = ImportArray(GetString("PVInputArray", "PV"));
+  fPVItInputArray = fPVInputArray->MakeIterator();
+
 }
 
 //------------------------------------------------------------------------------
@@ -95,6 +99,12 @@ void TrackPileUpSubtractor::Process()
   TIterator *iterator;
   TObjArray *array;
   Double_t z;
+  Double_t PVZ = 0.;
+
+  fPVItInputArray->Reset();
+  Candidate *pv = static_cast<Candidate*>(fPVItInputArray->Next());
+  if (pv) PVZ = pv->Position.Z();
+  //  cout << "SCZ TrackPileUpSubtractor Debug PVZ=" << PVZ << endl;
 
   // loop over all input arrays
   for(itInputMap = fInputMap.begin(); itInputMap != fInputMap.end(); ++itInputMap)
@@ -111,7 +121,7 @@ void TrackPileUpSubtractor::Process()
 
       // apply pile-up subtraction
       // assume perfect pile-up subtraction for tracks outside fZVertexResolution
-      if(candidate->IsPU && TMath::Abs(z) > fZVertexResolution) {
+      if(candidate->IsPU && TMath::Abs(z-PVZ) > fZVertexResolution) {
 	candidate->IsRecoPU = 1;
       } else {
 	candidate->IsRecoPU = 0;

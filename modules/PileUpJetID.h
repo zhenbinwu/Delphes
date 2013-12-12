@@ -38,6 +38,8 @@ private:
   // Results should be very similar for PF
   Int_t fUseConstituents; 
 
+  Bool_t fAverageEachTower;
+
   TIterator *fItJetInputArray; //!
 
   const TObjArray *fJetInputArray; //!
@@ -49,6 +51,7 @@ private:
   TIterator *fItNeutralInputArray; // SCZ
 
   TObjArray *fOutputArray; //!
+
 
   ClassDef(PileUpJetID, 1)
 };

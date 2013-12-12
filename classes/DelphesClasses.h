@@ -22,6 +22,8 @@
 #include "TRefArray.h"
 #include "TLorentzVector.h"
 
+#include <vector>
+
 #include "classes/SortableObject.h"
 
 namespace fastjet {
@@ -291,6 +293,8 @@ public:
   Float_t MeanSqDeltaR, PTD;
   Int_t NCharged, NNeutrals;
   Float_t  FracPt[5]; // [0] <--> 0.0 < dR < 0.1,  [1] <--> 0.1 < dR < 0.2,  etc.
+  Float_t t0,t1,t10,t20,t30,t40; // Jet timing (at calorimeter) with ecal deposit (particle) level smearing by 0,1,10,20,30,40 ps
+  Int_t nTimes;
 
   Float_t AreaX,AreaY,AreaZ,AreaT; // 4-vector area
   
@@ -367,6 +371,9 @@ public:
 
   Float_t Edges[4]; // calorimeter tower edges
 
+  Float_t t0; // ecal deposit time, averaged by sqrt(EM energy) over all particles, not smeared
+  Float_t nTimes;
+
   TRefArray Particles; // references to generated particles
 
   static CompBase *fgCompare; //!
@@ -430,6 +437,10 @@ public:
   Float_t MeanSqDeltaR, PTD;
   Int_t NCharged, NNeutrals;
   Float_t  FracPt[5]; // [0] <--> 0.0 < dR < 0.1,  [1] <--> 0.1 < dR < 0.2,  etc.
+  Float_t t0,t1,t10,t20,t30,t40; // Jet timing (at calorimeter) with ecal deposit (particle) level smearing by 0,1,10,20,30,40 ps
+  Int_t nTimes;
+
+  std::vector<std::pair<float,float> > ecal_E_t; 
 
   static CompBase *fgCompare; //!
   const CompBase *GetCompare() const { return fgCompare; }

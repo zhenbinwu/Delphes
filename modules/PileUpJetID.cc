@@ -55,6 +55,8 @@ void PileUpJetID::Init()
   fParameterR = GetDouble("ParameterR", 0.5);
   fUseConstituents = GetInt("UseConstituents", 0);
 
+  fAverageEachTower = false; // for timing
+
   // import input array(s)
 
   fJetInputArray = ImportArray(GetString("JetInputArray", "FastJetFinder/jets"));
@@ -113,6 +115,15 @@ void PileUpJetID::Process()
     momentum = candidate->Momentum;
     area = candidate->Area;
 
+    float sumT0 = 0.;
+    float sumT1 = 0.;
+    float sumT10 = 0.;
+    float sumT20 = 0.;
+    float sumT30 = 0.;
+    float sumT40 = 0.;
+    float sumWeightsForT = 0.;
+    candidate->nTimes = 0;
+
     float sumpt = 0.;
     float sumptch = 0.;
     float sumptchpv = 0.;
@@ -151,6 +162,34 @@ void PileUpJetID::Process()
 	    pt_ann[i] += pt;
 	  }
 	}
+	float tow_sumT = 0;
+	float tow_sumW = 0;
+	for (int i = 0 ; i < constituent->ecal_E_t.size() ; i++) {
+	  float w = TMath::Sqrt(constituent->ecal_E_t[i].first);
+	  if (fAverageEachTower) {
+            tow_sumT += w*constituent->ecal_E_t[i].second;
+            tow_sumW += w;
+	  } else {
+	    sumT0 += w*constituent->ecal_E_t[i].second;
+	    sumT1 += w*gRandom->Gaus(constituent->ecal_E_t[i].second,0.001);
+	    sumT10 += w*gRandom->Gaus(constituent->ecal_E_t[i].second,0.010);
+	    sumT20 += w*gRandom->Gaus(constituent->ecal_E_t[i].second,0.020);
+	    sumT30 += w*gRandom->Gaus(constituent->ecal_E_t[i].second,0.030);
+	    sumT40 += w*gRandom->Gaus(constituent->ecal_E_t[i].second,0.040);
+	    sumWeightsForT += w;
+	    candidate->nTimes++;
+	  }
+	}
+	if (fAverageEachTower && tow_sumW > 0.) {
+	  sumT0 += tow_sumT;
+	  sumT1 += tow_sumW*gRandom->Gaus(tow_sumT/tow_sumW,0.001);
+          sumT10 += tow_sumW*gRandom->Gaus(tow_sumT/tow_sumW,0.0010);
+          sumT20 += tow_sumW*gRandom->Gaus(tow_sumT/tow_sumW,0.0020);
+          sumT30 += tow_sumW*gRandom->Gaus(tow_sumT/tow_sumW,0.0030);
+          sumT40 += tow_sumW*gRandom->Gaus(tow_sumT/tow_sumW,0.0040);
+	  sumWeightsForT += tow_sumW;
+	  candidate->nTimes++;
+	}
       }
     } else {
       // Not using constituents, using dr
@@ -177,11 +216,11 @@ void PileUpJetID::Process()
 	}
       }
       fItNeutralInputArray->Reset();
-      while ((trk = static_cast<Candidate*>(fItNeutralInputArray->Next()))) {
-	if (trk->Momentum.DeltaR(candidate->Momentum) < fParameterR) {
-	  float pt = trk->Momentum.Pt();
+      while ((constituent = static_cast<Candidate*>(fItNeutralInputArray->Next()))) {
+	if (constituent->Momentum.DeltaR(candidate->Momentum) < fParameterR) {
+	  float pt = constituent->Momentum.Pt();
 	  sumpt += pt;
-	  float dr = candidate->Momentum.DeltaR(trk->Momentum);
+	  float dr = candidate->Momentum.DeltaR(constituent->Momentum);
 	  sumdrsqptsq += dr*dr*pt*pt;
 	  sumptsq += pt*pt;
 	  nn++;
@@ -190,8 +229,51 @@ void PileUpJetID::Process()
             pt_ann[i] += pt;
 	    }
 	  }
+	  float tow_sumT = 0;
+	  float tow_sumW = 0;
+	  for (int i = 0 ; i < constituent->ecal_E_t.size() ; i++) {
+	    float w = TMath::Sqrt(constituent->ecal_E_t[i].first);
+	    if (fAverageEachTower) {
+	      tow_sumT += w*constituent->ecal_E_t[i].second;
+	      tow_sumW += w;
+	    } else {
+	      sumT0 += w*constituent->ecal_E_t[i].second;
+	      sumT1 += w*gRandom->Gaus(constituent->ecal_E_t[i].second,0.001);
+	      sumT10 += w*gRandom->Gaus(constituent->ecal_E_t[i].second,0.010);
+	      sumT20 += w*gRandom->Gaus(constituent->ecal_E_t[i].second,0.020);
+	      sumT30 += w*gRandom->Gaus(constituent->ecal_E_t[i].second,0.030);
+	      sumT40 += w*gRandom->Gaus(constituent->ecal_E_t[i].second,0.040);
+	      sumWeightsForT += w;
+	      candidate->nTimes++;
+	    }
+	  }
+	  if (fAverageEachTower && tow_sumW > 0.) {
+	    sumT0 += tow_sumT;
+	    sumT1 += tow_sumW*gRandom->Gaus(tow_sumT/tow_sumW,0.001);
+	    sumT10 += tow_sumW*gRandom->Gaus(tow_sumT/tow_sumW,0.0010);
+	    sumT20 += tow_sumW*gRandom->Gaus(tow_sumT/tow_sumW,0.0020);
+	    sumT30 += tow_sumW*gRandom->Gaus(tow_sumT/tow_sumW,0.0030);
+	    sumT40 += tow_sumW*gRandom->Gaus(tow_sumT/tow_sumW,0.0040);
+	    sumWeightsForT += tow_sumW;
+	    candidate->nTimes++;
+	  }
 	}
       }
+    }
+
+    candidate->t0 = -9999999.;
+    candidate->t1 = -9999999.;
+    candidate->t10 = -9999999.;
+    candidate->t20 = -9999999.;
+    candidate->t30 = -9999999.;
+    candidate->t40 = -9999999.;
+    if (sumT0 > 0) {
+      candidate->t0 = sumT0/sumWeightsForT;
+      candidate->t1 = sumT1/sumWeightsForT;
+      candidate->t10 = sumT10/sumWeightsForT;
+      candidate->t20 = sumT20/sumWeightsForT;
+      candidate->t30 = sumT30/sumWeightsForT;
+      candidate->t40 = sumT40/sumWeightsForT;
     }
 
     if (sumptch > 0.) {

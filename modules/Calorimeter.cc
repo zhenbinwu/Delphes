@@ -151,6 +151,14 @@ void Calorimeter::Init()
 
   fEFlowTrackOutputArray = ExportArray(GetString("EFlowTrackOutputArray", "eflowTracks"));
   fEFlowTowerOutputArray = ExportArray(GetString("EFlowTowerOutputArray", "eflowTowers"));
+
+  // For timing
+  // So far this flag needs to be false
+  // Curved extrapolation not supported
+  electronsFromTrack = false;
+
+  fTimingEMin = GetDouble("TimingEMin",4.);
+
 }
 
 //------------------------------------------------------------------------------
@@ -349,6 +357,17 @@ void Calorimeter::Process()
       fTrackECalEnergy += ecalEnergy;
       fTrackHCalEnergy += hcalEnergy;
 
+      if (ecalEnergy > fTimingEMin && fTower) {
+	if (electronsFromTrack) {
+	  //	  cout << " SCZ Debug pushing back track hit E=" << ecalEnergy << " T=" << track->Position.T() << " isPU=" << track->IsPU << " isRecoPU=" << track->IsRecoPU 
+	  //	       << " PID=" << track->PID << endl;
+	  fTower->ecal_E_t.push_back(std::make_pair<float,float>(ecalEnergy,track->Position.T()));
+	} else {
+	  //	  cout << " Skipping track hit E=" << ecalEnergy << " T=" << track->Position.T() << " isPU=" << track->IsPU << " isRecoPU=" << track->IsRecoPU 
+	  //	       << " PID=" << track->PID << endl;
+	}
+      }
+
       fTowerTrackArray->Add(track);
 
       continue;
@@ -367,9 +386,23 @@ void Calorimeter::Process()
     fTowerECalEnergy += ecalEnergy;
     fTowerHCalEnergy += hcalEnergy;
 
+    if (ecalEnergy > fTimingEMin && fTower) {
+      if (abs(particle->PID) != 11 || !electronsFromTrack) {
+	//	cout << " SCZ Debug About to push back particle hit E=" << ecalEnergy << " T=" << particle->Position.T() << " isPU=" << particle->IsPU 
+	//	     << " PID=" << particle->PID << endl;
+	fTower->ecal_E_t.push_back(std::make_pair<float,float>(ecalEnergy,particle->Position.T()));
+      } else {
+	
+	// N.B. Only charged particle set to leave ecal energy is the electrons
+	//	cout << " SCZ Debug To avoid double-counting, skipping particle hit E=" << ecalEnergy << " T=" << particle->Position.T() << " isPU=" << particle->IsPU 
+	//	     << " PID=" << particle->PID << endl;
+	
+      }
+    }
+
     fTower->AddCandidate(particle);
   }
-
+  
   // finalize last tower
   FinalizeTower();
 }
@@ -401,15 +434,42 @@ void Calorimeter::FinalizeTower()
 
   energy = ecalEnergy + hcalEnergy;
 
-//  eta = fTowerEta;
-//  phi = fTowerPhi;
+  eta = fTowerEta;
+  phi = fTowerPhi;
 
-  eta = gRandom->Uniform(fTowerEdges[0], fTowerEdges[1]);
-  phi = gRandom->Uniform(fTowerEdges[2], fTowerEdges[3]);
+// SCZ: let's go back to putting them at the center of the tower rather than a random spot (2 old lines above)
+// I mean, we do know where the center of the cell is, right?  I don't get why a random point makes sense
+//  eta = gRandom->Uniform(fTowerEdges[0], fTowerEdges[1]);
+//  phi = gRandom->Uniform(fTowerEdges[2], fTowerEdges[3]);
 
   pt = energy / TMath::CosH(eta);
 
-  fTower->Position.SetPtEtaPhiE(1.0, eta, phi, 0.0);
+  /*
+  cout << "SCZ Debug Tower with pt energy eta phi ecalEnergy hcalEnergy " << pt << " " << energy << " " << eta << " " << phi << " " << ecalEnergy << " " << hcalEnergy
+       << " has " << fTower->ecal_E_t.size() << " timing deposit(s)" << endl;
+  for ( int i = 0; i < fTower->ecal_E_t.size(); i++ ) {
+    cout << "SCZ Debug   E T " << fTower->ecal_E_t[i].first << " " << fTower->ecal_E_t[i].second << endl;
+  }
+  */
+
+  // Time calculation for tower
+  fTower->nTimes = 0;
+  float tow_sumT = 0;
+  float tow_sumW = 0;
+  for (int i = 0 ; i < fTower->ecal_E_t.size() ; i++) {
+    float w = TMath::Sqrt(fTower->ecal_E_t[i].first);
+    tow_sumT += w*fTower->ecal_E_t[i].second;
+    tow_sumW += w;
+    fTower->nTimes++;
+  }
+  
+  if (tow_sumW > 0.) {
+    fTower->t0 = tow_sumT/tow_sumW;
+  } else {
+    fTower->t0 = -999999.;
+  }
+
+  fTower->Position.SetPtEtaPhiE(1.0, eta, phi, 0.);
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
   fTower->Eem = ecalEnergy;
   fTower->Ehad = hcalEnergy;

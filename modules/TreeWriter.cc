@@ -1,4 +1,3 @@
-
 /** \class TreeWriter
  *
  *  Fills ROOT tree branches.
@@ -310,6 +309,9 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, TObjArray *array)
     entry->Edges[2] = candidate->Edges[2];
     entry->Edges[3] = candidate->Edges[3];
 
+    entry->t0 = candidate->t0;
+    entry->nTimes = candidate->nTimes;
+
     FillParticles(candidate, &entry->Particles);
   }
 }
@@ -489,6 +491,13 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     for (int i = 0 ; i < 5 ; i++) {
       entry->FracPt[i] = candidate->FracPt[i];
     }
+    entry->t0 = candidate->t0;
+    entry->t1 = candidate->t1;
+    entry->t10 = candidate->t10;
+    entry->t20 = candidate->t20;
+    entry->t30 = candidate->t30;
+    entry->t40 = candidate->t40;
+    entry->nTimes = candidate->nTimes;
 
     entry->AreaX = candidate->Area.X();
     entry->AreaY = candidate->Area.Y();

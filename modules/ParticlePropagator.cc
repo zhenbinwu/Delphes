@@ -1,4 +1,3 @@
-
 /** \class ParticlePropagator
  *
  *  Propagates charged and neutral particles
@@ -15,6 +14,8 @@
  */
 
 #include "modules/ParticlePropagator.h"
+
+#include "CLHEP/Units/GlobalSystemOfUnits.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -105,6 +106,8 @@ void ParticlePropagator::Process()
   Double_t t_z, t_r, t_ra, t_rb;
   Double_t tmp, discr, discr2;
   Double_t delta, gammam, omega, asinrho;
+
+  float t_orig;
   
   const Double_t c_light = 2.99792458E8;
     
@@ -116,6 +119,7 @@ void ParticlePropagator::Process()
     x = candidatePosition.X()*1.0E-3;
     y = candidatePosition.Y()*1.0E-3;
     z = candidatePosition.Z()*1.0E-3;
+    t_orig = candidatePosition.T(); // this should already be in ns; if not, fix it!
     q = candidate->Charge;
 
     // check that particle position is inside the cylinder
@@ -169,7 +173,16 @@ void ParticlePropagator::Process()
       mother = candidate;
       candidate = static_cast<Candidate*>(candidate->Clone());
 
-      candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, 0.0);
+      // In the neutral part of the code, t has units of m / GeV
+      // This is some parameterization of the path, but not the time in any way that's obvious to me (S. Zenz)
+      // Probably easiest to recompute the time from the (straight-line) distance travelled...
+      t = 1E9*(1/c_light)*TMath::Sqrt((x_t-x)*(x_t-x)+(y_t-y)*(y_t-y)+(z_t-z)*(z_t-z)); // 1E9/c_light converts meters --> ns
+      //      if (pt > 1.) {
+      //      	cout << " SCZ NEUTRAL Debug t t_orig " << t << " " << t_orig << endl;
+      //      }
+      t += t_orig;
+
+      candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, t);
 
       candidate->Momentum = candidateMomentum;
       candidate->AddCandidate(mother);
@@ -216,7 +229,7 @@ void ParticlePropagator::Process()
       // 3. time evaluation t = TMath::Min(t_r, t_z)
       //    t_r : time to exit from the sides
       //    t_z : time to exit from the front or the back
-      t_r = 0.0; // in [ns]
+      t_r = 0.0; // this is in s in this part of the code, I think...?
       int sign_pz = (pz > 0.0) ? 1 : -1;
       if(pz == 0.0) t_z = 1.0E99;
       else t_z = gammam / (pz*1.0E9/c_light) * (-z + fHalfLength*sign_pz);
@@ -263,7 +276,13 @@ void ParticlePropagator::Process()
         mother = candidate;
         candidate = static_cast<Candidate*>(candidate->Clone());
 
-        candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, 0.0);
+	//	if (pt > 1.) {
+	//		  cout << " SCZ CHARGED Debug: t_r t_z t 1E9*t t_orig " << t_r << " " << t_z << " " << t << " "  << 1E9*t << " " << t_orig << endl;
+	//                  cout << "   SCZ Debug line2: pt pz x y z " << pt << " " << pz << " " << x << " " << y << " " << z << endl;
+	//	}
+	t = 1E9*t + t_orig; // Delphes had omega in inverse s, so 1E9 converts to ns
+
+        candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, t);
 
         candidate->Momentum = candidateMomentum;
         candidate->AddCandidate(mother);
@@ -273,6 +292,13 @@ void ParticlePropagator::Process()
         {
           case 11:
             fElectronOutputArray->Add(candidate);
+	    /*
+	    if (pt > 0.5) {
+  	      double t_straight = t_orig + 1E9*(1/c_light)*TMath::Sqrt((x_t-x)*(x_t-x)+(y_t-y)*(y_t-y)+(z_t-z)*(z_t-z)); // 1E9/c_light converts meters --> ns
+              cout << " SCZ Debug ParticlePropogator pt t_orig t_straight t IsPU PID " << pt << " " << t_orig << " " << t_straight << " "
+		   << t << " " << candidate->IsPU << " " << candidate->PID << endl;
+	    }
+	    */
             break;
           case 13:
             fMuonOutputArray->Add(candidate);

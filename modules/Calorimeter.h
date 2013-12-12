@@ -46,6 +46,8 @@ private:
   Double_t fTrackECalEnergy, fTrackHCalEnergy;
   Int_t fTowerTrackHits, fTowerPhotonHits;
 
+  Double_t fTimingEMin;
+
   TFractionMap fFractionMap; //!
   TBinMap fBinMap; //!
 
@@ -80,6 +82,8 @@ private:
 
   void FinalizeTower();
   Double_t LogNormal(Double_t mean, Double_t sigma);
+
+  bool electronsFromTrack; // for timing
 
   ClassDef(Calorimeter, 1)
 };
