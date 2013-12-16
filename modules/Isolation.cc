@@ -6,8 +6,8 @@
  *  to the candidate's transverse momentum. outputs candidates that have
  *  the transverse momenta fraction within (PTRatioMin, PTRatioMax].
  *
- *  $Date: 2013-03-06 18:11:35 +0100 (Wed, 06 Mar 2013) $
- *  $Revision: 1033 $
+ *  $Date: 2013-11-04 13:14:33 +0100 (Mon, 04 Nov 2013) $
+ *  $Revision: 1317 $
  *
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
@@ -68,7 +68,8 @@ Int_t IsolationClassifier::GetCategory(TObject *object)
 
 Isolation::Isolation() :
   fClassifier(0), fFilter(0),
-  fItIsolationInputArray(0), fItCandidateInputArray(0)
+  fItIsolationInputArray(0), fItCandidateInputArray(0),
+  fItRhoInputArray(0)
 {
   fClassifier = new IsolationClassifier;
 }
@@ -89,6 +90,10 @@ void Isolation::Init()
 
   fPTRatioMax = GetDouble("PTRatioMax", 0.1);
 
+  fPTSumMax = GetDouble("PTSumMax", 5.0);
+
+  fUsePTSum = GetBool("UsePTSum", false);
+
   fClassifier->fPTMin = GetDouble("PTMin", 0.5);
 
   // import input array(s)
@@ -105,6 +110,7 @@ void Isolation::Init()
   if(rhoInputArrayName[0] != '\0')
   {
     fRhoInputArray = ImportArray(rhoInputArrayName);
+    fItRhoInputArray = fRhoInputArray->MakeIterator();
   }
   else
   {
@@ -120,6 +126,7 @@ void Isolation::Init()
 
 void Isolation::Finish()
 {
+  if(fItRhoInputArray) delete fItRhoInputArray;
   if(fFilter) delete fFilter;
   if(fItCandidateInputArray) delete fItCandidateInputArray;
   if(fItIsolationInputArray) delete fItIsolationInputArray;
@@ -129,10 +136,11 @@ void Isolation::Finish()
 
 void Isolation::Process()
 {
-  Candidate *candidate, *isolation;
+  Candidate *candidate, *isolation, *object;
   TObjArray *isolationArray;
-  Double_t sumPT, ratio;
+  Double_t sum, ratio;
   Int_t counter;
+  Double_t eta = 0.0;
   Double_t rho = 0.0;
 
   if(fRhoInputArray && fRhoInputArray->GetEntriesFast() > 0)
@@ -154,9 +162,10 @@ void Isolation::Process()
   while((candidate = static_cast<Candidate*>(fItCandidateInputArray->Next())))
   {
     const TLorentzVector &candidateMomentum = candidate->Momentum;
+    eta = TMath::Abs(candidateMomentum.Eta());
 
     // loop over all input tracks
-    sumPT = 0.0;
+    sum = 0.0;
     counter = 0;
     itIsolationArray.Reset();
     while((isolation = static_cast<Candidate*>(itIsolationArray.Next())))
@@ -166,17 +175,30 @@ void Isolation::Process()
       if(candidateMomentum.DeltaR(isolationMomentum) <= fDeltaRMax &&
          !candidate->Overlaps(isolation))
       {
-        sumPT += isolationMomentum.Pt();
+        sum += isolationMomentum.Pt();
         ++counter;
       }
     }
 
-    // correct sumPT for pile-up contamination
-    sumPT = sumPT - rho*fDeltaRMax*fDeltaRMax*TMath::Pi();  
+    // find rho
+    rho = 0.0;
+    if(fRhoInputArray)
+    {
+      fItRhoInputArray->Reset();
+      while((object = static_cast<Candidate*>(fItRhoInputArray->Next())))
+      {
+        if(eta >= object->Edges[0] && eta < object->Edges[1])
+        {
+          rho = object->Momentum.Pt();
+        }
+      }
+    }
 
-    ratio = sumPT/candidateMomentum.Pt();
-    candidate->IsolationVar = ratio;
-    if(ratio > fPTRatioMax) continue;
+    // correct sum for pile-up contamination
+    sum = sum - rho*fDeltaRMax*fDeltaRMax*TMath::Pi();
+
+    ratio = sum/candidateMomentum.Pt();
+    if((fUsePTSum && sum > fPTSumMax) || ratio > fPTRatioMax) continue;
 
     fOutputArray->Add(candidate);
   }

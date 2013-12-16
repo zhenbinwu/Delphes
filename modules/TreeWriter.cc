@@ -563,18 +563,22 @@ void TreeWriter::ProcessScalarHT(ExRootTreeBranch *branch, TObjArray *array)
 
 void TreeWriter::ProcessRho(ExRootTreeBranch *branch, TObjArray *array)
 {
+  TIter iterator(array);
   Candidate *candidate = 0;
   Rho *entry = 0;
 
-  // get the first entry
-  if((candidate = static_cast<Candidate*>(array->At(0))))
-  {
-    const TLorentzVector &momentum = candidate->Momentum;
+  // loop over all rho
+  iterator.Reset();
+  while((candidate = static_cast<Candidate*>(iterator.Next())))
+    {
+      const TLorentzVector &momentum = candidate->Momentum;
 
-    entry = static_cast<Rho*>(branch->NewEntry());
+      entry = static_cast<Rho*>(branch->NewEntry());
 
-    entry->Rho = momentum.E();
-  }
+      entry->Rho = momentum.E();
+      entry->Edges[0] = candidate->Edges[0];
+      entry->Edges[1] = candidate->Edges[1];
+    }
 }
 
 //------------------------------------------------------------------------------

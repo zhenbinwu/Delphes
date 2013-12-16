@@ -45,8 +45,11 @@ void JetExample(const char *inputFile)
     treeReader->ReadEntry(entry);
   
     cout << "Event " << entry << endl;
-    ScalarHT *rho = (ScalarHT*) branchRho->At(0);
-    cout << "  Rho: " << rho->HT << endl;
+    
+    for (int i = 0 ; i < branchRho->GetEntries() ; i++) {
+      Rho *rho = (Rho*) branchRho->At(i);
+      cout << "  Rho (" << rho->Edges[0] << "-" << rho->Edges[1] << "): " << rho->Rho << endl;
+    }
 
     // I have cheated and recorder the true number of pileup vertices in a "ScalarHT" object!
     ScalarHT *NPU = (ScalarHT*) branchNPU->At(0);

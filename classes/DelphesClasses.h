@@ -173,11 +173,12 @@ public:
 
 class Rho: public TObject
 {
-public:
+ public:
   Float_t Rho; // rho energy density
-
+  Float_t Edges[2]; // pseudorapidity range edges
+  
   ClassDef(Rho, 1)
-};
+    };
 
 //---------------------------------------------------------------------------
 

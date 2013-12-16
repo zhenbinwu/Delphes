@@ -3,8 +3,8 @@
  *
  *  Finds jets using FastJet library.
  *
- *  $Date: 2013-05-24 01:26:33 +0200 (Fri, 24 May 2013) $
- *  $Revision: 1122 $
+ *  $Date: 2013-11-04 11:59:27 +0100 (Mon, 04 Nov 2013) $
+ *  $Revision: 1315 $
  *
  *
  *  \author P. Demin - UCL, Louvain-la-Neuve
@@ -30,7 +30,7 @@
 #include "TDatabasePDG.h"
 #include "TLorentzVector.h"
 
-#include <algorithm> 
+#include <algorithm>
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -43,12 +43,11 @@
 #include "fastjet/ClusterSequenceArea.hh"
 #include "fastjet/tools/JetMedianBackgroundEstimator.hh"
 #include "fastjet/tools/Filter.hh"
+#include "fastjet/tools/Njettiness.hh"
 
 #include "fastjet/plugins/SISCone/fastjet/SISConePlugin.hh"
 #include "fastjet/plugins/CDFCones/fastjet/CDFMidPointPlugin.hh"
 #include "fastjet/plugins/CDFCones/fastjet/CDFJetCluPlugin.hh"
-
-#include "fastjet/tools/Njettiness.hh"
 
 using namespace std;
 using namespace fastjet;
@@ -74,6 +73,18 @@ void FastJetFinder::Init()
 {
   JetDefinition::Plugin *plugin = NULL;
 
+  // read eta ranges
+
+  ExRootConfParam param = GetParam("RhoEtaRange");
+  Long_t i, size;
+
+  fEtaRangeMap.clear();
+  size = param.GetSize();
+  for(i = 0; i < size/2; ++i)
+  {
+    fEtaRangeMap[param[i*2].GetDouble()] = param[i*2 + 1].GetDouble();
+  }
+
   // define algorithm
 
   fJetAlgorithm = GetInt("JetAlgorithm", 6);
@@ -93,7 +104,6 @@ void FastJetFinder::Init()
   // ---  Jet Area Parameters ---
   fAreaAlgorithm = GetInt("AreaAlgorithm", 0);
   fComputeRho = GetBool("ComputeRho", false);
-  fRhoEtaMax = GetDouble("RhoEtaMax", 5.0);
   // - ghost based areas -
   fGhostEtaMax = GetDouble("GhostEtaMax", 5.0);
   fRepeat = GetInt("Repeat", 1);
@@ -129,7 +139,7 @@ void FastJetFinder::Init()
 
   switch(fJetAlgorithm)
   {
-    case 1: 
+    case 1:
       plugin = new fastjet::CDFJetCluPlugin(fSeedThreshold, fConeRadius, fAdjacencyCut, fMaxIterations, fIratch, fOverlapThreshold);
       fDefinition = new fastjet::JetDefinition(plugin);
       break;
@@ -152,11 +162,11 @@ void FastJetFinder::Init()
       fDefinition = new fastjet::JetDefinition(fastjet::antikt_algorithm, fParameterR);
       break;
   }
-  
+
   fPlugin = plugin;
 
   ClusterSequence::print_banner();
-  
+
   // import input array
 
   fInputArray = ImportArray(GetString("InputArray", "Calorimeter/towers"));
@@ -190,6 +200,7 @@ void FastJetFinder::Process()
   PseudoJet jet, area;
   vector<PseudoJet> inputList, outputList;
   ClusterSequence *sequence;
+  map< Double_t, Double_t >::iterator itEtaRangeMap;
 
   DelphesFactory *factory = GetFactory();
 
@@ -199,15 +210,15 @@ void FastJetFinder::Process()
   fItInputArray->Reset();
   number = 0;
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
-  {   
+  {
     momentum = candidate->Momentum;
     jet = PseudoJet(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
     jet.set_user_index(number);
     inputList.push_back(jet);
     ++number;
   }
-   
-  // construct jets 
+
+  // construct jets
   if(fAreaDefinition)
   {
     sequence = new ClusterSequenceArea(inputList, *fDefinition, *fAreaDefinition);
@@ -215,21 +226,26 @@ void FastJetFinder::Process()
   else
   {
     sequence = new ClusterSequence(inputList, *fDefinition);
-  } 
+  }
 
   // compute rho and store it
   if(fComputeRho && fAreaDefinition)
   {
-    Selector select_rapidity = SelectorAbsRapMax(fRhoEtaMax);
-    JetMedianBackgroundEstimator estimator(select_rapidity, *fDefinition, *fAreaDefinition);
-    estimator.set_particles(inputList);
-    rho = estimator.rho();
+    for(itEtaRangeMap = fEtaRangeMap.begin(); itEtaRangeMap != fEtaRangeMap.end(); ++itEtaRangeMap)
+    {
+      Selector select_rapidity = SelectorAbsRapRange(itEtaRangeMap->first, itEtaRangeMap->second);
+      JetMedianBackgroundEstimator estimator(select_rapidity, *fDefinition, *fAreaDefinition);
+      estimator.set_particles(inputList);
+      rho = estimator.rho();
 
-    candidate = factory->NewCandidate();
-    candidate->Momentum.SetPtEtaPhiE(rho, 0.0, 0.0, rho); 
-    fRhoOutputArray->Add(candidate);
+      candidate = factory->NewCandidate();
+      candidate->Momentum.SetPtEtaPhiE(rho, 0.0, 0.0, rho);
+      candidate->Edges[0] = itEtaRangeMap->first;
+      candidate->Edges[1] = itEtaRangeMap->second;
+      fRhoOutputArray->Add(candidate);
+    }
   }
-  
+
   outputList.clear();
   outputList = sorted_by_pt(sequence->inclusive_jets(fJetPTMin));
 
@@ -271,76 +287,76 @@ void FastJetFinder::Process()
 
     if (itOutputList->perp()>200){
 
-	//------------------------------------
-	// Trimming
-	//------------------------------------
+      //------------------------------------
+      // Trimming
+      //------------------------------------
 
-	double Rtrim = 0.2;
-	double ptfrac = 0.05;
-	fastjet::Filter trimmer(fastjet::JetDefinition(fastjet::cambridge_algorithm, Rtrim), fastjet::SelectorPtFractionMin(ptfrac) );
-	fastjet::PseudoJet trimmed_jet = trimmer(*itOutputList);
-	
-	double trimmedMass=trimmed_jet.m();
-	if (trimmedMass<0) trimmedMass=0;
-	candidate->TrimmedMass=trimmedMass;
+      double Rtrim = 0.2;
+      double ptfrac = 0.05;
+      fastjet::Filter trimmer(fastjet::JetDefinition(fastjet::cambridge_algorithm, Rtrim), fastjet::SelectorPtFractionMin(ptfrac) );
+      fastjet::PseudoJet trimmed_jet = trimmer(*itOutputList);
 
-	//------------------------------------
-	// Subjet Quantities
-	//------------------------------------
+      double trimmedMass=trimmed_jet.m();
+      if (trimmedMass<0) trimmedMass=0;
+      candidate->TrimmedMass=trimmedMass;
+  
+      //------------------------------------
+      // Subjet Quantities
+      //------------------------------------
 
-	vector<PseudoJet> kept_subjets = trimmed_jet.pieces();
-	candidate->NSubJets=kept_subjets.size();
+      vector<PseudoJet> kept_subjets = trimmed_jet.pieces();
+      candidate->NSubJets=kept_subjets.size();
 
-	double largest_mass_subjet = 0;
-	for (size_t i = 0; i < kept_subjets.size(); i++) 
-	  {
-	    if ( kept_subjets[i].m() > largest_mass_subjet )
-	      {
-		largest_mass_subjet = kept_subjets[i].m();
-	      }
-	  }
+      double largest_mass_subjet = 0;
+      for (size_t i = 0; i < kept_subjets.size(); i++)
+	{
+	  if ( kept_subjets[i].m() > largest_mass_subjet )
+	    {
+	      largest_mass_subjet = kept_subjets[i].m();
+	    }
+	}
 
-	double massdrop=1;
-	if ( trimmedMass!=0 ) massdrop = largest_mass_subjet / trimmedMass;
-	candidate->MassDrop=massdrop;
+      double massdrop=1;
+      if ( trimmedMass!=0 ) massdrop = largest_mass_subjet / trimmedMass;
+      candidate->MassDrop=massdrop;
 
-	//------------------------------------
-	// NSubJettiness
-	//------------------------------------
-	double beta = 1.0; // power for angular dependence, e.g. beta = 1 --> linear k-means, beta = 2 --> quadratic/classic k-means
-	double R0 = 0.8; // Characteristic jet radius for normalization
-	double Rcut = 10000.0; // maximum R particles can be from axis to be included in jet (large value for no cutoff)   
-	NsubParameters paraNsub(beta, R0, Rcut);
+      //------------------------------------
+      // NSubJettiness
+      //------------------------------------
+      double beta = 1.0; // power for angular dependence, e.g. beta = 1 --> linear k-means, beta = 2 --> quadratic/classic k-means
+      double R0 = 0.8; // Characteristic jet radius for normalization
+      double Rcut = 10000.0; // maximum R particles can be from axis to be included in jet (large value for no cutoff)
+      NsubParameters paraNsub(beta, R0, Rcut);
 
-	Njettiness nSubOnePass(Njettiness::onepass_kt_axes,paraNsub);
+      Njettiness nSubOnePass(Njettiness::onepass_kt_axes,paraNsub);
 
-	vector<fastjet::PseudoJet> jet_constituents = itOutputList->constituents();
-	candidate->Tau1 = nSubOnePass.getTau(1,jet_constituents);
-	candidate->Tau2 = nSubOnePass.getTau(2,jet_constituents);
-	candidate->Tau3 = nSubOnePass.getTau(3,jet_constituents);
+      vector<fastjet::PseudoJet> jet_constituents = itOutputList->constituents();
+      candidate->Tau1 = nSubOnePass.getTau(1,jet_constituents);
+      candidate->Tau2 = nSubOnePass.getTau(2,jet_constituents);
+      candidate->Tau3 = nSubOnePass.getTau(3,jet_constituents);
+  
+      //------------------------------------
+      // W-tag - Mass drop from trimmed jets
+      //------------------------------------
 
-	//------------------------------------
-	// W-tag - Mass drop from trimmed jets
-	//------------------------------------
+      if (massdrop < 0.4 && 60 < trimmedMass && trimmedMass < 120)
+	candidate->WTag=1;
 
-	if (massdrop < 0.4 && 60 < trimmedMass && trimmedMass < 120)
-	    candidate->WTag=1;
+      //------------------------------------
+      // Top-tag
+      //------------------------------------
 
-	//------------------------------------
-	// Top-tag
-	//------------------------------------
+      if (kept_subjets.size()>=3 && 140 < trimmedMass && trimmedMass < 230)
+	candidate->TopTag=1;
 
-	if (kept_subjets.size()>=3 && 140 < trimmedMass && trimmedMass < 230)
-	  candidate->TopTag=1;
+      //------------------------------------
+      // h-tag - Mass drop from trimmed jets
+      //------------------------------------
 
-        //------------------------------------
-        // h-tag - Mass drop from trimmed jets
-        //------------------------------------
-
-        if (massdrop < 0.4 && 100 < trimmedMass && trimmedMass < 140)
-          candidate->HTag=1;
+      if (massdrop < 0.4 && 100 < trimmedMass && trimmedMass < 140)
+	candidate->HTag=1;
     }
-    
+
     fOutputArray->Add(candidate);
   }
   delete sequence;

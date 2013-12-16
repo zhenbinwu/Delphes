@@ -630,6 +630,9 @@ module FastJetFinder Rho {
   set GhostEtaMax 5.0
   set RhoEtaMax 5.0
 
+  add RhoEtaRange 0.0 2.5
+  add RhoEtaRange 2.5 5.0
+
   set JetPTMin 0.0
 }
 
@@ -1044,7 +1047,7 @@ module TreeWriter TreeWriter {
 #  add Branch MuonIsolation/muons Muon Muon
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
-  add Branch Rho/rho Rho ScalarHT
+  add Branch Rho/rho Rho Rho
   add Branch PileUpMerger/NPU NPU ScalarHT
 }
 
