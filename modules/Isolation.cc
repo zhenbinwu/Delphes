@@ -198,6 +198,9 @@ void Isolation::Process()
     sum = sum - rho*fDeltaRMax*fDeltaRMax*TMath::Pi();
 
     ratio = sum/candidateMomentum.Pt();
+
+    candidate->IsolationVar = ratio;
+
     if((fUsePTSum && sum > fPTSumMax) || ratio > fPTRatioMax) continue;
 
     fOutputArray->Add(candidate);
