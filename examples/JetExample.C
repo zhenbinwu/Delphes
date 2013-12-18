@@ -30,11 +30,15 @@ void JetExample(const char *inputFile)
   TClonesArray *branchRho = treeReader->UseBranch("Rho");
   TClonesArray *branchNPU = treeReader->UseBranch("NPU");
 
+  TClonesArray *branchGenJetWithPU = treeReader->UseBranch("GenJetWithPU");
+
+
   // Constituents will be 0 otherwise
   TClonesArray *branchEFlowTrack = treeReader->UseBranch("EFlowTrack");
   TClonesArray *branchEFlowTower = treeReader->UseBranch("EFlowTower");
   TClonesArray *branchEFlowMuon = treeReader->UseBranch("EFlowMuon");
   TClonesArray *branchGenParticle = treeReader->UseBranch("Particle");
+  TClonesArray *branchGenParticleWithPU = treeReader->UseBranch("ParticleWithPU");
 
   bool verbose = true;
   bool doResTree = false;
@@ -164,6 +168,31 @@ void JetExample(const char *inputFile)
 	  }
 	}
       }
+
+      if (branchGenJetWithPU) {
+	for (int i = 0 ; i < branchGenJetWithPU->GetEntries() ; i++) {
+	  Jet *jet = (Jet*) branchGenJetWithPU->At(i);
+	  if (jet->PT > 100.) {
+	    cout << "  Gen Jet (with PU included) " << i << endl;
+	    cout << "    pT: " << jet->PT << endl;
+	    cout << "    Eta: " << jet->Eta << endl;
+	    cout << "    Area: " << jet->AreaP4().Pt() << endl;
+	    cout << "    Constituents: " << jet->Constituents.GetEntries() << endl;
+	    if (branchGenParticleWithPU) {
+	      for (int j = 0 ; j < jet->Constituents.GetEntries() ; j++) {
+		TObject *obj = jet->Constituents[j];
+		if (obj->IsA() == GenParticle::Class()) {
+		  GenParticle *part = static_cast<GenParticle *> ( obj ) ;
+		  cout << "     Jet constituent Pt Eta Phi Z T (at origin) " << part->PT << " " << part->Eta << " " << part->Phi << " " << part->Z << " " << part->T << endl;
+		} else {
+		  cout << "     Jet constituent is not a particle (?)" << endl;
+		}
+	      }
+	    }
+	  }
+	}
+      }
+
 
     } // verbose 
   } // event

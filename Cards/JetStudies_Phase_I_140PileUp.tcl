@@ -41,6 +41,7 @@ set ExecutionPath {
   GenJetFinder
   JetPileUpSubtractor
   CAJetPileUpSubtractor
+  GenJetFinderWithPU
 
   PhotonEfficiency
   PhotonIsolation
@@ -652,6 +653,19 @@ module FastJetFinder GenJetFinder {
   set JetPTMin 10.0
 }
 
+module FastJetFinder GenJetFinderWithPU {
+#  set InputArray Delphes/stableParticles
+  set InputArray ModifyBeamSpot/stableParticles
+
+  set OutputArray jets
+
+  # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
+  set JetAlgorithm 6
+  set ParameterR 0.5
+
+  set JetPTMin 10.0
+}
+
 ############
 # Jet finder
 ############
@@ -1027,6 +1041,9 @@ module TreeWriter TreeWriter {
 
 #  add Branch TrackMerger/tracks Track Track
 #  add Branch Calorimeter/towers Tower Tower
+
+  add Branch ModifyBeamSpot/stableParticles ParticleWithPU GenParticle
+  add Branch GenJetFinderWithPU/jets GenJetWithPU Jet
 
   add Branch ModifyBeamSpotNoPU/stableParticles Particle GenParticle
   add Branch TrackPileUpSubtractor/eflowTracks EFlowTrack Track
