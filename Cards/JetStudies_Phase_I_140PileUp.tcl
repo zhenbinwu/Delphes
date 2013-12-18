@@ -65,7 +65,6 @@ set ExecutionPath {
 
   ScalarHT
 
-  ConstituentFilter
   TreeWriter
 }
 
@@ -641,7 +640,8 @@ module FastJetFinder Rho {
 #####################
 
 module FastJetFinder GenJetFinder {
-  set InputArray Delphes/stableParticles
+#  set InputArray Delphes/stableParticles
+  set InputArray ModifyBeamSpotNoPU/stableParticles
 
   set OutputArray jets
 
@@ -781,6 +781,7 @@ module Isolation PhotonIsolation {
   set PTMin 1.0
 
   set PTRatioMax 0.4
+
 }
 
 #####################
@@ -1024,17 +1025,17 @@ module TreeWriter TreeWriter {
 #  add Branch Delphes/allParticles Particle GenParticle
 #  add Branch StatusPid/filteredParticles Particle GenParticle
 
-#  add Branch PileUpMerger/stableParticles Particle GenParticle
 #  add Branch TrackMerger/tracks Track Track
 #  add Branch Calorimeter/towers Tower Tower
 
-#  add Branch TrackPileUpSubtractor/eflowTracks EFlowTrack Track
-#  add Branch Calorimeter/eflowTowers EFlowTower Tower
-#  add Branch MuonMomentumSmearing/muons EFlowMuon Muon
+  add Branch ModifyBeamSpotNoPU/stableParticles Particle GenParticle
+  add Branch TrackPileUpSubtractor/eflowTracks EFlowTrack Track
+  add Branch Calorimeter/eflowTowers EFlowTower Tower
+  add Branch MuonMomentumSmearing/muons EFlowMuon Muon
 
-  add Branch ConstituentFilter/eflowTracks EFlowTrack Track
-  add Branch ConstituentFilter/eflowTowers EFlowTower Tower
-  add Branch ConstituentFilter/muons EFlowMuon Muon
+#  add Branch ConstituentFilter/eflowTracks EFlowTrack Track
+#  add Branch ConstituentFilter/eflowTowers EFlowTower Tower
+#  add Branch ConstituentFilter/muons EFlowMuon Muon
 
   add Branch GenJetFinder/jets GenJet Jet
   add Branch CAJetPileUpSubtractor/jets CAJet Jet
