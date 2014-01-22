@@ -13,8 +13,8 @@
 
 #include "modules/PileUpMerger.h"
 
-#include "CLHEP/Units/GlobalSystemOfUnits.h"
-#include "CLHEP/Units/GlobalPhysicalConstants.h"
+//#include "CLHEP/Units/GlobalSystemOfUnits.h"
+//#include "CLHEP/Units/GlobalPhysicalConstants.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -37,6 +37,13 @@
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
+
+static const double mm  = 1.;
+static const double m = 1000.*mm;
+static const double ns  = 1.;
+static const double s = 1.e+9 *ns;
+static const double c_light   = 2.99792458e+8 * m/s;
+
 
 using namespace std;
 
