@@ -61,6 +61,8 @@ void ParticlePropagator::Init()
   fRadius2 = fRadius*fRadius;
   fHalfLength = GetDouble("HalfLength", 3.0);
   fBz = GetDouble("Bz", 0.0);
+  fKeepPileUp = GetInt("KeepPileUp",1);
+
   if(fRadius < 1.0E-2)
   { 
     cout << "ERROR: magnetic field radius is too low\n";
@@ -114,6 +116,12 @@ void ParticlePropagator::Process()
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
+
+    // For no pileup samples...
+    if (fKeepPileUp == 0 && candidate->IsPU > 0) {
+      continue;
+    }
+
     candidatePosition = candidate->Position;
     candidateMomentum = candidate->Momentum;
     x = candidatePosition.X()*1.0E-3;
@@ -178,7 +186,7 @@ void ParticlePropagator::Process()
       // Probably easiest to recompute the time from the (straight-line) distance travelled...
       t = 1E9*(1/c_light)*TMath::Sqrt((x_t-x)*(x_t-x)+(y_t-y)*(y_t-y)+(z_t-z)*(z_t-z)); // 1E9/c_light converts meters --> ns
       //      if (pt > 1.) {
-      //      	cout << " SCZ NEUTRAL Debug t t_orig " << t << " " << t_orig << endl;
+      //	cout << " SCZ NEUTRAL Debug t t_orig " << t << " " << t_orig << endl;
       //      }
       t += t_orig;
 
@@ -276,11 +284,13 @@ void ParticlePropagator::Process()
         mother = candidate;
         candidate = static_cast<Candidate*>(candidate->Clone());
 
-	//	if (pt > 1.) {
-	//		  cout << " SCZ CHARGED Debug: t_r t_z t 1E9*t t_orig " << t_r << " " << t_z << " " << t << " "  << 1E9*t << " " << t_orig << endl;
-	//                  cout << "   SCZ Debug line2: pt pz x y z " << pt << " " << pz << " " << x << " " << y << " " << z << endl;
-	//	}
+	if (pt > 1.) {
+	  //			  cout << " SCZ CHARGED Debug: t_r t_z t 1E9*t t_orig " << t_r << " " << t_z << " " << t << " "  << 1E9*t << " " << t_orig << endl;
+	  //	                  cout << "   SCZ Debug line2: pt pz x y z " << pt << " " << pz << " " << x << " " << y << " " << z << endl;
+	  //	}
 	t = 1E9*t + t_orig; // Delphes had omega in inverse s, so 1E9 converts to ns
+
+	//	cout << " Original (z,t)=(" << z << ", " << t_orig << ") - New (z,t)=(" << z_t*1.0E3 << ", " << t << ")" << endl;
 
         candidate->Position.SetXYZT(x_t*1.0E3, y_t*1.0E3, z_t*1.0E3, t);
 

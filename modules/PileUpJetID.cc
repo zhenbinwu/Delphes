@@ -143,6 +143,7 @@ void PileUpJetID::Process()
       while((constituent = static_cast<Candidate*>(itConstituents.Next()))) {
         float pt = constituent->Momentum.Pt();
         float dr = candidate->Momentum.DeltaR(constituent->Momentum);
+	//	cout << " There exists a constituent with dr=" << dr << endl;
 	sumpt += pt;
 	sumdrsqptsq += dr*dr*pt*pt;
 	sumptsq += pt*pt;

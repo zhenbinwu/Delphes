@@ -36,6 +36,7 @@ private:
 
   Double_t fRadius, fRadius2, fHalfLength;
   Double_t fBz;
+  Int_t fKeepPileUp;
 
   TIterator *fItInputArray; //!
 
