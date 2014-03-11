@@ -15,7 +15,7 @@
 
 #include "modules/ParticlePropagator.h"
 
-#include "CLHEP/Units/GlobalSystemOfUnits.h"
+//#include "CLHEP/Units/GlobalSystemOfUnits.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -37,6 +37,13 @@
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
+
+static const double mm  = 1.;
+static const double m = 1000.*mm;
+static const double ns  = 1.;
+static const double s = 1.e+9 *ns;
+static const double c_light   = 2.99792458e+8 * m/s;
+
 
 using namespace std;
 
@@ -111,7 +118,7 @@ void ParticlePropagator::Process()
 
   float t_orig;
   
-  const Double_t c_light = 2.99792458E8;
+  //  const Double_t c_light = 2.99792458E8;
     
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
