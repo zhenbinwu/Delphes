@@ -3,14 +3,14 @@ root -l examples/Example1.C\(\"delphes_output.root\"\)
 
 or just:
 
-./JetExample delphes_output.root
+./GeneralExample delphes_output.root
 
-N.B. you must touch JetExample.cpp in order to convince Make that there is anything to do to build this!
+N.B. you must touch GeneralExample.cpp in order to convince Make that there is anything to do to build this!
 */
 
 //------------------------------------------------------------------------------
 
-void JetExample(const char *inputFile)
+void GeneralExample(const char *inputFile)
 {
   //  gSystem->Load("libDelphes");
 

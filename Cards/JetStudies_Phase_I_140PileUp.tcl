@@ -22,7 +22,6 @@ set ExecutionPath {
   TrackPileUpSubtractor
   EFlowMerger
 
-  ModifyBeamSpotNoPU
   ParticlePropagatorNoPU
   ChargedHadronTrackingEfficiencyNoPU
   ElectronTrackingEfficiencyNoPU
@@ -66,6 +65,7 @@ set ExecutionPath {
 
   ScalarHT
 
+  ConstituentFilter
   TreeWriter
 }
 
@@ -83,6 +83,7 @@ module PileUpJetID PileUpJetID {
   set ParameterR 0.5
   
   set JetPTMin 10.0
+
 
 }
 
@@ -125,12 +126,12 @@ module ModifyBeamSpot ModifyBeamSpot {
   set PVOutputArray PV  
 }
 
-module ModifyBeamSpot ModifyBeamSpotNoPU {
-  set ZVertexSpread 0.053
-  set InputArray Delphes/stableParticles
-  set OutputArray stableParticles
-  set PVOutputArray PV
-}
+#module ModifyBeamSpot ModifyBeamSpotNoPU {
+#  set ZVertexSpread 0.053
+#  set InputArray Delphes/stableParticles
+#  set OutputArray stableParticles
+#  set PVOutputArray PV
+#}
 
 #################################
 # Propagate particles in cylinder
@@ -154,7 +155,8 @@ module ParticlePropagator ParticlePropagator {
 }
 
 module ParticlePropagator ParticlePropagatorNoPU {
-  set InputArray ModifyBeamSpotNoPU/stableParticles
+#  set InputArray ModifyBeamSpotNoPU/stableParticles
+  set InputArray ModifyBeamSpot/stableParticles
 
   set OutputArray stableParticles
   set ChargedHadronOutputArray chargedHadrons
@@ -168,6 +170,9 @@ module ParticlePropagator ParticlePropagatorNoPU {
 
   # magnetic field
   set Bz 3.8
+
+  # remove pileup again (using it for synchronization)
+  set KeepPileUp 0
 }
 
 
@@ -421,6 +426,9 @@ module Merger TrackMergerNoPU {
 #############
 
 module Calorimeter Calorimeter {
+    
+  set TimingEMin 0.5
+
   set ParticleInputArray ParticlePropagator/stableParticles
   set TrackInputArray TrackMerger/tracks
 
@@ -642,7 +650,7 @@ module FastJetFinder Rho {
 
 module FastJetFinder GenJetFinder {
 #  set InputArray Delphes/stableParticles
-  set InputArray ModifyBeamSpotNoPU/stableParticles
+  set InputArray ModifyBeamSpot/stableParticles
 
   set OutputArray jets
 
@@ -651,6 +659,9 @@ module FastJetFinder GenJetFinder {
   set ParameterR 0.5
 
   set JetPTMin 10.0
+
+  # remove pileup again (using it for synchronization)
+  set KeepPileUp 0
 }
 
 module FastJetFinder GenJetFinderWithPU {
@@ -726,9 +737,15 @@ module FastJetFinder CAJetFinder {
 
 module ConstituentFilter ConstituentFilter {
 
+  set ConEMin 1.
+
 # # add JetInputArray InputArray
    add JetInputArray GenJetFinder/jets
-   add JetInputArray FastJetFinder/jets
+
+# SZ changed this but it seems sensible
+#   add JetInputArray FastJetFinder/jets
+   add JetInputArray UniqueObjectFinderMJ/jets
+
 #   add JetInputArray CAJetFinder/jets
 
   
@@ -1042,10 +1059,14 @@ module TreeWriter TreeWriter {
 #  add Branch TrackMerger/tracks Track Track
 #  add Branch Calorimeter/towers Tower Tower
 
-  add Branch ModifyBeamSpot/stableParticles ParticleWithPU GenParticle
+# commented out temporarily, SZ March 4
+#  add Branch ModifyBeamSpot/stableParticles ParticleWithPU GenParticle
+
   add Branch GenJetFinderWithPU/jets GenJetWithPU Jet
 
-  add Branch ModifyBeamSpotNoPU/stableParticles Particle GenParticle
+#  add Branch ModifyBeamSpotNoPU/stableParticles Particle GenParticle
+
+# These commented out temporarily, SZ March 3
   add Branch TrackPileUpSubtractor/eflowTracks EFlowTrack Track
   add Branch Calorimeter/eflowTowers EFlowTower Tower
   add Branch MuonMomentumSmearing/muons EFlowMuon Muon
@@ -1055,13 +1076,20 @@ module TreeWriter TreeWriter {
 #  add Branch ConstituentFilter/muons EFlowMuon Muon
 
   add Branch GenJetFinder/jets GenJet Jet
-  add Branch CAJetPileUpSubtractor/jets CAJet Jet
+
+  # commented out temporarily, SZ Mar 4
+#  add Branch CAJetPileUpSubtractor/jets CAJet Jet
+
   add Branch UniqueObjectFinderMJ/jets Jet Jet
   add Branch UniqueObjectFinderEJ/electrons Electron Electron
   add Branch UniqueObjectFinderGJ/photons Photon Photon
   add Branch UniqueObjectFinderMJ/muons Muon Muon
-  add Branch FastJetFinder/jets RawJet Jet
-  add Branch FastJetFinderNoPU/jets RawJetNoPU Jet
+
+# Commented out temporarily, SZ Mar 4
+#  add Branch FastJetFinder/jets RawJet Jet
+#  add Branch FastJetFinderNoPU/jets RawJetNoPU Jet
+
+
 #  add Branch MuonIsolation/muons Muon Muon
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT

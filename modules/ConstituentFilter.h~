@@ -36,7 +36,6 @@ private:
 
   Double_t fJetPTMin;
   Double_t fConPTMin;
-  Double_t fConEMin;
 
   std::vector< TIterator * > fInputList; //!
 

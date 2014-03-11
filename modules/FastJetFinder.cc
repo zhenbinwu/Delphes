@@ -85,6 +85,9 @@ void FastJetFinder::Init()
     fEtaRangeMap[param[i*2].GetDouble()] = param[i*2 + 1].GetDouble();
   }
 
+  fKeepPileUp = GetInt("KeepPileUp",1);
+  //  cout << "set fKeepPileUp=" << fKeepPileUp << endl;
+
   // define algorithm
 
   fJetAlgorithm = GetInt("JetAlgorithm", 6);
@@ -211,6 +214,13 @@ void FastJetFinder::Process()
   number = 0;
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
   {
+
+    // for genjets mostly
+    if (fKeepPileUp == 0 && candidate->IsPU > 0) {
+    //      cout << " skipping pile up object" << endl;
+      continue;
+    }
+
     momentum = candidate->Momentum;
     jet = PseudoJet(momentum.Px(), momentum.Py(), momentum.Pz(), momentum.E());
     jet.set_user_index(number);
@@ -266,6 +276,8 @@ void FastJetFinder::Process()
     for(itInputList = inputList.begin(); itInputList != inputList.end(); ++itInputList)
     {
       constituent = static_cast<Candidate*>(fInputArray->At(itInputList->user_index()));
+
+      //      cout << "fKeepPileUp=" << fKeepPileUp << " constituent->IsPU=" << constituent->IsPU << endl;
 
       deta = TMath::Abs(momentum.Eta() - constituent->Momentum.Eta());
       dphi = TMath::Abs(momentum.DeltaPhi(constituent->Momentum));

@@ -205,6 +205,8 @@ public:
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
   Float_t IsolationVar; 
 
+  Float_t TOuter; // time at calorimeter face
+
   TRefArray Particles; // references to generated particles
 
   static CompBase *fgCompare; //!
@@ -229,6 +231,8 @@ public:
 
   Float_t EhadOverEem; // ratio of the hadronic versus electromagnetic energy deposited in the calorimeter
   Float_t IsolationVar; // Sum of chHadEt, NeutralHadEt, and  GammaEt
+
+  Float_t TOuter; // Time at calorimeter face
 
   TRef Particle; // reference to generated particle
 
@@ -294,6 +298,8 @@ public:
   Float_t MeanSqDeltaR, PTD;
   Int_t NCharged, NNeutrals;
   Float_t  FracPt[5]; // [0] <--> 0.0 < dR < 0.1,  [1] <--> 0.1 < dR < 0.2,  etc.
+
+  // These are experimental and not currently planned to be used
   Float_t t0,t1,t10,t20,t30,t40; // Jet timing (at calorimeter) with ecal deposit (particle) level smearing by 0,1,10,20,30,40 ps
   Int_t nTimes;
 
@@ -346,6 +352,9 @@ public:
   Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable
                   // Reflects decision ncoprorating z vertex resolution
 
+  Float_t T; // track vertex time: I think this is cheating, but I guess no more than (X,Y,Z)
+  Float_t TOuter; // track time at tracker edge
+
   TRef Particle; // reference to generated particle
 
   static CompBase *fgCompare; //!
@@ -372,7 +381,7 @@ public:
 
   Float_t Edges[4]; // calorimeter tower edges
 
-  Float_t t0; // ecal deposit time, averaged by sqrt(EM energy) over all particles, not smeared
+  Float_t TOuter; // ecal deposit time, averaged by sqrt(EM energy) over all particles, not smeared
   Float_t nTimes;
 
   TRefArray Particles; // references to generated particles

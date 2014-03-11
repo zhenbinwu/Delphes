@@ -59,8 +59,6 @@ void ConstituentFilter::Init()
 
   fJetPTMin = GetDouble("JetPTMin", 0.0);
   fConPTMin = GetDouble("ConPTMin", 0.0);
-  fConEMin = GetDouble("ConEMin", 0.0);
-
 
   // import input array(s)
 
@@ -149,7 +147,7 @@ void ConstituentFilter::Process()
     while((constituent = static_cast<Candidate*>(iterator->Next())))
     {
       // check the IsConstituent flag
-      if(constituent->IsConstituent && constituent->Momentum.Pt() > fConPTMin && constituent->Momentum.E() > fConEMin)
+      if(constituent->IsConstituent && constituent->Momentum.Pt() > fConPTMin)
       {
         array->Add(constituent);
       }

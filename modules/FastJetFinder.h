@@ -42,6 +42,9 @@ private:
   void *fPlugin; //!
   fastjet::JetDefinition *fDefinition; //!
 
+  // For genjets mostly
+  Int_t fKeepPileUp;
+
   Int_t fJetAlgorithm;
   Double_t fParameterR;
   Double_t fJetPTMin;

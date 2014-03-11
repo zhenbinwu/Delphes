@@ -246,6 +246,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->XOuter = position.X();
     entry->YOuter = position.Y();
     entry->ZOuter = position.Z();
+    entry->TOuter = position.T();
 
     const TLorentzVector &momentum = candidate->Momentum;
 
@@ -259,14 +260,15 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->Phi = momentum.Phi();
     entry->PT = pt;
 
-    entry->IsRecoPU = candidate->IsRecoPU;
-
     particle = static_cast<Candidate*>(candidate->GetCandidates()->At(0));
     const TLorentzVector &initialPosition = particle->Position;
 
     entry->X = initialPosition.X();
     entry->Y = initialPosition.Y();
     entry->Z = initialPosition.Z();
+    entry->T = initialPosition.T();
+
+    entry->IsRecoPU = candidate->IsRecoPU;
 
     entry->Particle = particle;
   }
@@ -309,7 +311,7 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, TObjArray *array)
     entry->Edges[2] = candidate->Edges[2];
     entry->Edges[3] = candidate->Edges[3];
 
-    entry->t0 = candidate->t0;
+    entry->TOuter = candidate->t0;
     entry->nTimes = candidate->nTimes;
 
     FillParticles(candidate, &entry->Particles);
@@ -350,6 +352,8 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
 
     entry->EhadOverEem = candidate->Eem > 0.0 ? candidate->Ehad/candidate->Eem : 999.9;
 
+    entry->TOuter = candidate->Position.T();
+
     FillParticles(candidate, &entry->Particles);
   }
 }
@@ -386,6 +390,8 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array)
     entry->Charge = candidate->Charge;
 
     entry->EhadOverEem = 0.0;
+
+    entry->TOuter = candidate->Position.T();
 
     entry->Particle = candidate->GetCandidates()->At(0);
   }
@@ -511,6 +517,7 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     hcalEnergy = 0.0;
     while((constituent = static_cast<Candidate*>(itConstituents.Next())))
     {
+      //      cout << "Adding constituent with dr=" << entry->P4().DeltaR(constituent->Momentum) << endl;
       entry->Constituents.Add(constituent);
       ecalEnergy += constituent->Eem;
       hcalEnergy += constituent->Ehad;
