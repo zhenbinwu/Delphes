@@ -291,7 +291,7 @@ void ParticlePropagator::Process()
         mother = candidate;
         candidate = static_cast<Candidate*>(candidate->Clone());
 
-	if (pt > 1.) {
+	//	if (pt > 1.) {
 	  //			  cout << " SCZ CHARGED Debug: t_r t_z t 1E9*t t_orig " << t_r << " " << t_z << " " << t << " "  << 1E9*t << " " << t_orig << endl;
 	  //	                  cout << "   SCZ Debug line2: pt pz x y z " << pt << " " << pz << " " << x << " " << y << " " << z << endl;
 	  //	}
