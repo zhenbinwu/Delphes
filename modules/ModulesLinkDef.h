@@ -39,6 +39,7 @@
 #include "modules/CleansedJetFinder.h"
 #include "modules/PileUpJetID.h"
 #include "modules/ModifyBeamSpot.h"
+#include "modules/GenBeamSpotFilter.h"
 
 #ifdef __CINT__
 
@@ -74,5 +75,6 @@
 #pragma link C++ class CleansedJetFinder+;
 #pragma link C++ class PileUpJetID+;
 #pragma link C++ class ModifyBeamSpot+;
+#pragma link C++ class GenBeamSpotFilter+;
 
 #endif

@@ -8,6 +8,7 @@ set ExecutionPath {
   ModifyBeamSpot
   ParticlePropagator
   StatusPid
+  GenBeamSpotFilter
 
   ChargedHadronTrackingEfficiency
   ElectronTrackingEfficiency
@@ -155,7 +156,6 @@ module ParticlePropagator ParticlePropagator {
 }
 
 module ParticlePropagator ParticlePropagatorNoPU {
-#  set InputArray ModifyBeamSpotNoPU/stableParticles
   set InputArray ModifyBeamSpot/stableParticles
 
   set OutputArray stableParticles
@@ -185,9 +185,17 @@ module ParticlePropagator ParticlePropagatorNoPU {
 module StatusPidFilter StatusPid {
 #    set InputArray Delphes/stableParticles
     set InputArray Delphes/allParticles
+
     set OutputArray filteredParticles
 
     set PTMin 0.5
+}
+
+# Saves a particle (or particles?) intended to represent the beamspot
+module GenBeamSpotFilter GenBeamSpotFilter {
+    set InputArray ModifyBeamSpot/stableParticles
+    set OutputArray beamSpotParticles
+    
 }
 
 
@@ -737,7 +745,7 @@ module FastJetFinder CAJetFinder {
 
 module ConstituentFilter ConstituentFilter {
 
-  set ConEMin 1.
+  set ConEMin 0.
 
 # # add JetInputArray InputArray
    add JetInputArray GenJetFinder/jets
@@ -1054,7 +1062,8 @@ module UniqueObjectFinder UniqueObjectFinderMJ {
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
 #  add Branch Delphes/allParticles Particle GenParticle
-#  add Branch StatusPid/filteredParticles Particle GenParticle
+  add Branch StatusPid/filteredParticles Particle GenParticle
+  add Branch GenBeamSpotFilter/beamSpotParticles BeamSpotParticle GenParticle
 
 #  add Branch TrackMerger/tracks Track Track
 #  add Branch Calorimeter/towers Tower Tower
@@ -1062,7 +1071,7 @@ module TreeWriter TreeWriter {
 # commented out temporarily, SZ March 4
 #  add Branch ModifyBeamSpot/stableParticles ParticleWithPU GenParticle
 
-  add Branch GenJetFinderWithPU/jets GenJetWithPU Jet
+#  add Branch GenJetFinderWithPU/jets GenJetWithPU Jet
 
 #  add Branch ModifyBeamSpotNoPU/stableParticles Particle GenParticle
 

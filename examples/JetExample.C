@@ -37,7 +37,8 @@ void JetExample(const char *inputFile)
   TClonesArray *branchEFlowTrack = treeReader->UseBranch("EFlowTrack");
   TClonesArray *branchEFlowTower = treeReader->UseBranch("EFlowTower");
   TClonesArray *branchEFlowMuon = treeReader->UseBranch("EFlowMuon");
-  //  TClonesArray *branchGenParticle = treeReader->UseBranch("Particle");
+  TClonesArray *branchGenParticle = treeReader->UseBranch("Particle");
+  TClonesArray *branchBeamSpotParticle = treeReader->UseBranch("BeamSpotParticle");
   TClonesArray *branchGenParticleWithPU = treeReader->UseBranch("ParticleWithPU");
 
   bool verbose = true;
@@ -98,11 +99,31 @@ void JetExample(const char *inputFile)
 	tree->Fill(); // per genjet
       }
     } // doResTree
+
+    // One particle from primary vertex
+    if (verbose && branchBeamSpotParticle) {
+      GenParticle *part = (GenParticle*) branchBeamSpotParticle->At(0);
+      cout <<  "  True primary vertex X Y Z T: " << part->X << " " << part->Y << " " << part->Z << " " << part->T << endl;
+      //      cout << "     Generator particle PID Pt Eta Phi X Y Z T (at origin) "  << part->PID << " "
+      //	   << part->PT << " " << part->Eta << " " << part->Phi << " " << part->X << " " << part->Y << " " << part->Z << " " << part->T << endl;
+    }
+
+    // Status code 3 particle collection
+    if (verbose && branchGenParticle) {
+      for (int i = 0 ; i < branchGenParticle->GetEntries() ; i++ ) {
+	GenParticle *part = (GenParticle*) branchGenParticle->At(i);
+	cout << "     Status code 3 generator particle PID Pt Eta Phi Z T (at origin) "  << part->PID << " "
+	     << part->PT << " " << part->Eta << " " << part->Phi << " " << part->Z << " " << part->T << endl;
+      }
+    }
       
     if (verbose) {
       // Loop over jets
       for (int i = 0 ; i < branchJet->GetEntries() ; i++) {
+	//	cout << "  Jet " << i << "/" << branchJet->GetEntries() << endl;
 	Jet *jet = (Jet*) branchJet->At(i);
+	//	cout << jet->PT << endl;
+	//	continue;
 	if (jet->PT > 100.) {
 	  cout << "  Jet " << i << endl;
 	  cout << "    pT: " << jet->PT << endl;
@@ -129,25 +150,29 @@ void JetExample(const char *inputFile)
       }
       
       // Loop over jets
-      for (int i = 0 ; i < branchRawJet->GetEntries() ; i++) {
-	Jet *jet = (Jet*) branchRawJet->At(i);
-	if (jet->PT > 100.) {
-	  cout << "  Raw Jet " << i << endl;
-	  cout << "    pT: " << jet->PT << endl;
-	  cout << "    Eta: " << jet->Eta << endl;
-	  cout << "    Area: " << jet->AreaP4().Pt() << endl;
+      if (branchRawJet) {
+	for (int i = 0 ; i < branchRawJet->GetEntries() ; i++) {
+	  Jet *jet = (Jet*) branchRawJet->At(i);
+	  if (jet->PT > 100.) {
+	    cout << "  Raw Jet " << i << endl;
+	    cout << "    pT: " << jet->PT << endl;
+	    cout << "    Eta: " << jet->Eta << endl;
+	    cout << "    Area: " << jet->AreaP4().Pt() << endl;
+	  }
 	}
       }
-      for (int i = 0 ; i < branchRawJetNoPU->GetEntries() ; i++) {
-	Jet *jet = (Jet*) branchRawJetNoPU->At(i);
-	if (jet->PT > 30.) {
-	  cout << "  Raw Jet (no PU mixing) " << i << endl;
-	  cout << "    pT: " << jet->PT << endl;
-	  cout << "    Eta: " << jet->Eta << endl;
-	  cout << "    Area: " << jet->AreaP4().Pt() << endl;
+      if (branchRawJetNoPU) {
+	for (int i = 0 ; i < branchRawJetNoPU->GetEntries() ; i++) {
+	  Jet *jet = (Jet*) branchRawJetNoPU->At(i);
+	  if (jet->PT > 30.) {
+	    cout << "  Raw Jet (no PU mixing) " << i << endl;
+	    cout << "    pT: " << jet->PT << endl;
+	    cout << "    Eta: " << jet->Eta << endl;
+	    cout << "    Area: " << jet->AreaP4().Pt() << endl;
+	  }
 	}
       }
-      
+	
       for (int i = 0 ; i < branchGenJet->GetEntries() ; i++) {
 	Jet *jet = (Jet*) branchGenJet->At(i);
 	if (jet->PT > 30.) {
