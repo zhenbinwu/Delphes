@@ -351,6 +351,7 @@ public:
 
   Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable
                   // Reflects decision ncoprorating z vertex resolution
+  Int_t IsPU;
 
   Float_t T; // track vertex time: I think this is cheating, but I guess no more than (X,Y,Z)
   Float_t TOuter; // track time at tracker edge

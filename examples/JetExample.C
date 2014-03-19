@@ -73,7 +73,9 @@ void JetExample(const char *inputFile)
       if (verbose) cout << "  Rho (" << rho->Edges[0] << "-" << rho->Edges[1] << "): " << rho->Rho << endl;
     }
 
-    // I have cheated and recorder the true number of pileup vertices in a "ScalarHT" object!
+
+    cout << "before scalarHT" << endl;
+    // I have cheated and recorded the true number of pileup vertices in a "ScalarHT" object!
     ScalarHT *NPU = (ScalarHT*) branchNPU->At(0);
     int nPUvertices_true = (int)NPU->HT;
     if (verbose) cout << "  Number of true pileup vertices: " << nPUvertices_true << endl;
@@ -100,13 +102,18 @@ void JetExample(const char *inputFile)
       }
     } // doResTree
 
+
+    cout << "before branchBeamSpotParticle" << endl;
     // One particle from primary vertex
     if (verbose && branchBeamSpotParticle) {
+      cout << branchBeamSpotParticle->GetEntries() << endl;
       GenParticle *part = (GenParticle*) branchBeamSpotParticle->At(0);
       cout <<  "  True primary vertex X Y Z T: " << part->X << " " << part->Y << " " << part->Z << " " << part->T << endl;
       //      cout << "     Generator particle PID Pt Eta Phi X Y Z T (at origin) "  << part->PID << " "
       //	   << part->PT << " " << part->Eta << " " << part->Phi << " " << part->X << " " << part->Y << " " << part->Z << " " << part->T << endl;
     }
+    cout << "after branchBeamSpotParticle" << endl;
+
 
     // Status code 3 particle collection
     if (verbose && branchGenParticle) {

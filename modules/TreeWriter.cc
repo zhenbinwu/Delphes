@@ -70,6 +70,8 @@ void TreeWriter::Init()
   // read branch configuration and
   // import array with output from filter/classifier/jetfinder modules
 
+  fOffsetFromModifyBeamSpot = GetInt("OffsetFromModifyBeamSpot", 0);
+
   ExRootConfParam param = GetParam("Branch");
   Long_t i, size;
   TString branchName, branchClassName, branchInputArray;
@@ -133,7 +135,8 @@ void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
     }
 
     // track
-    candidate = static_cast<Candidate*>(candidate->GetCandidates()->At(0));
+    //    candidate = static_cast<Candidate*>(candidate->GetCandidates()->At(0));
+    candidate = static_cast<Candidate*>(candidate->GetCandidates()->Last()); //?
     if(candidate->GetCandidates()->GetEntriesFast() == 0)
     {
       array->Add(candidate);
@@ -144,7 +147,8 @@ void TreeWriter::FillParticles(Candidate *candidate, TRefArray *array)
     it2.Reset();
     while((candidate = static_cast<Candidate*>(it2.Next())))
     {
-      array->Add(candidate->GetCandidates()->At(0));
+      //      array->Add(candidate->GetCandidates()->At(0));
+      array->Add(candidate->GetCandidates()->Last());
     }
   }
 }
@@ -260,7 +264,7 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->Phi = momentum.Phi();
     entry->PT = pt;
 
-    particle = static_cast<Candidate*>(candidate->GetCandidates()->At(0));
+    particle = static_cast<Candidate*>(candidate->GetCandidates()->At(fOffsetFromModifyBeamSpot));
     const TLorentzVector &initialPosition = particle->Position;
 
     entry->X = initialPosition.X();
@@ -268,9 +272,16 @@ void TreeWriter::ProcessTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->Z = initialPosition.Z();
     entry->T = initialPosition.T();
 
+    entry->IsPU = candidate->IsPU;
     entry->IsRecoPU = candidate->IsRecoPU;
 
     entry->Particle = particle;
+
+    /*
+    cout << "  SCZ Processing track with Inner X Y Z T " << entry->X << " " << entry->Y << " " << entry->Z << " " << entry->T << endl;
+    cout << "                        and Outer X Y Z T " << entry->XOuter << " " << entry->YOuter << " " << entry->ZOuter << " " << entry->TOuter << endl;
+    */
+
   }
 }
 
@@ -393,7 +404,7 @@ void TreeWriter::ProcessElectrons(ExRootTreeBranch *branch, TObjArray *array)
 
     entry->TOuter = candidate->Position.T();
 
-    entry->Particle = candidate->GetCandidates()->At(0);
+    entry->Particle = candidate->GetCandidates()->At(fOffsetFromModifyBeamSpot);
   }
 }
 
@@ -432,7 +443,7 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array)
 
     entry->Charge = candidate->Charge;
 
-    entry->Particle = candidate->GetCandidates()->At(0);
+    entry->Particle = candidate->GetCandidates()->At(fOffsetFromModifyBeamSpot);
   }
 }
 

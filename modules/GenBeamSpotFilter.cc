@@ -120,6 +120,6 @@ void GenBeamSpotFilter::Process()
     if (pass) fOutputArray->Add(candidate);
   }
 
-  cout << "GenBeamSpotFilter Total same/different/pileup in this processing: " << N_same << "/" << N_different << "/" << N_pileup << endl;
+  //  cout << "GenBeamSpotFilter Total same/different/pileup in this processing: " << N_same << "/" << N_different << "/" << N_pileup << endl;
 }
 

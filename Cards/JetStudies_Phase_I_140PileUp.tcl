@@ -2,6 +2,8 @@
 # Order of execution of various modules
 #######################################
 
+set MaxEvents 10
+
 set ExecutionPath {
 
   PileUpMerger
@@ -1065,8 +1067,8 @@ module TreeWriter TreeWriter {
   add Branch StatusPid/filteredParticles Particle GenParticle
   add Branch GenBeamSpotFilter/beamSpotParticles BeamSpotParticle GenParticle
 
-#  add Branch TrackMerger/tracks Track Track
-#  add Branch Calorimeter/towers Tower Tower
+  add Branch TrackMerger/tracks Track Track
+  add Branch Calorimeter/towers Tower Tower
 
 # commented out temporarily, SZ March 4
 #  add Branch ModifyBeamSpot/stableParticles ParticleWithPU GenParticle
@@ -1104,6 +1106,11 @@ module TreeWriter TreeWriter {
   add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch Rho/rho Rho Rho
   add Branch PileUpMerger/NPU NPU ScalarHT
+
+  add Branch ParticlePropagator/chargedHadrons PropParticle Track
+  add Branch ParticlePropagatorNoPU/chargedHadrons PropParticleNoPU Track
+
+  set OffsetFromModifyBeamSpot 1
 }
 
 

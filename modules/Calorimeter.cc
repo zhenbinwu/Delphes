@@ -351,6 +351,17 @@ void Calorimeter::Process()
       track = static_cast<Candidate*>(fTrackInputArray->At(number));
       momentum = track->Momentum;
 
+      bool dbg_scz = false;
+      if (dbg_scz) {
+	cout << "   Calorimeter input track has x y z t " << track->Position.X() << " " << track->Position.Y() << " " << track->Position.Z() << " " << track->Position.T() 
+	     << endl;
+	Candidate *prt = static_cast<Candidate*>(track->GetCandidates()->Last());
+	const TLorentzVector &ini = prt->Position;
+
+	cout << "                and parent has x y z t " << ini.X() << " " << ini.Y() << " " << ini.Z() << " " << ini.T();
+
+      }
+
       ecalEnergy = momentum.E() * fTrackECalFractions[number];
       hcalEnergy = momentum.E() * fTrackHCalFractions[number];
 
@@ -389,7 +400,7 @@ void Calorimeter::Process()
     if (ecalEnergy > fTimingEMin && fTower) {
       if (abs(particle->PID) != 11 || !electronsFromTrack) {
 	//	cout << " SCZ Debug About to push back particle hit E=" << ecalEnergy << " T=" << particle->Position.T() << " isPU=" << particle->IsPU 
-	//	     << " PID=" << particle->PID << endl;
+	//   << " PID=" << particle->PID << endl;
 	fTower->ecal_E_t.push_back(std::make_pair<float,float>(ecalEnergy,particle->Position.T()));
       } else {
 	

@@ -59,6 +59,8 @@ private:
 
   TBranchMap fBranchMap; //!
 
+  int fOffsetFromModifyBeamSpot;
+
   std::map< TClass *, TProcessMethod > fClassMap; //!
 #endif
 

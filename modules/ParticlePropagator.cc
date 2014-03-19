@@ -202,6 +202,15 @@ void ParticlePropagator::Process()
       candidate->Momentum = candidateMomentum;
       candidate->AddCandidate(mother);
       
+      /*
+      cout << "In ParticlePropogator. Have just added neutral candidate with X Y Z T " << candidate->Position.X() << " " << candidate->Position.Y() << " "
+	   << candidate->Position.Z() << " " << candidate->Position.T() << " " << endl;
+      Candidate *prt = static_cast<Candidate*>(candidate->GetCandidates()->Last());
+      const TLorentzVector &ini = prt->Position;
+      cout << "                                                   Mother has X Y Z T " << ini.X() << " " << ini.Y() << " " << ini.Z() << " " << ini.T() << endl;
+      */
+
+
       fOutputArray->Add(candidate);
       if(TMath::Abs(q) > 1.0E-9) 
       {
@@ -303,6 +312,14 @@ void ParticlePropagator::Process()
 
         candidate->Momentum = candidateMomentum;
         candidate->AddCandidate(mother);
+
+	/*
+	cout << "In ParticlePropogator. Have just added charged candidate with X Y Z T " << candidate->Position.X() << " " << candidate->Position.Y() << " "
+	     << candidate->Position.Z() << " " << candidate->Position.T() << " " << endl;
+	Candidate *prt = static_cast<Candidate*>(candidate->GetCandidates()->Last());
+	const TLorentzVector &ini = prt->Position;
+	cout << "                                                   Mother has X Y Z T " << ini.X() << " " << ini.Y() << " " << ini.Y() << " " << ini.Z() << endl;
+	*/
 
         fOutputArray->Add(candidate);
         switch(TMath::Abs(candidate->PID))

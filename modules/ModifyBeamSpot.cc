@@ -1,4 +1,3 @@
-
 /** \class ModifyBeamSpot
  *
  *  
@@ -96,6 +95,7 @@ void ModifyBeamSpot::Process()
   Candidate *candidate, *mother;
   Double_t PVX = 0., PVY = 0., PVZ = 0., PVT = 0.; // Average position of primary particles
   Int_t PVN = 0;
+  currentPU = -1;
 
   fItInputArray->Reset();
   while((candidate = static_cast<Candidate*>(fItInputArray->Next())))
@@ -143,6 +143,15 @@ void ModifyBeamSpot::Process()
     candidate->AddCandidate(mother);
  
     fOutputArray->Add(candidate);
+
+    /*
+    cout << "In ModifyBeamSpot. Have just added candidate with X Y Z T " << candidate->Position.X() << " " << candidate->Position.Y() << " "
+         << candidate->Position.Z() << " " << candidate->Position.T() << " " << endl;
+    Candidate *prt = static_cast<Candidate*>(candidate->GetCandidates()->Last());
+    const TLorentzVector &ini = prt->Position;
+    cout << "                                                   Mother has X Y Z T " << ini.X() << " " << ini.Y() << " " << ini.Z() << " " << ini.T() << endl;
+    */
+
   }
 
   // If PV is somehow last (i.e. no pileup, still gotta divide out
