@@ -363,7 +363,11 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
 
     entry->EhadOverEem = candidate->Eem > 0.0 ? candidate->Ehad/candidate->Eem : 999.9;
 
-    entry->TOuter = candidate->Position.T();
+    //    entry->TOuter = candidate->Position.T();
+
+    //    cout << " Processing photon: candidate->Position.T() = " << candidate->Position.T() << " candidate->t0 = " << candidate->t0 << endl;
+
+    entry->TOuter = candidate->t0;
 
     FillParticles(candidate, &entry->Particles);
   }
