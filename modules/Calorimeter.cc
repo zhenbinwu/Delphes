@@ -475,12 +475,12 @@ void Calorimeter::FinalizeTower()
   }
   
   if (tow_sumW > 0.) {
-    fTower->t0 = tow_sumT/tow_sumW;
+    fTower->Position.SetPtEtaPhiE(1.0, eta, phi,tow_sumT/tow_sumW);
   } else {
-    fTower->t0 = -999999.;
+    fTower->Position.SetPtEtaPhiE(1.0,eta,phi,999999.);
   }
 
-  fTower->Position.SetPtEtaPhiE(1.0, eta, phi, 0.);
+  //  fTower->Position.SetPtEtaPhiE(1.0, eta, phi, 0.);
   fTower->Momentum.SetPtEtaPhiE(pt, eta, phi, energy);
   fTower->Eem = ecalEnergy;
   fTower->Ehad = hcalEnergy;

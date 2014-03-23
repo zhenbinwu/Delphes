@@ -300,8 +300,8 @@ public:
   Float_t  FracPt[5]; // [0] <--> 0.0 < dR < 0.1,  [1] <--> 0.1 < dR < 0.2,  etc.
 
   // These are experimental and not currently planned to be used
-  Float_t t0,t1,t10,t20,t30,t40; // Jet timing (at calorimeter) with ecal deposit (particle) level smearing by 0,1,10,20,30,40 ps
-  Int_t nTimes;
+  //  Float_t t0,t1,t10,t20,t30,t40; // Jet timing (at calorimeter) with ecal deposit (particle) level smearing by 0,1,10,20,30,40 ps
+  //  Int_t nTimes;
 
   Float_t AreaX,AreaY,AreaZ,AreaT; // 4-vector area
   
@@ -321,7 +321,7 @@ public:
   TLorentzVector P4();
   TLorentzVector AreaP4();
 
-  ClassDef(Jet, 3)
+  ClassDef(Jet, 4)
 };
 
 //---------------------------------------------------------------------------
@@ -448,7 +448,7 @@ public:
   Float_t MeanSqDeltaR, PTD;
   Int_t NCharged, NNeutrals;
   Float_t  FracPt[5]; // [0] <--> 0.0 < dR < 0.1,  [1] <--> 0.1 < dR < 0.2,  etc.
-  Float_t t0,t1,t10,t20,t30,t40; // Jet timing (at calorimeter) with ecal deposit (particle) level smearing by 0,1,10,20,30,40 ps
+  //  Float_t t0,t1,t10,t20,t30,t40; // Jet timing (at calorimeter) with ecal deposit (particle) level smearing by 0,1,10,20,30,40 ps
   Int_t nTimes;
 
   std::vector<std::pair<float,float> > ecal_E_t; 

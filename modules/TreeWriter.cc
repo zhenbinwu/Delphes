@@ -322,7 +322,7 @@ void TreeWriter::ProcessTowers(ExRootTreeBranch *branch, TObjArray *array)
     entry->Edges[2] = candidate->Edges[2];
     entry->Edges[3] = candidate->Edges[3];
 
-    entry->TOuter = candidate->t0;
+    entry->TOuter = candidate->Position.T();
     entry->nTimes = candidate->nTimes;
 
     FillParticles(candidate, &entry->Particles);
@@ -363,12 +363,7 @@ void TreeWriter::ProcessPhotons(ExRootTreeBranch *branch, TObjArray *array)
 
     entry->EhadOverEem = candidate->Eem > 0.0 ? candidate->Ehad/candidate->Eem : 999.9;
 
-    //    entry->TOuter = candidate->Position.T();
-
-    //    cout << " Processing photon: candidate->Position.T() = " << candidate->Position.T() << " candidate->t0 = " << candidate->t0 << endl;
-
-    entry->TOuter = candidate->t0;
-
+    entry->TOuter = candidate->Position.T();
     FillParticles(candidate, &entry->Particles);
   }
 }
@@ -512,13 +507,13 @@ void TreeWriter::ProcessJets(ExRootTreeBranch *branch, TObjArray *array)
     for (int i = 0 ; i < 5 ; i++) {
       entry->FracPt[i] = candidate->FracPt[i];
     }
-    entry->t0 = candidate->t0;
-    entry->t1 = candidate->t1;
-    entry->t10 = candidate->t10;
-    entry->t20 = candidate->t20;
-    entry->t30 = candidate->t30;
-    entry->t40 = candidate->t40;
-    entry->nTimes = candidate->nTimes;
+    //    entry->t0 = candidate->t0;
+    //    entry->t1 = candidate->t1;
+    //    entry->t10 = candidate->t10;
+    //    entry->t20 = candidate->t20;
+    //    entry->t30 = candidate->t30;
+    //    entry->t40 = candidate->t40;
+    //    entry->nTimes = candidate->nTimes;
 
     entry->AreaX = candidate->Area.X();
     entry->AreaY = candidate->Area.Y();

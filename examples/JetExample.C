@@ -136,8 +136,8 @@ void JetExample(const char *inputFile)
 	  cout << "    pT: " << jet->PT << endl;
 	  cout << "    Eta: " << jet->Eta << endl;
 	  cout << "    Area: " << jet->AreaP4().Pt() << endl;
-	  cout << "    Time at calo: " << jet->t0 << endl;
-	  cout << "    Time at calo smeared by 1ps 10ps 20ps 30ps 40ps: " << jet->t1 << " " << jet->t10 << " " << jet->t20 << " " << jet->t30 << " " << jet->t40 << endl;
+	  //	  cout << "    Time at calo: " << jet->t0 << endl;
+	  //	  cout << "    Time at calo smeared by 1ps 10ps 20ps 30ps 40ps: " << jet->t1 << " " << jet->t10 << " " << jet->t20 << " " << jet->t30 << " " << jet->t40 << endl;
 	  cout << "    Beta*:" << jet->BetaStar << endl;
 	  cout << "    NCharged: " << jet->NCharged << endl;
 	  cout << "    Number of constituents: " << jet->Constituents.GetEntries() << endl;

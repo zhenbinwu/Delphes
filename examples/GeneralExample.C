@@ -88,7 +88,7 @@ void GeneralExample(const char *inputFile)
 
       for (int i = 0 ; i < branchPhoton->GetEntries() ; i++) {
         Photon *pho = (Photon*) branchPhoton->At(i);
-        cout << "    Photon " << i << ": PT Eta Phi Isolation " << pho->PT << " " << pho->Eta << " " << pho->Phi << " " << pho->IsolationVar << endl;
+        cout << "    Photon " << i << ": PT Eta Phi Isolation T " << pho->PT << " " << pho->Eta << " " << pho->Phi << " " << pho->IsolationVar << " " << pho->TOuter << endl;
       }
 
       for (int i = 0 ; i < branchMuon->GetEntries() ; i++) {
