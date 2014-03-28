@@ -5,8 +5,10 @@
 set ExecutionPath {
 
   PileUpMerger
+  ModifyBeamSpot
   ParticlePropagator
   StatusPid
+  GenBeamSpotFilter
 
   ChargedHadronTrackingEfficiency
   ElectronTrackingEfficiency
@@ -23,10 +25,8 @@ set ExecutionPath {
 
   Rho
   FastJetFinder
-  CAJetFinder
   GenJetFinder
   JetPileUpSubtractor
-  CAJetPileUpSubtractor
 
   PhotonEfficiency
   PhotonIsolation
@@ -49,6 +49,9 @@ set ExecutionPath {
 
   ScalarHT
 
+  PileUpJetID
+
+  ConstituentFilter  
   TreeWriter
 }
 
@@ -755,6 +758,26 @@ module UniqueObjectFinder UniqueObjectFinderMJ {
    add InputArray MuonIsolation/muons muons
    add InputArray UniqueObjectFinderEJ/jets jets
 }
+
+### 
+Pileup jet id
+###
+
+module PileUpJetID PileUpJetID {
+  set JetInputArray JetPileUpSubtractor/jets
+  set OutputArray jets
+
+  # Using constituents does not make sense with Charged hadron subtraction                                                                                                           
+  # In 0 mode, dR cut used instead                                                                                                                                                   
+  set UseConstituents 0
+
+  set TrackInputArray Calorimeter/eflowTracks
+  set NeutralInputArray Calorimeter/eflowTowers
+  set ParameterR 0.5
+
+  set JetPTMin 10.0
+}
+
 
 
 ##################

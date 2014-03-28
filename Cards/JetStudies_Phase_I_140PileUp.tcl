@@ -45,6 +45,9 @@ set ExecutionPath {
   CAJetPileUpSubtractor
   GenJetFinderWithPU
 
+  RunPUPPI
+  PuppiJetFinder
+
   PhotonEfficiency
   PhotonIsolation
 
@@ -74,7 +77,6 @@ set ExecutionPath {
 
 module PileUpJetID PileUpJetID {
   set JetInputArray JetPileUpSubtractor/jets
-  
   set OutputArray jets
   
   # Using constituents does not make sense with Charged hadron subtraction
@@ -628,6 +630,27 @@ module Merger EFlowMergerNoPU {
 }
 
 
+#PUPPI
+
+module RunPUPPI RunPUPPI {
+  set TrackInputArray Calorimeter/eflowTracks
+  set NeutralInputArray Calorimeter/eflowTowers
+    
+  set TrackerEta 2.5
+
+  set OutputArray weightedparticles
+}
+
+module FastJetFinder PuppiJetFinder {
+  set InputArray RunPUPPI/weightedparticles
+  set OutputArray jets
+
+  set JetAlgorithm 6
+  set ParameterR 0.5
+
+  set JetPTMin 10.  
+}
+
 #############
 # Rho pile-up
 #############
@@ -1087,6 +1110,8 @@ module TreeWriter TreeWriter {
 #  add Branch ConstituentFilter/muons EFlowMuon Muon
 
   add Branch GenJetFinder/jets GenJet Jet
+
+  add Branch PuppiJetFinder/jets PuppiJet Jet
 
   # commented out temporarily, SZ Mar 4
 #  add Branch CAJetPileUpSubtractor/jets CAJet Jet
