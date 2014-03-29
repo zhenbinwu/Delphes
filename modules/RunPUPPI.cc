@@ -99,7 +99,7 @@ void RunPUPPI::Process()
     {   
       momentum = candidate->Momentum;
       RecoObj curPseudoJet;
-      curPseudoJet.pt  = momentum.M();
+      curPseudoJet.pt  = momentum.Pt();
       curPseudoJet.eta = momentum.Eta();
       curPseudoJet.phi = momentum.Phi();
       curPseudoJet.m   = momentum.M();
@@ -109,25 +109,37 @@ void RunPUPPI::Process()
 	curPseudoJet.id  = 2;
       }
       puppiInputVector.push_back(curPseudoJet);
+      // cout << " PUPPI input pt eta phi m id " << curPseudoJet.pt << " " << curPseudoJet.eta << " " << curPseudoJet.phi << " " << curPseudoJet.m << " " << curPseudoJet.id << endl;
     }
   while((candidate = static_cast<Candidate*>(fItNeutralInputArray->Next())))
     {
       momentum = candidate->Momentum;
       RecoObj curPseudoJet;
-      curPseudoJet.pt  = momentum.M();
+      curPseudoJet.pt  = momentum.Pt();
       curPseudoJet.eta = momentum.Eta();
       curPseudoJet.phi = momentum.Phi();
       curPseudoJet.m   = momentum.M();
       curPseudoJet.id  = 1;
       puppiInputVector.push_back(curPseudoJet);
+      // cout << " PUPPI input pt eta phi m id " << curPseudoJet.pt << " " << curPseudoJet.eta << " " << curPseudoJet.phi << " " << curPseudoJet.m << " " << curPseudoJet.id << endl;
     }
 
   puppiCleanContainer curEvent(puppiInputVector,fTrackerEta);
   std::vector < fastjet::PseudoJet > puppiParticles = curEvent.puppiEvent(7,0.5);
 
   for (std::vector<fastjet::PseudoJet>::iterator it = puppiParticles.begin() ; it != puppiParticles.end() ; it++) {
+
+    // cout << " RunPUPPI fastjet pt eta phi m " << it->pt() << " " << it->eta() << " " << it->phi() << " " << it->m() << endl;
+
+
     candidate = factory->NewCandidate();
     candidate->Momentum.SetXYZT(it->px(),it->py(),it->pz(),it->e());
+
+
+    // cout << " RunPUPPI candidate pt eta phi m " << candidate->Momentum.Pt() << " " << candidate->Momentum.Eta() << " " << candidate->Momentum.Phi() << " " << candidate->Momentum.M() << endl;
+
     fOutputArray->Add(candidate);
   }
+
+  // cout << "Done with RunPUPPI::Process()" << endl;
 }

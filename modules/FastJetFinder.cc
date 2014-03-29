@@ -195,6 +195,8 @@ void FastJetFinder::Finish()
 
 void FastJetFinder::Process()
 {
+  // cout << " Starting FastJetFinder::Process() " << GetString("InputArray", "Calorimeter/towers") << endl;
+
   Candidate *candidate, *constituent;
   TLorentzVector momentum;
   Double_t deta, dphi, detaMax, dphiMax;
@@ -226,6 +228,8 @@ void FastJetFinder::Process()
     jet.set_user_index(number);
     inputList.push_back(jet);
     ++number;
+
+    // cout << " fastJet pt eta phi m " << jet.pt() << " " << jet.eta() << " " << jet.phi() << " " << jet.m() << endl;
   }
 
   // construct jets
@@ -372,4 +376,6 @@ void FastJetFinder::Process()
     fOutputArray->Add(candidate);
   }
   delete sequence;
+
+  // cout << " Ending FastJetFinder::Process() " << endl;
 }
