@@ -147,6 +147,12 @@ std::vector<fastjet::PseudoJet> puppiCleanContainer::puppiEvent     (int iOpt,do
         //CHS
         if(_pfParticles[i0].user_index() == 2 ) pWeight = 1;
         if(_pfParticles[i0].user_index() == 3 ) pWeight = 0;
+	
+	bool justdochs = false; // for debugging
+	if (justdochs) {
+	  if (_pfParticles[i0].user_index() == 1 ) pWeight = 1;
+	}
+
         //Basic Cuts
         if(pWeight*_pfParticles[i0].pt()  < 0.05) continue;  //==> Elminate the low pT stuff 
         if(pWeight*_pfParticles[i0].E()   < fNeutralMinE && _recoParticles[i0].pfType > 3 ) continue;  //threshold cut on the neutral E
