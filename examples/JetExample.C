@@ -45,11 +45,14 @@ void JetExample(const char *inputFile)
   TClonesArray *branchBeamSpotParticle = treeReader->UseBranch("BeamSpotParticle");
   TClonesArray *branchGenParticleWithPU = treeReader->UseBranch("ParticleWithPU");
 
-  bool verbose = true;
-  bool doResTree = true;
-  bool doFakeTree = true;
-  bool doPuppiResTree = true;
-  bool doPuppiFakeTree = true;
+  TClonesArray *branchPuppiWeightedParticles = treeReader->UseBranch("PuppiWeightedParticles");
+
+  bool verbose = false;
+  bool puppiConstituents = true;
+  bool doResTree = false;
+  bool doFakeTree = false;
+  bool doPuppiResTree = false;
+  bool doPuppiFakeTree = false;
 
   float rt_geneta, rt_genpt, rt_recpt, rt_dr;
   float ft_receta, ft_genpt, ft_recpt, ft_dr;
@@ -105,8 +108,36 @@ void JetExample(const char *inputFile)
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
   
-    if (verbose||entry%5000==0) cout << "Event " << entry << " / " << numberOfEntries << endl;
+    if (puppiConstituents||verbose||entry%5000==0) cout << "Event " << entry << " / " << numberOfEntries << endl;
     
+    if (puppiConstituents) {
+
+      if (branchEFlowTrack && branchEFlowTower) {
+	for (int i = 0 ; i < branchEFlowTrack->GetEntries() ; i++) {
+	  Track *track = (Track*) branchEFlowTrack->At(i);
+	  if (track->IsRecoPU == 0) {
+	    cout << " Input Primary EFlow Track PT Eta Phi " << track->PT << " " << track->Eta << " " << track->Phi << endl;
+	  } else {
+            cout << " Input PileUp EFlow Track PT Eta Phi " << track->PT << " " << track->Eta << " "<< track->Phi << endl;
+	  }
+	}
+        for (int i = 0 ; i < branchEFlowTower->GetEntries() ; i++) {
+          Tower *tower = (Tower*) branchEFlowTower->At(i);
+	  cout << " Input EFlow Tower ET Eta Phi " << tower->ET << " " << tower->Eta << " " << tower->Phi << endl;
+	}
+      }
+
+      if (branchPuppiWeightedParticles) {
+        for (int i = 0 ; i < branchPuppiWeightedParticles->GetEntries() ; i++) {
+          GenParticle *part = (GenParticle*) branchPuppiWeightedParticles->At(i);
+	  cout << " PUPPI weighted particle PT Eta Phi M " << part->PT << " " << part->Eta << " " << part->Phi << " " << part->Mass << endl;
+        }
+      }
+
+    }
+
+
+
     for (int i = 0 ; i < branchRho->GetEntries() ; i++) {
       Rho *rho = (Rho*) branchRho->At(i);
       if (verbose) cout << "  Rho (" << rho->Edges[0] << "-" << rho->Edges[1] << "): " << rho->Rho << endl;
