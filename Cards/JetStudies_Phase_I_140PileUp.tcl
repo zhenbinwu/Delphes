@@ -45,8 +45,11 @@ set ExecutionPath {
   CAJetPileUpSubtractor
   GenJetFinderWithPU
 
+  EFlowChargedMerger
   RunPUPPI
   PuppiJetFinder
+  PuppiRho
+  PuppiJetPileUpSubtractor
 
   PhotonEfficiency
   PhotonIsolation
@@ -629,10 +632,16 @@ module Merger EFlowMergerNoPU {
   set OutputArray eflow
 }
 
+module Merger EFlowChargedMerger {
+  add InputArray TrackPileUpSubtractor/eflowTracks
+  add InputArray MuonMomentumSmearing/muons
+  set OutputArray eflowTracks
+}
 
 #PUPPI
 
 module RunPUPPI RunPUPPI {
+#  set TrackInputArray EFlowChargedMerger/eflowTracks
   set TrackInputArray Calorimeter/eflowTracks
   set NeutralInputArray Calorimeter/eflowTowers
     
@@ -646,10 +655,35 @@ module FastJetFinder PuppiJetFinder {
   set OutputArray jets
 
   set JetAlgorithm 6
-  set ParameterR 0.5
+  set ParameterR 0.4
 
-  set JetPTMin 10.  
+  set JetPTMin 0.  
+  
+  # remove pileup again (using it for synchronization)
+  set KeepPileUp 0
 }
+
+module FastJetFinder PuppiRho {
+  set InputArray RunPUPPI/weightedparticles
+
+  set ComputeRho true
+  set RhoOutputArray rho
+  
+  # area algorithm: 0 Do not compute area, 1 Active area explicit ghosts, 2 One ghost passive area, 3 Passive area, 4 Voronoi, 5 Active area
+  set AreaAlgorithm 5
+  
+  # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
+  set JetAlgorithm 4
+  set ParameterR 0.4
+  set GhostEtaMax 5.0
+  set RhoEtaMax 5.0
+  
+  add RhoEtaRange 0.0 2.5
+  add RhoEtaRange 2.5 5.0
+  
+  set JetPTMin 0.0
+}
+
 
 #############
 # Rho pile-up
@@ -689,7 +723,7 @@ module FastJetFinder GenJetFinder {
 
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
-  set ParameterR 0.5
+  set ParameterR 0.4
 
   set JetPTMin 10.0
 
@@ -705,7 +739,7 @@ module FastJetFinder GenJetFinderWithPU {
 
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
-  set ParameterR 0.5
+  set ParameterR 0.4
 
   set JetPTMin 10.0
 }
@@ -725,7 +759,7 @@ module FastJetFinder FastJetFinder {
 
   # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
-  set ParameterR 0.5
+  set ParameterR 0.4
 
   set JetPTMin 10.0
 }
@@ -741,7 +775,7 @@ module FastJetFinder FastJetFinderNoPU {
 
   # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
-  set ParameterR 0.5
+  set ParameterR 0.4
 
   set JetPTMin 10.0
 }
@@ -803,6 +837,16 @@ module JetPileUpSubtractor JetPileUpSubtractor {
 
   set JetPTMin 10.0
 }
+
+module JetPileUpSubtractor PuppiJetPileUpSubtractor {
+  set JetInputArray PuppiJetFinder/jets
+  set RhoInputArray PuppiRho/rho
+  
+  set OutputArray jets
+  
+  set JetPTMin 10.0
+}
+
 
 module JetPileUpSubtractor CAJetPileUpSubtractor {
   set JetInputArray CAJetFinder/jets
@@ -1112,6 +1156,9 @@ module TreeWriter TreeWriter {
   add Branch GenJetFinder/jets GenJet Jet
 
   add Branch PuppiJetFinder/jets PuppiJet Jet
+  add Branch PuppiJetPileUpSubtractor/jets SubtractedPuppiJet Jet
+  add Branch PuppiRho/rho PuppiRho Rho
+
 
   # commented out temporarily, SZ Mar 4
 #  add Branch CAJetPileUpSubtractor/jets CAJet Jet
@@ -1135,7 +1182,18 @@ module TreeWriter TreeWriter {
   add Branch ParticlePropagator/chargedHadrons PropParticle Track
   add Branch ParticlePropagatorNoPU/chargedHadrons PropParticleNoPU Track
 
+  add Branch RunPUPPI/weightedparticles PuppiWeightedParticles GenParticle
+
   set OffsetFromModifyBeamSpot 1
 }
 
 
+
+#module RunPUPPI RunPUPPI {
+#  set TrackInputArray Calorimeter/eflowTracks
+#  set NeutralInputArray Calorimeter/eflowTowers
+
+#  set TrackerEta 2.5
+  
+#  set OutputArray weightedparticles
+#}

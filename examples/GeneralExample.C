@@ -25,6 +25,7 @@ void GeneralExample(const char *inputFile)
   // Get pointers to branches used in this analysis
   TClonesArray *branchGenJet = treeReader->UseBranch("GenJet");
   TClonesArray *branchJet = treeReader->UseBranch("Jet");
+  TClonesArray *branchPuppiJet = treeReader->UseBranch("PuppiJet");
   TClonesArray *branchRho = treeReader->UseBranch("Rho");
   TClonesArray *branchNPU = treeReader->UseBranch("NPU");
   
@@ -96,6 +97,42 @@ void GeneralExample(const char *inputFile)
         cout << "    Muon " << i << ": PT Eta Phi Isolation " << mu->PT << " " << mu->Eta << " " << mu->Phi << " " << mu->IsolationVar << endl;
       }
 
+      for (int i = 0 ; i < branchGenJet->GetEntries() ; i++) {
+        Jet *jet = (Jet*) branchGenJet->At(i);
+        if (jet->PT > 30.) {
+          cout << "  Gen Jet " << i << endl;
+          cout << "    pT: " << jet->PT << endl;
+          cout << "    Eta: " << jet->Eta << endl;
+          cout << "    Phi: " << jet->Phi << endl;
+	  /*
+          cout << "    Area: " << jet->AreaP4().Pt() << endl;
+          cout << "    Constituents: " << jet->Constituents.GetEntries() << endl;
+          if (branchGenParticleWithPU) { // now same colection
+            for (int j = 0 ; j < jet->Constituents.GetEntries() ; j++) {
+              TObject *obj = jet->Constituents[j];
+              if (obj->IsA() == GenParticle::Class()) {
+                GenParticle *part = static_cast<GenParticle *> ( obj ) ;
+                cout << "     Jet constituent Pt Eta Phi Z T (at origin) " << part->PT << " " << part->Eta << " " << part->Phi << " " << part->Z << " " << part->T << endl;
+              } else {
+                cout << "     Jet constituent is not a particle (?)" << endl;
+              }
+            }
+          }
+	  */
+        }
+      }
+
+
+      // Loop over jets
+      for (int i = 0 ; i < branchPuppiJet->GetEntries() ; i++) {
+        Jet *jet = (Jet*) branchPuppiJet->At(i);
+	if (jet->PT > 30.) {
+          cout << "  PuppiJet " << i << endl;
+          cout << "    pT: " << jet->PT << endl;
+          cout << "    Eta: " << jet->Eta << endl;
+          cout << "    Phi: " << jet->Phi << endl;
+	}
+      }
 
       // Loop over jets
       for (int i = 0 ; i < branchJet->GetEntries() ; i++) {
@@ -127,29 +164,6 @@ void GeneralExample(const char *inputFile)
 	  }
 	}
       }
-      
-      for (int i = 0 ; i < branchGenJet->GetEntries() ; i++) {
-	Jet *jet = (Jet*) branchGenJet->At(i);
-	if (jet->PT > 30.) {
-	  cout << "  Gen Jet " << i << endl;
-	  cout << "    pT: " << jet->PT << endl;
-	  cout << "    Eta: " << jet->Eta << endl;
-	  cout << "    Area: " << jet->AreaP4().Pt() << endl;
-	  cout << "    Constituents: " << jet->Constituents.GetEntries() << endl;
-	  if (branchGenParticleWithPU) { // now same colection
-	    for (int j = 0 ; j < jet->Constituents.GetEntries() ; j++) {
-	      TObject *obj = jet->Constituents[j];
-	      if (obj->IsA() == GenParticle::Class()) {
-		GenParticle *part = static_cast<GenParticle *> ( obj ) ;
-		cout << "     Jet constituent Pt Eta Phi Z T (at origin) " << part->PT << " " << part->Eta << " " << part->Phi << " " << part->Z << " " << part->T << endl;
-	      } else {
-		cout << "     Jet constituent is not a particle (?)" << endl;
-	      }
-	    }
-	  }
-	}
-      }
-
     } // verbose 
 
   } // event
