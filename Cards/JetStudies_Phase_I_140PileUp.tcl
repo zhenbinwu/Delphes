@@ -1144,8 +1144,9 @@ module TreeWriter TreeWriter {
 
 #  add Branch ModifyBeamSpotNoPU/stableParticles Particle GenParticle
 
-# These commented out temporarily, SZ March 3
-  add Branch TrackPileUpSubtractor/eflowTracks EFlowTrack Track
+
+#  add Branch TrackPileUpSubtractor/eflowTracks EFlowTrack Track 
+  add Branch Calorimeter/eflowTracks EFlowTrack Track 
   add Branch Calorimeter/eflowTowers EFlowTower Tower
   add Branch MuonMomentumSmearing/muons EFlowMuon Muon
 
