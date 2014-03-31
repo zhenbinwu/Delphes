@@ -27,7 +27,11 @@ void JetExample(const char *inputFile)
   TClonesArray *branchRawJet = treeReader->UseBranch("RawJet");
   TClonesArray *branchGenJet = treeReader->UseBranch("GenJet");
   TClonesArray *branchJet = treeReader->UseBranch("Jet");
+  TClonesArray *branchPuppiJet = treeReader->UseBranch("PuppiJet");
+  TClonesArray *branchSubtractedPuppiJet = treeReader->UseBranch("SubtractedPuppiJet");
+
   TClonesArray *branchRho = treeReader->UseBranch("Rho");
+  TClonesArray *branchPuppiRho = treeReader->UseBranch("PuppiRho");
   TClonesArray *branchNPU = treeReader->UseBranch("NPU");
 
   TClonesArray *branchGenJetWithPU = treeReader->UseBranch("GenJetWithPU");
@@ -42,20 +46,55 @@ void JetExample(const char *inputFile)
   TClonesArray *branchGenParticleWithPU = treeReader->UseBranch("ParticleWithPU");
 
   bool verbose = true;
-  bool doResTree = false;
+  bool doResTree = true;
+  bool doFakeTree = true;
+  bool doPuppiResTree = true;
+  bool doPuppiFakeTree = true;
 
-  float geneta, genpt, recpt, dr;
+  float rt_geneta, rt_genpt, rt_recpt, rt_dr;
+  float ft_receta, ft_genpt, ft_recpt, ft_dr;
+  float prt_geneta, prt_genpt, prt_recpt, prt_dr;
+  float pft_receta, pft_genpt, pft_recpt, pft_dr;
   TFile *f;
-  TTree *tree;
+  TTree *rt, *ft, *prt, *pft;
+
+  if (doResTree||doFakeTree||doPuppiResTree||doPuppiFakeTree) {
+    f = new TFile("out.root","RECREATE");
+  }
 
   if (doResTree) {
-    f = new TFile("out.root","RECREATE");
-    tree = new TTree("tree","tree");
-    tree->Branch("geneta",&geneta,"geneta/F");
-    tree->Branch("genpt",&genpt,"genpt/F");
-    tree->Branch("recpt",&recpt,"recpt/F");
-    tree->Branch("dr",&dr,"dr/F");
+    rt = new TTree("rt","rt");
+    rt->Branch("geneta",&rt_geneta,"geneta/F");
+    rt->Branch("genpt",&rt_genpt,"genpt/F");
+    rt->Branch("recpt",&rt_recpt,"recpt/F");
+    rt->Branch("dr",&rt_dr,"dr/F");
   }
+
+  if (doPuppiResTree) {
+    prt = new TTree("prt","prt");
+    prt->Branch("geneta",&prt_geneta,"geneta/F");
+    prt->Branch("genpt",&prt_genpt,"genpt/F");
+    prt->Branch("recpt",&prt_recpt,"recpt/F");
+    prt->Branch("dr",&prt_dr,"dr/F");
+  }
+
+  if (doFakeTree) {
+    ft = new TTree("ft","ft");
+    ft->Branch("receta",&ft_receta,"geneta/F");
+    ft->Branch("genpt",&ft_genpt,"genpt/F");
+    ft->Branch("recpt",&ft_recpt,"recpt/F");
+    ft->Branch("dr",&ft_dr,"dr/F");
+  }
+
+  if (doPuppiFakeTree) {
+    pft = new TTree("pft","pft");
+    pft->Branch("receta",&pft_receta,"geneta/F");
+    pft->Branch("genpt",&pft_genpt,"genpt/F");
+    pft->Branch("recpt",&pft_recpt,"recpt/F");
+    pft->Branch("dr",&pft_dr,"dr/F");
+  }
+
+
 
 
   // Book histograms
@@ -73,8 +112,13 @@ void JetExample(const char *inputFile)
       if (verbose) cout << "  Rho (" << rho->Edges[0] << "-" << rho->Edges[1] << "): " << rho->Rho << endl;
     }
 
+    for (int i = 0 ; i < branchPuppiRho->GetEntries() ; i++) {
+      Rho *rho = (Rho*) branchPuppiRho->At(i);
+      if (verbose) cout << "  PUPPI Rho (" << rho->Edges[0] << "-" << rho->Edges[1] << "): " << rho->Rho << endl;
+    }
 
-    cout << "before scalarHT" << endl;
+
+    //    cout << "before scalarHT" << endl;
     // I have cheated and recorded the true number of pileup vertices in a "ScalarHT" object!
     ScalarHT *NPU = (ScalarHT*) branchNPU->At(0);
     int nPUvertices_true = (int)NPU->HT;
@@ -85,25 +129,87 @@ void JetExample(const char *inputFile)
       for (int i = 0 ; i < branchGenJet->GetEntries() ; i++) {
 	Jet *genjet = (Jet*) branchGenJet->At(i);
 	TLorentzVector genp4 = genjet->P4();
-	genpt = genjet->PT;
-	geneta = genjet->Eta;
-	dr = 9999.;
-	recpt = -1.;
+	rt_genpt = genjet->PT;
+	rt_geneta = genjet->Eta;
+	rt_dr = 9999.;
+	rt_recpt = -1.;
 	for (int j = 0 ; j < branchJet->GetEntries() ; j++ ) {
 	  Jet *jet = (Jet*) branchJet->At(j);
 	  TLorentzVector p4 = jet->P4();
 	  float tempdr = p4.DeltaR(genp4);
-	  if (tempdr < dr) {
-	    dr = tempdr;
-	    recpt = jet->PT;
+	  if (tempdr < rt_dr) {
+	    rt_dr = tempdr;
+	    rt_recpt = jet->PT;
 	  }
 	}
-	tree->Fill(); // per genjet
+	rt->Fill(); // per genjet
       }
     } // doResTree
 
+    if (doFakeTree) {
+      // some very simple variables in a very simple tree 
+      for (int i = 0 ; i < branchJet->GetEntries() ; i++) {
+        Jet *jet = (Jet*) branchJet->At(i);
+        TLorentzVector p4 = jet->P4();
+        ft_recpt = jet->PT;
+        ft_receta = jet->Eta;
+        ft_dr = 9999.;
+        ft_genpt = -1.;
+        for (int j = 0 ; j < branchGenJet->GetEntries() ; j++ ) {
+          Jet *genjet = (Jet*) branchGenJet->At(j);
+          TLorentzVector genp4 = genjet->P4();
+          float tempdr = p4.DeltaR(genp4);
+          if (tempdr < ft_dr) {
+            ft_dr = tempdr;
+            ft_genpt = jet->PT;
+          }
+        }
+      ft->Fill(); // per recjet
+      }
+    } // doFakeTree
+                                                                                                                                                                 
+    if (doPuppiResTree) {
+      for (int i = 0 ; i < branchGenJet->GetEntries() ; i++) {
+        Jet *genjet = (Jet*) branchGenJet->At(i);
+        TLorentzVector genp4 = genjet->P4();
+        prt_genpt = genjet->PT;
+        prt_geneta = genjet->Eta;
+        prt_dr = 9999.;
+        prt_recpt = -1.;
+        for (int j = 0 ; j < branchPuppiJet->GetEntries() ; j++ ) {
+          Jet *jet = (Jet*) branchPuppiJet->At(j);
+          TLorentzVector p4 = jet->P4();
+          float tempdr = p4.DeltaR(genp4);
+          if (tempdr < prt_dr) {
+            prt_dr = tempdr;
+            prt_recpt = jet->PT;
+          }
+        }
+        prt->Fill(); // per genjet
+      }
+    } // doPuppiResTree                                                                                                                                                                   
+    if (doPuppiFakeTree) {
+      for (int i = 0 ; i < branchPuppiJet->GetEntries() ; i++) {
+	Jet *jet = (Jet*) branchPuppiJet->At(i);
+        TLorentzVector p4 = jet->P4();
+        pft_recpt = jet->PT;
+        pft_receta = jet->Eta;
+        pft_dr = 9999.;
+        pft_genpt = -1.;
+        for (int j = 0 ; j < branchGenJet->GetEntries() ; j++ ) {
+          Jet *genjet = (Jet*) branchGenJet->At(j);
+          TLorentzVector genp4 = genjet->P4();
+          float tempdr = p4.DeltaR(genp4);
+          if (tempdr < pft_dr) {
+            pft_dr = tempdr;
+            pft_genpt = jet->PT;
+          }
+        }
+        pft->Fill(); // per puppijet
+      }
+    }  
 
-    cout << "before branchBeamSpotParticle" << endl;
+    //    cout << "before branchBeamSpotParticle" << endl;
     // One particle from primary vertex
     if (verbose && branchBeamSpotParticle) {
       cout << branchBeamSpotParticle->GetEntries() << endl;
@@ -112,7 +218,7 @@ void JetExample(const char *inputFile)
       //      cout << "     Generator particle PID Pt Eta Phi X Y Z T (at origin) "  << part->PID << " "
       //	   << part->PT << " " << part->Eta << " " << part->Phi << " " << part->X << " " << part->Y << " " << part->Z << " " << part->T << endl;
     }
-    cout << "after branchBeamSpotParticle" << endl;
+    //    cout << "after branchBeamSpotParticle" << endl;
 
 
     // Status code 3 particle collection
@@ -202,6 +308,24 @@ void JetExample(const char *inputFile)
 	}
       }
 
+      for (int i = 0 ; i < branchPuppiJet->GetEntries() ; i++) {
+        Jet *jet = (Jet*) branchPuppiJet->At(i);
+        if (jet->PT > 30.) {
+          cout << "  PUPPI Jet " << i << endl;
+          cout << "    pT: " << jet->PT << endl;
+          cout << "    Eta: " << jet->Eta << endl;
+	}
+      }
+      
+      for (int i = 0 ; i < branchSubtractedPuppiJet->GetEntries(); i++) {
+	Jet *jet = (Jet*) branchSubtractedPuppiJet->At(i);
+	  if (jet->PT > 30.) {
+	    cout << "  Subtracted PUPPI Jet " << i << endl;
+	    cout << "    pT: " << jet->PT << endl;
+	    cout << "    Eta: " << jet->Eta << endl;
+	  }
+      }
+      
       if (branchGenJetWithPU) {
 	for (int i = 0 ; i < branchGenJetWithPU->GetEntries() ; i++) {
 	  Jet *jet = (Jet*) branchGenJetWithPU->At(i);
@@ -230,9 +354,12 @@ void JetExample(const char *inputFile)
     } // verbose 
   } // event
 
-  if (doResTree) {
+  if (doResTree||doFakeTree||doPuppiResTree||doPuppiFakeTree) {
     f->cd();
-    tree->Write();
+    if (doResTree) rt->Write();
+    if (doFakeTree) ft->Write();
+    if (doPuppiResTree) prt->Write();
+    if (doPuppiFakeTree) pft->Write();
     f->Close();
   }
 
