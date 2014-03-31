@@ -134,6 +134,17 @@ void JetExample(const char *inputFile)
         }
       }
 
+      if (branchGenParticle) {
+        for (int i = 0 ; i < branchGenParticle->GetEntries() ; i++) {
+          GenParticle *part = (GenParticle*) branchGenParticle->At(i);
+	  if (part->IsPU == 0) {
+	    cout << " PV GenParticle PT Eta Phi M " << part->PT << " " << part->Eta << " " << part->Phi << " " << part->Mass << endl;
+	  } else {
+            cout << " Pileup (vtx " << part->IsPU << ") GenParticle PT Eta Phi M " << part->PT << " " << part->Eta << " " << part->Phi << " " << part->Mass << endl;
+	  }
+        }
+      }
+
     }
 
 
