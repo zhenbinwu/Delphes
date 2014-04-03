@@ -110,7 +110,7 @@ void GeneralExample(const char *inputFile)
           if (branchGenParticleWithPU) { // now same colection
             for (int j = 0 ; j < jet->Constituents.GetEntries() ; j++) {
               TObject *obj = jet->Constituents[j];
-              if (obj->IsA() == GenParticle::Class()) {
+              if (obj && obj->IsA() == GenParticle::Class()) {
                 GenParticle *part = static_cast<GenParticle *> ( obj ) ;
                 cout << "     Jet constituent Pt Eta Phi Z T (at origin) " << part->PT << " " << part->Eta << " " << part->Phi << " " << part->Z << " " << part->T << endl;
               } else {
@@ -120,18 +120,6 @@ void GeneralExample(const char *inputFile)
           }
 	  */
         }
-      }
-
-
-      // Loop over jets
-      for (int i = 0 ; i < branchPuppiJet->GetEntries() ; i++) {
-        Jet *jet = (Jet*) branchPuppiJet->At(i);
-	if (jet->PT > 30.) {
-          cout << "  PuppiJet " << i << endl;
-          cout << "    pT: " << jet->PT << endl;
-          cout << "    Eta: " << jet->Eta << endl;
-          cout << "    Phi: " << jet->Phi << endl;
-	}
       }
 
       // Loop over jets
@@ -154,7 +142,7 @@ void GeneralExample(const char *inputFile)
 	  if (listJetTowers && branchEFlowTrack && branchEFlowTower && branchEFlowMuon) {
 	    for (int j = 0 ; j < jet->Constituents.GetEntries() ; j++) {
 	      TObject *obj = jet->Constituents[j];
-	      if (obj->IsA() == Tower::Class()) {
+	      if (obj && obj->IsA() == Tower::Class()) {
 		Tower *tow = static_cast<Tower *> ( obj ) ;
 		cout << "     Jet constituent Et Eta Phi Time (at calo) " << tow->ET << " " << tow->Eta << " " << tow->Phi << " " << tow->TOuter << endl;
 	      } else {

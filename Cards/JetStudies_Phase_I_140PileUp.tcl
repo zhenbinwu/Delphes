@@ -1130,7 +1130,7 @@ module UniqueObjectFinder UniqueObjectFinderMJ {
 
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
-#  add Branch Delphes/allParticles Particle GenParticle
+  add Branch Delphes/allParticles Particle GenParticle
   add Branch StatusPid/filteredParticles Particle GenParticle
   add Branch GenBeamSpotFilter/beamSpotParticles BeamSpotParticle GenParticle
 
