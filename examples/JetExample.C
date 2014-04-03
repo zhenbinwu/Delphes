@@ -48,11 +48,11 @@ void JetExample(const char *inputFile)
   TClonesArray *branchPuppiWeightedParticles = treeReader->UseBranch("PuppiWeightedParticles");
 
   bool verbose = false;
-  bool puppiConstituents = true;
-  bool doResTree = false;
-  bool doFakeTree = false;
-  bool doPuppiResTree = false;
-  bool doPuppiFakeTree = false;
+  bool puppiConstituents = false;
+  bool doResTree = true;
+  bool doFakeTree = true;
+  bool doPuppiResTree = true;
+  bool doPuppiFakeTree = true;
 
   float rt_geneta, rt_genpt, rt_recpt, rt_dr;
   float ft_receta, ft_genpt, ft_recpt, ft_dr;
@@ -60,6 +60,8 @@ void JetExample(const char *inputFile)
   float pft_receta, pft_genpt, pft_recpt, pft_dr;
   TFile *f;
   TTree *rt, *ft, *prt, *pft;
+
+  float ft_BetaStar, ft_MeanSqDeltaR;
 
   if (doResTree||doFakeTree||doPuppiResTree||doPuppiFakeTree) {
     f = new TFile("out.root","RECREATE");
@@ -87,6 +89,8 @@ void JetExample(const char *inputFile)
     ft->Branch("genpt",&ft_genpt,"genpt/F");
     ft->Branch("recpt",&ft_recpt,"recpt/F");
     ft->Branch("dr",&ft_dr,"dr/F");
+    ft->Branch("BetaStar",&ft_BetaStar,"BetaStar/F");
+    ft->Branch("MeanSqDeltaR",&ft_MeanSqDeltaR,"MeanSqDeltaR/F");
   }
 
   if (doPuppiFakeTree) {
@@ -197,6 +201,8 @@ void JetExample(const char *inputFile)
         ft_receta = jet->Eta;
         ft_dr = 9999.;
         ft_genpt = -1.;
+	ft_BetaStar = jet->BetaStar;
+	ft_MeanSqDeltaR = jet->MeanSqDeltaR;
         for (int j = 0 ; j < branchGenJet->GetEntries() ; j++ ) {
           Jet *genjet = (Jet*) branchGenJet->At(j);
           TLorentzVector genp4 = genjet->P4();
