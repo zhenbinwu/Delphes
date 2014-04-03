@@ -5,8 +5,10 @@
 set ExecutionPath {
 
   PileUpMerger
+  ModifyBeamSpot
   ParticlePropagator
   StatusPid
+  GenBeamSpotFilter
 
   ChargedHadronTrackingEfficiency
   ElectronTrackingEfficiency
@@ -23,10 +25,8 @@ set ExecutionPath {
 
   Rho
   FastJetFinder
-  CAJetFinder
   GenJetFinder
   JetPileUpSubtractor
-  CAJetPileUpSubtractor
 
   PhotonEfficiency
   PhotonIsolation
@@ -49,6 +49,9 @@ set ExecutionPath {
 
   ScalarHT
 
+  PileUpJetID
+
+  ConstituentFilter  
   TreeWriter
 }
 
@@ -60,6 +63,15 @@ module PileUpMerger PileUpMerger {
   set InputArray Delphes/stableParticles
 
   set OutputArray stableParticles
+  set NPUOutputArray NPU
+
+  # Get rid of beam spot from http://red-gridftp11.unl.edu/Snowmass/MinBias100K_14TeV.pileup ...
+  set InputBSX 2.44
+  set InputBSY 3.39
+
+  # ... and replace it with beam spot from CMSSW files
+  set OutputBSX 0.24
+  set OutputBSY 0.39
 
   # pre-generated minbias input file
   set PileUpFile MinBias.pileup
@@ -67,8 +79,20 @@ module PileUpMerger PileUpMerger {
   # average expected pile up
   set MeanPileUp 140
   # spread in the beam direction in m (assumes gaussian)
-  set ZVertexSpread 0.05
+  set ZVertexSpread 0.053
 }
+
+################
+# ModifyBeamSpot
+################
+
+module ModifyBeamSpot ModifyBeamSpot {
+  set ZVertexSpread 0.053
+  set InputArray PileUpMerger/stableParticles
+  set OutputArray stableParticles
+  set PVOutputArray PV
+}
+
 
 #################################
 # Propagate particles in cylinder
@@ -104,6 +128,18 @@ module StatusPidFilter StatusPid {
 
     set PTMin 0.5
 }
+
+#######################
+# GenBeamSpotFilter
+# Saves a particle intended to represent the beamspot
+#######################
+
+module GenBeamSpotFilter GenBeamSpotFilter {
+    set InputArray ModifyBeamSpot/stableParticles
+    set OutputArray beamSpotParticles
+
+}
+
 
 
 ####################################
@@ -281,78 +317,76 @@ module Calorimeter Calorimeter {
   # each list starts with the lower edge of the first tower
   # the list ends with the higher edged of the last tower
 
-  # HGC interface with Phase II calorimeter: 
-  #   - Barrel will be unchanged
-  #   - Calorimeter settings for |eta| > 3 will assume Phase II d
-
   # 5 degrees towers
-  set PhiBins {}
-  for {set i -70} {$i <= 70} {incr i} {
-    add PhiBins [expr {$i * $pi/70.0}]
-  }
+    set PhiBins {}
+    for {set i -70} {$i <= 70} {incr i} {
+	add PhiBins [expr {$i * $pi/70.0}]
+    }
 
   # Barrel
-  foreach eta {-1.566 -1.479 -1.392 -1.305 -1.218 -1.131 -1.044 -0.957 -0.87 -0.783 -0.696 -0.609 -0.522 -0.435 -0.348 -0.261 -0.174 -0.087 0 0.087 0.174 0.261 0.348 0.435 0.522 0.609 0.696 0.783 0.87 0.957 1.044 1.131 1.218 1.305 1.392 1.479 1.566} {
+    foreach eta {-1.566 -1.479 -1.392 -1.305 -1.218 -1.131 -1.044 -0.957 -0.87 -0.783 -0.696 -0.609 -0.522 -0.435 -0.348 -0.261 -0.174 -0.087 0 0.087 0.174 0.261 0.348 0.435 0.522 0.609 0.696 0.783 0.87 0.957 1.044 1.131 1.218 1.305 1.392 1.479 1.566} {
     add EtaPhiBins $eta $PhiBins
-  }
+    }
 
   # HGC Geometry/Segmentation
-  # R represents the radius of the endcap circle, ending at eta = 3 
+  # R represents the radius of the endcap circle, ending at eta = 3
   # This geometry is actually very similar to CFC
   # Modifications for 1.2 --> 0.95: iterations increases from 102 to 108
-  for {set i 108} {$i >= 0} {incr i -1} {
-    set R [expr 154.333 - 0.95 * $i]
-    set eta_raw -[expr -log(tan(atan($R / 317.0) / 2.0))]
-    set eta [expr double(round(1000 * $eta_raw)) / 1000]
-    set N [expr round(($pi * $R) / 0.95)]
-    set PhiBins {}
-    for {set j -$N} {$j <= $N} {incr j} {
-      set phi_raw [expr $j * $pi / $N]
-      set phi [expr double(round(1000 * $phi_raw)) / 1000]
+    for {set i 108} {$i >= 0} {incr i -1} {
+	set R [expr 154.333 - 0.95 * $i]
+	set eta_raw -[expr -log(tan(atan($R / 317.0) / 2.0))]
+	set eta [expr double(round(1000 * $eta_raw)) / 1000]
+	set N [expr round(($pi * $R) / 0.95)]
+	set PhiBins {}
+	for {set j -$N} {$j <= $N} {incr j} {
+	    set phi_raw [expr $j * $pi / $N]
+	    set phi [expr double(round(1000 * $phi_raw)) / 1000]
       add PhiBins $phi
-    }
+	}
     add EtaPhiBins $eta $PhiBins
-  }
-  for {set i 0} {$i <= 108} {incr i} {
-    set R [expr 154.333 - 0.95 * $i]
-    set eta_raw [expr -log(tan(atan($R / 317.0) / 2.0))]
-    set eta [expr double(round(1000 * $eta_raw)) / 1000]
-    set N [expr round(($pi * $R) / 0.95)]
-    set PhiBins {}
-    for {set j -$N} {$j <= $N} {incr j} {
-      set phi_raw [expr $j * $pi / $N]
-      set phi [expr double(round(1000 * $phi_raw)) / 1000]
+    }
+    for {set i 0} {$i <= 108} {incr i} {
+	set R [expr 154.333 - 0.95 * $i]
+	set eta_raw [expr -log(tan(atan($R / 317.0) / 2.0))]
+	set eta [expr double(round(1000 * $eta_raw)) / 1000]
+	set N [expr round(($pi * $R) / 0.95)]
+	set PhiBins {}
+	for {set j -$N} {$j <= $N} {incr j} {
+	    set phi_raw [expr $j * $pi / $N]
+	    set phi [expr double(round(1000 * $phi_raw)) / 1000]
       add PhiBins $phi
-    }
+	}
     add EtaPhiBins $eta $PhiBins
-  }
+    }
 
   # Far Endcap
-  set PhiBins {}
-  for {set i -70} {$i <= 70} {incr i} {
-    add PhiBins [expr {$i * $pi/70.0}]
-  }
-  foreach eta {-4 -3.825 -3.65 -3.475 -3.3 -3.125 3.125 3.3 3.475 3.65 3.825 4} {
+    set PhiBins {}
+    for {set i -70} {$i <= 70} {incr i} {
+	add PhiBins [expr {$i * $pi/70.0}]
+    }
+    foreach eta {-4 -3.825 -3.65 -3.475 -3.3 -3.125 3.125 3.3 3.475 3.65 3.825 4} {
     add EtaPhiBins $eta $PhiBins
-  }
+    }
 
   # 10 degrees towers
-  set PhiBins {}
-  for {set i -11} {$i <= 11} {incr i} {
-    add PhiBins [expr {$i * $pi/11.0}]
-  }
-  foreach eta {-4.35 -4.175 -4 4.175 4.35 4.525} {
+    set PhiBins {}
+    for {set i -11} {$i <= 11} {incr i} {
+	add PhiBins [expr {$i * $pi/11.0}]
+    }
+    foreach eta {-4.35 -4.175 -4 4.175 4.35 4.525} {
     add EtaPhiBins $eta $PhiBins
-  }
+    }
 
   # 20 degrees towers
-  set PhiBins {}
-  for {set i -9} {$i <= 9} {incr i} {
-    add PhiBins [expr {$i * $pi/9.0}]
-  }
-  foreach eta {-5 -4.7 -4.525 4.7 5} {
+    set PhiBins {}
+    for {set i -9} {$i <= 9} {incr i} {
+	add PhiBins [expr {$i * $pi/9.0}]
+    }
+    foreach eta {-5 -4.7 -4.525 4.7 5} {
     add EtaPhiBins $eta $PhiBins
-  }
+    }
+
+
 
   # default energy fractions {abs(PDG code)} {Fecal Fhcal}
   add EnergyFraction {0} {0.0 1.0}
@@ -376,25 +410,19 @@ module Calorimeter Calorimeter {
 
 
   # set ECalResolutionFormula {resolution formula as a function of eta and energy}
-  # set ECalResolutionFormula {(abs(eta) <= 1.5)                   * sqrt(energy^2*0.005^2 + energy*0.027^2 + 0.15^2) + \
-  #                            (abs(eta) > 1.5 && abs(eta) <= 4.0) * sqrt(energy^2*0.008^2 + energy*0.092^2 + 0.088^2) + \
-  #                            (abs(eta) > 4.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.08^2 + energy*1.97^2)}
-  # For HGC, nothing changes except from 1.5 to 3 in pseudorapidity
-  set ECalResolutionFormula {(abs(eta) <= 1.5)                   * sqrt(energy^2*0.005^2 + energy*0.027^2 + 0.15^2) + \
+    set ECalResolutionFormula {(abs(eta) <= 1.5)                   * sqrt(energy^2*0.005^2 + energy*0.027^2 + 0.15^2) + \
                              (abs(eta) > 1.5 && abs(eta) <= 3.0) * sqrt(energy^2*0.0056^2 + energy*0.209^2) + \
                              (abs(eta) > 3.0 && abs(eta) <= 4.0) * sqrt(energy^2*0.008^2 + energy*0.092^2 + 0.088^2) + \
-                             (abs(eta) > 4.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.08^2 + energy*1.97^2)}
+				   (abs(eta) > 4.0 && abs(eta) <= 5.0) * sqrt(energy^2*0.08^2 + energy*1.97^2)}
+
 
 
 
   # set HCalResolutionFormula {resolution formula as a function of eta and energy}
-  # set HCalResolutionFormula {(abs(eta) <= 1.7)                   * sqrt(energy^2*0.0302^2 + energy*0.5205^2 + 1.59^2) + \
-  #                            (abs(eta) > 1.7 && abs(eta) <= 3.2) * sqrt(energy^2*0.050^2 + energy*0.706^2) + \
-  #                            (abs(eta) > 3.0 && abs(eta) <= 4.9) * sqrt(energy^2*0.05^2 + energy*1.00^2)}
-  # For HGC, taking ZEUS hadron calorimeter numbers (35%/sqrt(E) + 2%)
-  set HCalResolutionFormula {(abs(eta) <= 1.5)                   * sqrt(energy^2*0.0302^2 + energy*0.5205^2 + 1.59^2) + \
+    set HCalResolutionFormula {(abs(eta) <= 1.5)                   * sqrt(energy^2*0.0302^2 + energy*0.5205^2 + 1.59^2) + \
                              (abs(eta) > 1.5 && abs(eta) <= 3.0) * sqrt(energy^2*0.02^2 + energy*0.35^2) + \
-                             (abs(eta) > 3.0 && abs(eta) <= 4.9) * sqrt(energy^2*0.05^2 + energy*1.00^2)}
+				   (abs(eta) > 3.0 && abs(eta) <= 4.9) * sqrt(energy^2*0.05^2 + energy*1.00^2)}
+
 }
 
 ##########################
@@ -406,6 +434,8 @@ module TrackPileUpSubtractor TrackPileUpSubtractor {
   add InputArray Calorimeter/eflowTracks eflowTracks
   add InputArray ElectronEnergySmearing/electrons electrons
   add InputArray MuonMomentumSmearing/muons muons
+
+  set PVInputArray  ModifyBeamSpot/PV
 
   # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
   # Z vertex resolution in m
@@ -444,6 +474,9 @@ module FastJetFinder Rho {
   set GhostEtaMax 5.0
   set RhoEtaMax 5.0
 
+  add RhoEtaRange 0.0 2.5
+  add RhoEtaRange 2.5 5.0
+
   set JetPTMin 0.0
 }
 
@@ -460,7 +493,7 @@ module FastJetFinder GenJetFinder {
   set JetAlgorithm 6
   set ParameterR 0.5
 
-  set JetPTMin 20.0
+  set JetPTMin 5.0
 }
 
 ############
@@ -480,7 +513,7 @@ module FastJetFinder FastJetFinder {
   set JetAlgorithm 6
   set ParameterR 0.5
 
-  set JetPTMin 20.0
+  set JetPTMin 5.0
 }
 
 
@@ -504,19 +537,26 @@ module FastJetFinder CAJetFinder {
 # Constituent filter
 ####################
 
-# module ConstituentFilter ConstituentFilter {
+module ConstituentFilter ConstituentFilter {
+
+  set ConEMin 1.
 
 # # add JetInputArray InputArray
-#   add JetInputArray GenJetFinder/jets
+   add JetInputArray GenJetFinder/jets
+
+# SZ changed this but it seems sensible
+#   add JetInputArray FastJetFinder/jets
+   add JetInputArray UniqueObjectFinderMJ/jets
+
 #   add JetInputArray CAJetFinder/jets
 
-  
+
 # # add ConstituentInputArray InputArray OutputArray
-#   add ConstituentInputArray Delphes/stableParticles stableParticles
-#   add ConstituentInputArray TrackPileUpSubtractor/eflowTracks eflowTracks
-#   add ConstituentInputArray Calorimeter/eflowTowers eflowTowers
-#   add ConstituentInputArray MuonMomentumSmearing/muons muons
-# }
+   add ConstituentInputArray Delphes/stableParticles stableParticles
+   add ConstituentInputArray TrackPileUpSubtractor/eflowTracks eflowTracks
+   add ConstituentInputArray Calorimeter/eflowTowers eflowTowers
+   add ConstituentInputArray MuonMomentumSmearing/muons muons
+  # }
 
 
 
@@ -530,7 +570,7 @@ module JetPileUpSubtractor JetPileUpSubtractor {
 
   set OutputArray jets
 
-  set JetPTMin 20.0
+  set JetPTMin 5.0
 }
 
 module JetPileUpSubtractor CAJetPileUpSubtractor {
@@ -810,29 +850,70 @@ module UniqueObjectFinder UniqueObjectFinderMJ {
    add InputArray UniqueObjectFinderEJ/jets jets
 }
 
+### 
+#Pileup jet id
+###
+
+module PileUpJetID PileUpJetID {
+  set JetInputArray JetPileUpSubtractor/jets
+  set OutputArray jets
+
+  # Using constituents does not make sense with Charged hadron subtraction                                                                                                           
+  # In 0 mode, dR cut used instead                                                                                                                                                   
+  set UseConstituents 0
+
+  set TrackInputArray Calorimeter/eflowTracks
+  set NeutralInputArray Calorimeter/eflowTowers
+  set ParameterR 0.5
+
+  set JetPTMin 5.0
+}
+
+
 
 ##################
 # ROOT tree writer
 ##################
 
 module TreeWriter TreeWriter {
-# add Branch InputArray BranchName BranchClass
-#  add Branch Delphes/allParticles Particle GenParticle
   add Branch StatusPid/filteredParticles Particle GenParticle
-#  add Branch TrackMerger/tracks Track Track
-#  add Branch Calorimeter/towers Tower Tower
-#  add Branch ConstituentFilter/eflowTracks EFlowTrack Track
-#  add Branch ConstituentFilter/eflowTowers EFlowTower Tower
-#  add Branch ConstituentFilter/muons EFlowMuon Muon
+  add Branch GenBeamSpotFilter/beamSpotParticles BeamSpotParticle GenParticle
+
+  add Branch ConstituentFilter/eflowTracks EFlowTrack Track
+  add Branch ConstituentFilter/eflowTowers EFlowTower Tower
+  add Branch ConstituentFilter/muons EFlowMuon Muon
+
   add Branch GenJetFinder/jets GenJet Jet
-  add Branch CAJetPileUpSubtractor/jets CAJet Jet
   add Branch UniqueObjectFinderMJ/jets Jet Jet
   add Branch UniqueObjectFinderEJ/electrons Electron Electron
   add Branch UniqueObjectFinderGJ/photons Photon Photon
   add Branch UniqueObjectFinderMJ/muons Muon Muon
+
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
-  add Branch Rho/rho Rho ScalarHT
+  add Branch Rho/rho Rho Rho
+  add Branch PileUpMerger/NPU NPU ScalarHT
+
+  set OffsetFromModifyBeamSpot 1
 }
+
+# # add Branch InputArray BranchName BranchClass
+#  # add Branch Delphes/allParticles Particle GenParticle
+  # add Branch StatusPid/filteredParticles Particle GenParticle
+#  # add Branch TrackMerger/tracks Track Track
+#  # add Branch Calorimeter/towers Tower Tower
+#  # add Branch ConstituentFilter/eflowTracks EFlowTrack Track
+#  # add Branch ConstituentFilter/eflowTowers EFlowTower Tower
+#  # add Branch ConstituentFilter/muons EFlowMuon Muon
+  # add Branch GenJetFinder/jets GenJet Jet
+  # add Branch CAJetPileUpSubtractor/jets CAJet Jet
+  # add Branch UniqueObjectFinderMJ/jets Jet Jet
+  # add Branch UniqueObjectFinderEJ/electrons Electron Electron
+  # add Branch UniqueObjectFinderGJ/photons Photon Photon
+  # add Branch UniqueObjectFinderMJ/muons Muon Muon
+  # add Branch MissingET/momentum MissingET MissingET
+  # add Branch ScalarHT/energy ScalarHT ScalarHT
+  # add Branch Rho/rho Rho ScalarHT
+
 
 

@@ -63,6 +63,15 @@ module PileUpMerger PileUpMerger {
   set InputArray Delphes/stableParticles
 
   set OutputArray stableParticles
+  set NPUOutputArray NPU
+
+  # Get rid of beam spot from http://red-gridftp11.unl.edu/Snowmass/MinBias100K_14TeV.pileup ...
+  set InputBSX 2.44
+  set InputBSY 3.39
+
+  # ... and replace it with beam spot from CMSSW files
+  set OutputBSX 0.24
+  set OutputBSY 0.39
 
   # pre-generated minbias input file
   set PileUpFile MinBias.pileup
@@ -70,8 +79,20 @@ module PileUpMerger PileUpMerger {
   # average expected pile up
   set MeanPileUp 140
   # spread in the beam direction in m (assumes gaussian)
-  set ZVertexSpread 0.05
+  set ZVertexSpread 0.053
 }
+
+################
+# ModifyBeamSpot
+################
+
+module ModifyBeamSpot ModifyBeamSpot {
+  set ZVertexSpread 0.053
+  set InputArray PileUpMerger/stableParticles
+  set OutputArray stableParticles
+  set PVOutputArray PV
+}
+
 
 #################################
 # Propagate particles in cylinder
@@ -107,6 +128,18 @@ module StatusPidFilter StatusPid {
 
     set PTMin 0.5
 }
+
+#######################
+# GenBeamSpotFilter
+# Saves a particle intended to represent the beamspot
+#######################
+
+module GenBeamSpotFilter GenBeamSpotFilter {
+    set InputArray ModifyBeamSpot/stableParticles
+    set OutputArray beamSpotParticles
+
+}
+
 
 
 ####################################
@@ -356,6 +389,8 @@ module TrackPileUpSubtractor TrackPileUpSubtractor {
   add InputArray ElectronEnergySmearing/electrons electrons
   add InputArray MuonMomentumSmearing/muons muons
 
+  set PVInputArray  ModifyBeamSpot/PV
+
   # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
   # Z vertex resolution in m
   set ZVertexResolution 0.0001
@@ -393,6 +428,9 @@ module FastJetFinder Rho {
   set GhostEtaMax 5.0
   set RhoEtaMax 5.0
 
+  add RhoEtaRange 0.0 2.5
+  add RhoEtaRange 2.5 5.0
+
   set JetPTMin 0.0
 }
 
@@ -409,7 +447,7 @@ module FastJetFinder GenJetFinder {
   set JetAlgorithm 6
   set ParameterR 0.5
 
-  set JetPTMin 20.0
+  set JetPTMin 5.0
 }
 
 ############
@@ -429,7 +467,7 @@ module FastJetFinder FastJetFinder {
   set JetAlgorithm 6
   set ParameterR 0.5
 
-  set JetPTMin 20.0
+  set JetPTMin 5.0
 }
 
 
@@ -453,19 +491,26 @@ module FastJetFinder CAJetFinder {
 # Constituent filter
 ####################
 
-# module ConstituentFilter ConstituentFilter {
+module ConstituentFilter ConstituentFilter {
+
+  set ConEMin 1.
 
 # # add JetInputArray InputArray
-#   add JetInputArray GenJetFinder/jets
+   add JetInputArray GenJetFinder/jets
+
+# SZ changed this but it seems sensible
+#   add JetInputArray FastJetFinder/jets
+   add JetInputArray UniqueObjectFinderMJ/jets
+
 #   add JetInputArray CAJetFinder/jets
 
-  
+
 # # add ConstituentInputArray InputArray OutputArray
-#   add ConstituentInputArray Delphes/stableParticles stableParticles
-#   add ConstituentInputArray TrackPileUpSubtractor/eflowTracks eflowTracks
-#   add ConstituentInputArray Calorimeter/eflowTowers eflowTowers
-#   add ConstituentInputArray MuonMomentumSmearing/muons muons
-# }
+   add ConstituentInputArray Delphes/stableParticles stableParticles
+   add ConstituentInputArray TrackPileUpSubtractor/eflowTracks eflowTracks
+   add ConstituentInputArray Calorimeter/eflowTowers eflowTowers
+   add ConstituentInputArray MuonMomentumSmearing/muons muons
+  # }
 
 
 
@@ -479,7 +524,7 @@ module JetPileUpSubtractor JetPileUpSubtractor {
 
   set OutputArray jets
 
-  set JetPTMin 20.0
+  set JetPTMin 5.0
 }
 
 module JetPileUpSubtractor CAJetPileUpSubtractor {
@@ -760,7 +805,7 @@ module UniqueObjectFinder UniqueObjectFinderMJ {
 }
 
 ### 
-Pileup jet id
+#Pileup jet id
 ###
 
 module PileUpJetID PileUpJetID {
@@ -775,7 +820,7 @@ module PileUpJetID PileUpJetID {
   set NeutralInputArray Calorimeter/eflowTowers
   set ParameterR 0.5
 
-  set JetPTMin 10.0
+  set JetPTMin 5.0
 }
 
 
@@ -785,23 +830,44 @@ module PileUpJetID PileUpJetID {
 ##################
 
 module TreeWriter TreeWriter {
-# add Branch InputArray BranchName BranchClass
-#  add Branch Delphes/allParticles Particle GenParticle
   add Branch StatusPid/filteredParticles Particle GenParticle
-#  add Branch TrackMerger/tracks Track Track
-#  add Branch Calorimeter/towers Tower Tower
-#  add Branch ConstituentFilter/eflowTracks EFlowTrack Track
-#  add Branch ConstituentFilter/eflowTowers EFlowTower Tower
-#  add Branch ConstituentFilter/muons EFlowMuon Muon
+  add Branch GenBeamSpotFilter/beamSpotParticles BeamSpotParticle GenParticle
+
+  add Branch ConstituentFilter/eflowTracks EFlowTrack Track
+  add Branch ConstituentFilter/eflowTowers EFlowTower Tower
+  add Branch ConstituentFilter/muons EFlowMuon Muon
+
   add Branch GenJetFinder/jets GenJet Jet
-  add Branch CAJetPileUpSubtractor/jets CAJet Jet
   add Branch UniqueObjectFinderMJ/jets Jet Jet
   add Branch UniqueObjectFinderEJ/electrons Electron Electron
   add Branch UniqueObjectFinderGJ/photons Photon Photon
   add Branch UniqueObjectFinderMJ/muons Muon Muon
+
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
-  add Branch Rho/rho Rho ScalarHT
+  add Branch Rho/rho Rho Rho
+  add Branch PileUpMerger/NPU NPU ScalarHT
+
+  set OffsetFromModifyBeamSpot 1
 }
+
+# # add Branch InputArray BranchName BranchClass
+#  # add Branch Delphes/allParticles Particle GenParticle
+  # add Branch StatusPid/filteredParticles Particle GenParticle
+#  # add Branch TrackMerger/tracks Track Track
+#  # add Branch Calorimeter/towers Tower Tower
+#  # add Branch ConstituentFilter/eflowTracks EFlowTrack Track
+#  # add Branch ConstituentFilter/eflowTowers EFlowTower Tower
+#  # add Branch ConstituentFilter/muons EFlowMuon Muon
+  # add Branch GenJetFinder/jets GenJet Jet
+  # add Branch CAJetPileUpSubtractor/jets CAJet Jet
+  # add Branch UniqueObjectFinderMJ/jets Jet Jet
+  # add Branch UniqueObjectFinderEJ/electrons Electron Electron
+  # add Branch UniqueObjectFinderGJ/photons Photon Photon
+  # add Branch UniqueObjectFinderMJ/muons Muon Muon
+  # add Branch MissingET/momentum MissingET MissingET
+  # add Branch ScalarHT/energy ScalarHT ScalarHT
+  # add Branch Rho/rho Rho ScalarHT
+
 
 
