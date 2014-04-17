@@ -1,0 +1,2 @@
+setenv DELPHES Delphes
+setenv LD_LIBRARY_PATH $PWD/../../${DELPHES}/:$LD_LIBRARY_PATH
