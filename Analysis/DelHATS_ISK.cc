@@ -91,6 +91,26 @@ int main ( int argc, char *argv[] )
   TH1 *histLepEffEta      = new TH1F("histLepEffEta", "Lepton Efficiency", 120, -6, 6);
 
 
+  TH1 *histGenEleEta      = new TH1F("histGenEleEta ", "GenEletron Eta", 120, -6, 6);
+  TH1 *histMatchGenEleEta = new TH1F("histMatchGenEleEta", "Matched GenEletron Eta", 120, -6, 6);
+  TH1 *histEleISKEffEta      = new TH1F("histEleISKEffEta", "Electron Isotrak Efficiency", 120, -6, 6);
+  TH1 *histGenElePt      = new TH1F("histGenElePt ", "GenEletron Pt", 100, 0, 200);
+  TH1 *histMatchGenElePt = new TH1F("histMatchGenElePt", "Matched GenEletron Pt", 100, 0, 200);
+  TH1 *histEleISKEffPt      = new TH1F("histEleISKEffPt", "Electron Isotrak Efficiency", 100, 0, 200);
+
+  TH1 *histGenMuonEta      = new TH1F("histGenMuonEta ", "GenMuontron Eta", 120, -6, 6);
+  TH1 *histMatchGenMuonEta = new TH1F("histMatchGenMuonEta", "Matched GenMuontron Eta", 120, -6, 6);
+  TH1 *histMuonISKEffEta      = new TH1F("histMuonISKEffEta", "Muonctron Isotrak Efficiency", 120, -6, 6);
+  TH1 *histGenMuonPt      = new TH1F("histGenMuonPt ", "GenMuontron Pt", 100, 0, 200);
+  TH1 *histMatchGenMuonPt = new TH1F("histMatchGenMuonPt", "Matched GenMuontron Pt", 100, 0, 200);
+  TH1 *histMuonISKEffPt      = new TH1F("histMuonISKEffPt", "Muonctron Isotrak Efficiency", 100, 0, 200);
+
+  TH1 *histGenTauEta      = new TH1F("histGenTauEta ", "GenTautron Eta", 120, -6, 6);
+  TH1 *histMatchGenTauEta = new TH1F("histMatchGenTauEta", "Matched GenTautron Eta", 120, -6, 6);
+  TH1 *histTauISKEffEta      = new TH1F("histTauISKEffEta", "Tauctron Isotrak Efficiency", 120, -6, 6);
+  TH1 *histGenTauPt      = new TH1F("histGenTauPt ", "GenTautron Pt", 100, 0, 200);
+  TH1 *histMatchGenTauPt = new TH1F("histMatchGenTauPt", "Matched GenTautron Pt", 100, 0, 200);
+  TH1 *histTauISKEffPt      = new TH1F("histTauISKEffPt", "Tauctron Isotrak Efficiency", 100, 0, 200);
 //----------------------------------------------------------------------------
 //  JEtMET execise
 //----------------------------------------------------------------------------
@@ -145,23 +165,53 @@ int main ( int argc, char *argv[] )
 //----------------------------------------------------------------------------
 //  Lepton Efficiency Exercise
 //----------------------------------------------------------------------------
-    std::map<int, int> MatchIdxe = MatchingLepton<Electron>(branchParticle, branchElectron, 11);
-    std::map<int, int> MatchIdxm = MatchingLepton<Muon>(branchParticle, branchMuon, 13);
-    if (MatchIdxe.size() + MatchIdxm.size() == 0) continue;
+    //std::map<int, int> MatchIdxe = MatchingLepton<Electron>(branchParticle, branchElectron, 11);
+    //std::map<int, int> MatchIdxm = MatchingLepton<Muon>(branchParticle, branchMuon, 13);
+    //if (MatchIdxe.size() + MatchIdxm.size() == 0) continue;
     lept++;
-    std::map<int, int> MatchIske = MatchingLepton<Electron>(branchParticle, branchIsoTrk, 11);
+    std::map<int, int> MatchIske = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 11);
     std::map<int, int> MatchIskm = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 13);
-    //for(std::map<int, int>::iterator it=MatchIdx.begin();
-      //it!=MatchIdx.end(); it++)
-    //{
-      //GenParticle *gen = (GenParticle*) branchParticle->At(it->first);
-      //histGenLepEta->Fill(gen->Eta);
-      //if (it->second != -1)
-      //{
-        //histMatchGenLepEta->Fill(gen->Eta);
-      //}
-    //}
+    std::map<int, int> MatchIskt = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 15);
+    //std::cout << " ele " << MatchIske.size() <<"  muon " << MatchIskm.size()  << " tau " << MatchIskt.size() << std::endl;
+    for(std::map<int, int>::iterator it=MatchIske.begin();
+      it!=MatchIske.end(); it++)
+    {
+      GenParticle *gen = (GenParticle*) branchParticle->At(it->first);
+      histGenEleEta->Fill(gen->Eta);
+      histGenElePt->Fill(gen->PT);
+      if (it->second != -1)
+      {
+        histMatchGenEleEta->Fill(gen->Eta);
+        histMatchGenElePt->Fill(gen->PT);
+      }
+    }
 
+    for(std::map<int, int>::iterator it=MatchIskm.begin();
+      it!=MatchIskm.end(); it++)
+    {
+      GenParticle *gen = (GenParticle*) branchParticle->At(it->first);
+      histGenMuonEta->Fill(gen->Eta);
+      histGenMuonPt->Fill(gen->PT);
+      if (it->second != -1)
+      {
+        histMatchGenMuonEta->Fill(gen->Eta);
+        histMatchGenMuonPt->Fill(gen->PT);
+      }
+    }
+
+
+    for(std::map<int, int>::iterator it=MatchIskt.begin();
+      it!=MatchIskt.end(); it++)
+    {
+      GenParticle *gen = (GenParticle*) branchParticle->At(it->first);
+      histGenTauEta->Fill(gen->Eta);
+      histGenTauPt->Fill(gen->PT);
+      if (it->second != -1)
+      {
+        histMatchGenTauEta->Fill(gen->Eta);
+        histMatchGenTauPt->Fill(gen->PT);
+      }
+    }
 
     if ((branchElectron->GetEntries() + branchMuon->GetEntries()) == 0) 
     {
@@ -173,7 +223,6 @@ int main ( int argc, char *argv[] )
         if (trk->PT > 10) NISK++;
       }
       if (NISK == 0) isoveto++;
-
     }
 
   } // End of looping events
@@ -184,11 +233,62 @@ int main ( int argc, char *argv[] )
   histLepEffEta->SetTitle("Lepton Efficiency");
   histLepEffEta->Divide(histGenLepEta);
 
+  histEleISKEffEta = (TH1*)histMatchGenEleEta->Clone("histEleISKEffEta");
+  histEleISKEffEta->SetTitle("Eleton Efficiency");
+  histEleISKEffEta->Divide(histGenEleEta);
+
+
+  histMuonISKEffEta = (TH1*)histMatchGenMuonEta->Clone("histMuonISKEffEta");
+  histMuonISKEffEta->SetTitle("Muonton Efficiency");
+  histMuonISKEffEta->Divide(histGenMuonEta);
+
+  histTauISKEffEta = (TH1*)histMatchGenTauEta->Clone("histTauISKEffEta");
+  histTauISKEffEta->SetTitle("Tauton Efficiency");
+  histTauISKEffEta->Divide(histGenTauEta);
+
+  histEleISKEffPt = (TH1*)histMatchGenElePt->Clone("histEleISKEffPt");
+  histEleISKEffPt->SetTitle("Eleton Efficiency");
+  histEleISKEffPt->Divide(histGenElePt);
+
+
+  histMuonISKEffPt = (TH1*)histMatchGenMuonPt->Clone("histMuonISKEffPt");
+  histMuonISKEffPt->SetTitle("Muonton Efficiency");
+  histMuonISKEffPt->Divide(histGenMuonPt);
+
+  histTauISKEffPt = (TH1*)histMatchGenTauPt->Clone("histTauISKEffPt");
+  histTauISKEffPt->SetTitle("Tauton Efficiency");
+  histTauISKEffPt->Divide(histGenTauPt);
+
+
   // Saving resulting histograms
   histJetPT->Write();
   histGenLepEta->Write();
   histMatchGenLepEta->Write();
   histLepEffEta->Write();
+
+  histGenEleEta->Write();
+  histGenElePt->Write();
+  histMatchGenEleEta->Write();
+  histMatchGenElePt->Write();
+  histEleISKEffEta->Write();
+  histEleISKEffPt->Write();
+
+  histGenMuonEta->Write();
+  histGenMuonPt->Write();
+  histMatchGenMuonEta->Write();
+  histMatchGenMuonPt->Write();
+  histMuonISKEffEta->Write();
+  histMuonISKEffPt->Write();
+
+
+  histGenTauEta->Write();
+  histGenTauPt->Write();
+  histMatchGenTauEta->Write();
+  histMatchGenTauPt->Write();
+  histTauISKEffEta->Write();
+  histTauISKEffPt->Write();
+
+
   //histJetEta->Write();
   //histMET->Write();
   //histMET_X->Write();
@@ -225,7 +325,7 @@ std::map<int, int> MatchingLepton(TClonesArray *branchParticle, TClonesArray *br
   for (int i = 0; i < GenSize; ++i)
   {
     GenParticle *p = (GenParticle*) branchParticle->At(i);
-    std::cout << "i " << i << " p " << p->PID << " status " << p->Status  << std::endl;
+    //std::cout << "i " << i << " p " << p->PID << " status " << p->Status  << std::endl;
     //if (p->Status != 1 ) //Only select stable particle
       //continue;
     if ( (p->M1 != -1 && fabs(((GenParticle*)branchParticle->At(p->M1))->PID) != 24) && 
@@ -233,7 +333,7 @@ std::map<int, int> MatchingLepton(TClonesArray *branchParticle, TClonesArray *br
         continue;  //Making sure the lepton from W decay 
     if (std::fabs(p->PID) == PID) //Matched to the wanted lepton
     {
-      std::cout << p->PID << std::endl;
+      //std::cout << p->PID << std::endl;
       MatchIdx[i] = -1;
     }
   }
