@@ -36,11 +36,12 @@
 #include "modules/Weighter.h"
 #include "modules/ExampleModule.h"
 
-#include "modules/CleansedJetFinder.h"
+//#include "modules/CleansedJetFinder.h"
 #include "modules/PileUpJetID.h"
 #include "modules/ModifyBeamSpot.h"
 #include "modules/GenBeamSpotFilter.h"
 #include "modules/RunPUPPI.h"
+#include "modules/NeutrinoFilter.h"
 
 #ifdef __CINT__
 
@@ -73,10 +74,11 @@
 #pragma link C++ class Weighter+;
 #pragma link C++ class ExampleModule+;
 
-#pragma link C++ class CleansedJetFinder+;
+//#pragma link C++ class CleansedJetFinder+;
 #pragma link C++ class PileUpJetID+;
 #pragma link C++ class ModifyBeamSpot+;
 #pragma link C++ class GenBeamSpotFilter+;
 #pragma link C++ class RunPUPPI+;
+#pragma link C++ class NeutrinoFilter+;
 
 #endif

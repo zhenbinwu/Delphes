@@ -493,7 +493,7 @@ module FastJetFinder CAJetFinder {
 
 module ConstituentFilter ConstituentFilter {
 
-  set ConEMin 1.
+  set ConEMin 4.
 
 # # add JetInputArray InputArray
    add JetInputArray GenJetFinder/jets
@@ -834,7 +834,8 @@ module TreeWriter TreeWriter {
   add Branch GenBeamSpotFilter/beamSpotParticles BeamSpotParticle GenParticle
 
   add Branch ConstituentFilter/eflowTracks EFlowTrack Track
-  add Branch ConstituentFilter/eflowTowers EFlowTower Tower
+#  add Branch ConstituentFilter/eflowTowers EFlowTower Tower
+  add Branch Calorimeter/eflowTowers eflowTower Tower
   add Branch ConstituentFilter/muons EFlowMuon Muon
 
   add Branch GenJetFinder/jets GenJet Jet

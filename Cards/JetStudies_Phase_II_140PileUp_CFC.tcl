@@ -76,7 +76,7 @@ module RunPUPPI RunPUPPI {
   set TrackInputArray Calorimeter/eflowTracks
   set NeutralInputArray Calorimeter/eflowTowers
 
-  set TrackerEta 2.5
+  set TrackerEta 4.0
 
   set OutputArray weightedparticles
 }
@@ -110,7 +110,8 @@ module FastJetFinder PuppiRho {
   set RhoEtaMax 5.0
   
   add RhoEtaRange 0.0 2.5
-  add RhoEtaRange 2.5 5.0
+  add RhoEtaRange 2.5 4.0
+  add RhoEtaRange 4.0 5.0
   
   set JetPTMin 0.0
 }
@@ -524,7 +525,8 @@ module FastJetFinder Rho {
   set RhoEtaMax 5.0
 
   add RhoEtaRange 0.0 2.5
-  add RhoEtaRange 2.5 5.0
+  add RhoEtaRange 2.5 4.0
+  add RhoEtaRange 4.0 5.0
 
   set JetPTMin 0.0
 }

@@ -76,7 +76,7 @@ module RunPUPPI RunPUPPI {
   set TrackInputArray Calorimeter/eflowTracks
   set NeutralInputArray Calorimeter/eflowTowers
 
-  set TrackerEta 2.5
+  set TrackerEta 4.0
 
   set OutputArray weightedparticles
 }
@@ -110,7 +110,9 @@ module FastJetFinder PuppiRho {
   set RhoEtaMax 5.0
   
   add RhoEtaRange 0.0 2.5
-  add RhoEtaRange 2.5 5.0
+  add RhoEtaRange 2.5 4.0
+  add RhoEtaRange 4.0 5.0
+
   
   set JetPTMin 0.0
 }
@@ -429,6 +431,20 @@ module Calorimeter Calorimeter {
     add EtaPhiBins $eta $PhiBins
     }
 
+    # eta 3-4
+
+  # 5 degrees towers
+    set PhiBins {}
+    for {set i -70} {$i <= 70} {incr i} {
+	add PhiBins [expr {$i * $pi/70.0}]
+    }
+
+    foreach eta {-4 -3.825 -3.65 -3.475 -3.3 -3.125 -2.95 -2.868 -2.65 -2.5 -2.322 -2.172 -2.043 -1.93 -1.83 -1.74 -1.653 -1.566 -1.479 -1.392 -1.305 -1.218 -1.131 -1.044 -0.957 -0.87 -0.783 -0.696 -0.609 -0.522 -0.435 -0.348 -0.261 -0.174 -0.087 0 0.087 0.174 0.261 0.348 0.435 0.522 0.609 0.696 0.783 0.87 0.957 1.044 1.131 1.218 1.305 1.392 1.479 1.566 1.653 \
+		     1.74 1.83 1.93 2.043 2.172 2.322 2.5 2.65 2.868 2.95 3.125 3.3 3.475 3.65 3.825 4} {
+    add EtaPhiBins $eta $PhiBins
+    }
+
+
   # Far Endcap
     set PhiBins {}
     for {set i -70} {$i <= 70} {incr i} {
@@ -545,7 +561,8 @@ module FastJetFinder Rho {
   set RhoEtaMax 5.0
 
   add RhoEtaRange 0.0 2.5
-  add RhoEtaRange 2.5 5.0
+  add RhoEtaRange 2.5 4.0
+  add RhoEtaRange 4.0 5.0
 
   set JetPTMin 0.0
 }

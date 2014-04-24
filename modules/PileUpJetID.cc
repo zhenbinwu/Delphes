@@ -235,8 +235,8 @@ void PileUpJetID::Process()
     }
 
     if (sumptch > 0.) {
-      candidate->Beta = sumptchpu/sumptch;
-      candidate->BetaStar = sumptchpv/sumptch;
+      candidate->Beta = sumptchpv/sumptch;
+      candidate->BetaStar = sumptchpu/sumptch;
     } else {
       candidate->Beta = -999.;
       candidate->BetaStar = -999.;
