@@ -10,7 +10,7 @@ N.B. you must touch JetExample.cpp in order to convince Make that there is anyth
 
 //------------------------------------------------------------------------------
 
-void JetExample(const char *inputFile)
+void JetExample(const char *inputFile,const char *outputFile)
 {
   //  gSystem->Load("libDelphes");
 
@@ -64,7 +64,7 @@ void JetExample(const char *inputFile)
   float ft_BetaStar, ft_MeanSqDeltaR;
 
   if (doResTree||doFakeTree||doPuppiResTree||doPuppiFakeTree) {
-    f = new TFile("out.root","RECREATE");
+    f = new TFile(outputFile,"RECREATE");
   }
 
   if (doResTree) {

@@ -29,13 +29,13 @@ using namespace std;
 
 // Here you can put your analysis macro
 
-#include "JetExample.C"
+#include "CountEventData.C"
 
 //------------------------------------------------------------------------------
 
 int main(int argc, char *argv[])
 {
-  char *appName = "JetExample";
+  char *appName = "CountEventData";
 
   if(argc != 3)
   {
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
 // Here you call your macro's main function 
 
-  JetExample(inputFile,outputFile);
+  CountEventData(inputFile,outputFile);
 
 //------------------------------------------------------------------------------
 
