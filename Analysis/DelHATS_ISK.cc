@@ -111,6 +111,9 @@ int main ( int argc, char *argv[] )
   TH1 *histGenTauPt      = new TH1F("histGenTauPt ", "GenTautron Pt", 100, 0, 200);
   TH1 *histMatchGenTauPt = new TH1F("histMatchGenTauPt", "Matched GenTautron Pt", 100, 0, 200);
   TH1 *histTauISKEffPt      = new TH1F("histTauISKEffPt", "Tauctron Isotrak Efficiency", 100, 0, 200);
+
+  TH1 *histMissIsKEta      = new TH1F("histMissISKEta ", "MissISK Eta", 120, -6, 6);
+  TH1 *histMissIsKPT      = new TH1F("histMissISKPT", "MissISK PT", 100, 0, 200);
 //----------------------------------------------------------------------------
 //  JEtMET execise
 //----------------------------------------------------------------------------
@@ -160,6 +163,7 @@ int main ( int argc, char *argv[] )
       //std::cout << jet->PT << std::endl;
     }
 
+    //if (entry > 500 ) break;
     if (entry % 500 == 0)
       std::cout << "--------------------" << entry << std::endl;
 //----------------------------------------------------------------------------
@@ -167,15 +171,24 @@ int main ( int argc, char *argv[] )
 //----------------------------------------------------------------------------
     //std::map<int, int> MatchIdxe = MatchingLepton<Electron>(branchParticle, branchElectron, 11);
     //std::map<int, int> MatchIdxm = MatchingLepton<Muon>(branchParticle, branchMuon, 13);
-    //if (MatchIdxe.size() + MatchIdxm.size() == 0) continue;
-    lept++;
     std::map<int, int> MatchIske = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 11);
     std::map<int, int> MatchIskm = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 13);
     std::map<int, int> MatchIskt = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 15);
+
+    if (MatchIske.size() + MatchIskm.size() +  MatchIskt.size()== 0) continue;
+    lept++;
     //std::cout << " ele " << MatchIske.size() <<"  muon " << MatchIskm.size()  << " tau " << MatchIskt.size() << std::endl;
+    //
+    //
+    std::vector<int> EIsk;
+    std::vector<int> MIsk;
+    std::vector<int> TIsk;
+
+    
     for(std::map<int, int>::iterator it=MatchIske.begin();
       it!=MatchIske.end(); it++)
     {
+      EIsk.push_back(it->second);
       GenParticle *gen = (GenParticle*) branchParticle->At(it->first);
       histGenEleEta->Fill(gen->Eta);
       histGenElePt->Fill(gen->PT);
@@ -189,6 +202,7 @@ int main ( int argc, char *argv[] )
     for(std::map<int, int>::iterator it=MatchIskm.begin();
       it!=MatchIskm.end(); it++)
     {
+      MIsk.push_back(it->second);
       GenParticle *gen = (GenParticle*) branchParticle->At(it->first);
       histGenMuonEta->Fill(gen->Eta);
       histGenMuonPt->Fill(gen->PT);
@@ -203,6 +217,7 @@ int main ( int argc, char *argv[] )
     for(std::map<int, int>::iterator it=MatchIskt.begin();
       it!=MatchIskt.end(); it++)
     {
+      TIsk.push_back(it->second);
       GenParticle *gen = (GenParticle*) branchParticle->At(it->first);
       histGenTauEta->Fill(gen->Eta);
       histGenTauPt->Fill(gen->PT);
@@ -212,6 +227,41 @@ int main ( int argc, char *argv[] )
         histMatchGenTauPt->Fill(gen->PT);
       }
     }
+
+
+
+//----------------------------------------------------------------------------
+//  Loop over track collection for matching
+//----------------------------------------------------------------------------
+    for (int i = 0; i < branchIsoTrk->GetEntries(); ++i)
+    {
+      int found = 0;
+      if (std::find(EIsk.begin(), EIsk.end(), i) != EIsk.end()) found++;
+      if (std::find(MIsk.begin(), MIsk.end(), i) != MIsk.end()) found++;
+      if (std::find(TIsk.begin(), TIsk.end(), i) != TIsk.end()) found++;
+      if (found > 1)
+      {
+        std::cout<<"Run to \033[0;31m"<<__func__<<"\033[0m at \033[1;36m"<< __FILE__<<"\033[0m, line \033[0;34m"<< __LINE__<<"\033[0m"<< std::endl; 
+      }
+      if (found == 0)
+      {
+        Muon *trk = (Muon*) branchIsoTrk->At(i);
+        histMissIsKEta->Fill(trk->Eta);
+        histMissIsKPT->Fill(trk->PT);
+      }
+    }
+
+    //if (TIsk.size() != 0)
+    //{
+    //std::cout<<"Run to \033[0;31m"<<__func__<<"\033[0m at \033[1;36m"<< __FILE__<<"\033[0m, line \033[0;34m"<< __LINE__<<"\033[0m"<< std::endl; 
+      //for (int i = 0; i < branchParticle->GetEntries(); ++i)
+      //{
+        //GenParticle *p = (GenParticle*) branchParticle->At(i);
+
+        //std::cout << "i " << i << " p " << p->PID << " status " << p->Status
+          //<< " m1 " << p->M1 << " m2 " << p->M2 <<" eta " << p->Eta << " PT " << p->PT<< std::endl;
+      //}
+    //}
 
     if ((branchElectron->GetEntries() + branchMuon->GetEntries()) == 0) 
     {
@@ -288,6 +338,8 @@ int main ( int argc, char *argv[] )
   histTauISKEffEta->Write();
   histTauISKEffPt->Write();
 
+  histMissIsKEta->Write();
+  histMissIsKPT->Write();
 
   //histJetEta->Write();
   //histMET->Write();
@@ -348,7 +400,7 @@ std::map<int, int> MatchingLepton(TClonesArray *branchParticle, TClonesArray *br
       it!=MatchIdx.end(); it++)
     {
       GenParticle *p = (GenParticle*) branchParticle->At(it->first);
-      if (p->P4().DeltaR(lep->P4())<0.3)
+      if (p->P4().DeltaR(lep->P4())<0.5)
       {
         it->second = i;
         break;
