@@ -27,13 +27,15 @@ set ExecutionPath {
   MuonEfficiency
   MuonIsolation
 
-  IsoTrack
 
   MissingET
 
   GenJetFinder
   FastJetFinder
   CAJetFinder
+
+  IsoTrackMerger
+  IsoTrack
 
   UniqueObjectFinderGJ
   UniqueObjectFinderEJ
@@ -445,6 +447,18 @@ module TrackPileUpSubtractor TrackPVSubtractor {
   set ZVertexResolution 0.0005
 }
 
+##############
+# Track merger
+##############
+
+module Merger IsoTrackMerger {
+# add InputArray InputArray
+  add InputArray ChargedHadronMomentumSmearing/chargedHadrons
+  add InputArray ElectronEnergySmearing/electrons
+  add InputArray MuonMomentumSmearing/muons
+  set OutputArray tracks
+}
+
 
 
 ################
@@ -454,10 +468,12 @@ module IsoTrack IsoTrack {
   ## Candidate of isotrack
   #set CandidateInputArray TrackPVSubtractor/eflowTracks
   #set IsolationInputArray TrackPVSubtractor/eflowTracks
-  set CandidateInputArray TrackMerger/tracks 
   ## Isolation using all the tracks
-  set IsolationInputArray TrackMerger/tracks 
+  set CandidateInputArray IsoTrackMerger/tracks 
+  set IsolationInputArray IsoTrackMerger/tracks 
 
+  #add CandidateInputArray Calorimeter/eflowTracks 
+  #add IsolationInputArray Calorimeter/eflowTracks
 
   set OutputArray IsoTrack
 
@@ -472,10 +488,13 @@ module IsoTrack IsoTrack {
   # From primary vertex, not in the 0Pu case
   #set ZVertexResolution 0.0001
 
-  set PTRatioMax 0.05
+  set PTRatioMax 1.0
+  #set PTRatioMax 0.05
 
-  set IsoTrackPTMin 15
-  set IsoTrackEtaMax 2.4
+  set IsoTrackPTMin 2
+  #set IsoTrackPTMin 15
+  set IsoTrackEtaMax 5
+  #set IsoTrackEtaMax 2.4
 }
 
 
@@ -701,11 +720,11 @@ module UniqueObjectFinder UniqueObjectFinderMJ {
 
 module TreeWriter TreeWriter {
 # add Branch InputArray BranchName BranchClass
-#  add Branch Delphes/allParticles Particle GenParticle
-  add Branch StatusPid/filteredParticles Particle GenParticle
-#  add Branch TrackMerger/tracks Track Track
+  add Branch Delphes/allParticles Particle GenParticle
+  #add Branch StatusPid/filteredParticles Particle GenParticle
+  add Branch TrackMerger/tracks Track Track
 #  add Branch Calorimeter/towers Tower Tower
-#  add Branch ConstituentFilter/eflowTracks EFlowTrack Track
+  add Branch ConstituentFilter/eflowTracks EFlowTrack Track
 #  add Branch ConstituentFilter/eflowTowers EFlowTower Tower
 #  add Branch ConstituentFilter/muons EFlowMuon Muon
   add Branch GenJetFinder/jets GenJet Jet
@@ -718,5 +737,3 @@ module TreeWriter TreeWriter {
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
 }
-
-
