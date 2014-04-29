@@ -797,7 +797,7 @@ module FastJetFinder GenJetFinder {
 
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
-  set ParameterR 0.5
+  set ParameterR 0.4
 
   set JetPTMin 5.0
 
@@ -816,7 +816,7 @@ module FastJetFinder GenJetFinderNoNu {
 
   # algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
-  set ParameterR 0.5
+  set ParameterR 0.4
   
   set JetPTMin 5.0
 
@@ -838,7 +838,7 @@ module FastJetFinder FastJetFinder {
 
   # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
-  set ParameterR 0.5
+  set ParameterR 0.4
 
   set JetPTMin 5.0
 }
@@ -854,7 +854,7 @@ module FastJetFinder FastJetFinderNoPU {
 
   # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
   set JetAlgorithm 6
-  set ParameterR 0.5
+  set ParameterR 0.4
 
   set JetPTMin 5.0
 }
@@ -1088,7 +1088,7 @@ module BTagging BTagging {
   set JetInputArray JetPileUpSubtractor/jets
 
   set BitNumber 0
-  set DeltaR 0.5
+  set DeltaR 0.4
   set PartonPTMin 1.0
   set PartonEtaMax 4.0
 
@@ -1119,7 +1119,7 @@ module BTagging BTaggingLoose {
   set JetInputArray JetPileUpSubtractor/jets
 
   set BitNumber 1
-  set DeltaR 0.5
+  set DeltaR 0.4
   set PartonPTMin 1.0
   set PartonEtaMax 4.0
 
@@ -1153,7 +1153,7 @@ module TauTagging TauTagging {
 #  set JetInputArray FastJetFinder/jets
   set JetInputArray JetPileUpSubtractor/jets
 
-  set DeltaR 0.5
+  set DeltaR 0.4
 
   set TauPTMin 1.0
 
@@ -1208,7 +1208,7 @@ module PileUpJetID PileUpJetID {
 
   set TrackInputArray Calorimeter/eflowTracks
   set NeutralInputArray Calorimeter/eflowTowers
-  set ParameterR 0.5
+  set ParameterR 0.4
 
   set JetPTMin 5.0
 }
