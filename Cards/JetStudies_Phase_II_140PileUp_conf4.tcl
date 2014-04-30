@@ -221,23 +221,6 @@ module ParticlePropagator ParticlePropagator {
   set Bz 3.8
 }
 
-module ParticlePropagator ParticlePropagator {
-  set InputArray PileUpMerger/stableParticles
-
-  set OutputArray stableParticles
-  set ChargedHadronOutputArray chargedHadrons
-  set ElectronOutputArray electrons
-  set MuonOutputArray muons
-
-  # radius of the magnetic field coverage, in m
-  set Radius 1.29
-  # half-length of the magnetic field coverage, in m
-  set HalfLength 3.00
-  
-  # magnetic field
-  set Bz 3.8
-}
-
 module ParticlePropagator ParticlePropagatorNoPU {
   set InputArray Delphes/stableParticles
 
@@ -1231,11 +1214,11 @@ module PileUpJetID PileUpJetID {
 
   set JetPTMin 5.0
 
-  set MeanSqDeltaRMinBarrel 0.13
+  set MeanSqDeltaRMaxBarrel 0.13
   set BetaMinBarrel 0.16
-  set MeanSqDeltaRMinEndcap 0.07
+  set MeanSqDeltaRMaxEndcap 0.07
   set BetaMinEndcap 0.06
-  set MeanSqDeltaRMinForward 0.1
+  set MeanSqDeltaRMaxForward 0.1
 
 }
 

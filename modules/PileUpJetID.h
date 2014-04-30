@@ -33,12 +33,13 @@ private:
   Double_t fJetPTMin;
   Double_t fParameterR;
 
-  Double_t fMeanSqDeltaRMinBarrel; // |eta| < 1.5
+  Double_t fMeanSqDeltaRMaxBarrel; // |eta| < 1.5
   Double_t fBetaMinBarrel; // |eta| < 2.5
-  Double_t fMeanSqDeltaRMinEndcap; // 1.5 < |eta| < 4.0
+  Double_t fMeanSqDeltaRMaxEndcap; // 1.5 < |eta| < 4.0
   Double_t fBetaMinEndcap; // 1.5 < |eta| < 4.0
-  Double_t fMeanSqDeltaRMinForward; // |eta| > 4.0
+  Double_t fMeanSqDeltaRMaxForward; // |eta| > 4.0
 
+  Double_t fJetPTMinForNeutrals;
 
   /*
 JAY

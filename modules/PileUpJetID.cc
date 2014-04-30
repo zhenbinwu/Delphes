@@ -56,19 +56,28 @@ void PileUpJetID::Init()
   fParameterR = GetDouble("ParameterR", 0.5);
   fUseConstituents = GetInt("UseConstituents", 0);
 
+
   /*
-  Double_t fMeanSqDeltaRMinBarrel; // |eta| < 1.5
+  Double_t fMeanSqDeltaRMaxBarrel; // |eta| < 1.5
   Double_t fBetaMinBarrel; // |eta| < 2.5
-  Double_t fMeanSqDeltaRMinEndcap; // 1.5 < |eta| < 4.0
+  Double_t fMeanSqDeltaRMaxEndcap; // 1.5 < |eta| < 4.0
   Double_t fBetaMinEndcap; // 1.5 < |eta| < 4.0
-  Double_t fMeanSqDeltaRMinForward; // |eta| > 4.0
+  Double_t fMeanSqDeltaRMaxForward; // |eta| > 4.0
   */
 
-  fMeanSqDeltaRMinBarrel = GetDouble("MeanSqDeltaRMinBarrel",0.1);
+  fMeanSqDeltaRMaxBarrel = GetDouble("MeanSqDeltaRMaxBarrel",0.1);
   fBetaMinBarrel = GetDouble("BetaMinBarrel",0.1);
-  fMeanSqDeltaRMinEndcap = GetDouble("MeanSqDeltaRMinEndcap",0.1);
+  fMeanSqDeltaRMaxEndcap = GetDouble("MeanSqDeltaRMaxEndcap",0.1);
   fBetaMinEndcap = GetDouble("BetaMinEndcap",0.1);
-  fMeanSqDeltaRMinForward = GetDouble("MeanSqDeltaRMinForward",0.1);
+  fMeanSqDeltaRMaxForward = GetDouble("MeanSqDeltaRMaxForward",0.1);
+  fJetPTMinForNeutrals = GetDouble("JetPTMinForNeutrals", 20.0);
+
+
+  cout << "  set MeanSqDeltaRMaxBarrel " << fMeanSqDeltaRMaxBarrel << endl;
+  cout << "  set BetaMinBarrel " << fBetaMinBarrel << endl;
+  cout << "  set MeanSqDeltaRMaxEndcap " << fMeanSqDeltaRMaxEndcap << endl;
+  cout << "  set BetaMinEndcap " << fBetaMinEndcap << endl;
+  cout << "  set MeanSqDeltaRMaxForward " << fMeanSqDeltaRMaxForward << endl;
 
 
 
@@ -284,21 +293,26 @@ void PileUpJetID::Process()
 
     // New stuff
     /*
-    fMeanSqDeltaRMinBarrel = GetDouble("MeanSqDeltaRMinBarrel",0.1);
+    fMeanSqDeltaRMaxBarrel = GetDouble("MeanSqDeltaRMaxBarrel",0.1);
     fBetaMinBarrel = GetDouble("BetaMinBarrel",0.1);
-    fMeanSqDeltaRMinEndcap = GetDouble("MeanSqDeltaRMinEndcap",0.1);
+    fMeanSqDeltaRMaxEndcap = GetDouble("MeanSqDeltaRMaxEndcap",0.1);
     fBetaMinEndcap = GetDouble("BetaMinEndcap",0.1);
-    fMeanSqDeltaRMinForward = GetDouble("MeanSqDeltaRMinForward",0.1);
+    fMeanSqDeltaRMaxForward = GetDouble("MeanSqDeltaRMaxForward",0.1);
     */
 
     bool passId = false;
-    if (fabs(candidate->Momentum.Eta())<1.5) {
-      passId = ((candidate->Beta > fBetaMinBarrel) && (candidate->MeanSqDeltaR > fMeanSqDeltaRMinBarrel));
-    } else if (fabs(candidate->Momentum.Eta())<4.0) {
-      passId = ((candidate->Beta > fBetaMinEndcap) && (candidate->MeanSqDeltaR > fMeanSqDeltaRMinEndcap));
-    } else {
-      passId = (candidate->MeanSqDeltaR > fMeanSqDeltaRMinForward);
+    if (candidate->Momentum.Pt() > fJetPTMinForNeutrals) {
+      if (fabs(candidate->Momentum.Eta())<1.5) {
+	passId = ((candidate->Beta > fBetaMinBarrel) && (candidate->MeanSqDeltaR < fMeanSqDeltaRMaxBarrel));
+      } else if (fabs(candidate->Momentum.Eta())<4.0) {
+	passId = ((candidate->Beta > fBetaMinEndcap) && (candidate->MeanSqDeltaR < fMeanSqDeltaRMaxEndcap));
+      } else {
+	passId = (candidate->MeanSqDeltaR < fMeanSqDeltaRMaxForward);
+      }
     }
+
+    cout << " Pt Eta MeanSqDeltaR Beta PassId " << candidate->Momentum.Pt() 
+	 << " " << candidate->Momentum.Eta() << " " << candidate->MeanSqDeltaR << " " << candidate->Beta << " " << passId << endl;
 
     if (passId) {
       if (fUseConstituents) {
