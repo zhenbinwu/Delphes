@@ -41,9 +41,14 @@ void GeneralExample(const char *inputFile)
   TClonesArray *branchBeamSpotParticle = treeReader->UseBranch("BeamSpotParticle");
   TClonesArray *branchGenParticleWithPU = treeReader->UseBranch("ParticleWithPU");
 
-  bool verbose = true;
-  bool listJetTowers = false;
+  TClonesArray *branchMissingET = treeReader->UseBranch("MissingET");
+  TClonesArray *branchGenMissingET = treeReader->UseBranch("GenMissingET");
+  TClonesArray *branchPileUpJetIDMissingET = treeReader->UseBranch("PileUpJetIDMissingET");
 
+
+  bool verbose = false;
+  bool listJetTowers = false;
+  bool listMET = true;
 
   // Loop over all events
   for(Int_t entry = 0; entry < numberOfEntries; ++entry)
@@ -51,14 +56,30 @@ void GeneralExample(const char *inputFile)
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
   
-    if (verbose||entry%5000==0) cout << "Event " << entry << " / " << numberOfEntries << endl;
+    if (listMET||verbose||entry%5000==0) cout << "Event " << entry << " / " << numberOfEntries << endl;
     
+    for (int i = 0 ;  i < branchMissingET->GetEntries() ; i++) {
+      MissingET *met = (MissingET*) branchMissingET->At(i);
+      if (verbose || listMET) cout << "MissingET: " << met->MET << endl;
+    }
+
+    for (int i = 0 ;  i < branchPileUpJetIDMissingET->GetEntries() ; i++) {
+      MissingET *met = (MissingET*) branchPileUpJetIDMissingET->At(i);
+      if (verbose || listMET) cout << "MissingET using PileUpJetID: " << met->MET << endl;
+    }
+
+    for (int i = 0 ;  i < branchGenMissingET->GetEntries() ; i++) {
+      MissingET *met = (MissingET*) branchGenMissingET->At(i);
+      if (verbose || listMET) cout << "Gen MissingET: " << met->MET << endl;
+    }
+
+
     for (int i = 0 ; i < branchRho->GetEntries() ; i++) {
       Rho *rho = (Rho*) branchRho->At(i);
       if (verbose) cout << "  Rho (" << rho->Edges[0] << "-" << rho->Edges[1] << "): " << rho->Rho << endl;
     }
 
-    cout << "before scalarHT" << endl;
+    //    cout << "before scalarHT" << endl;
     // I have cheated and recorded the true number of pileup vertices in a "ScalarHT" object!
     ScalarHT *NPU = (ScalarHT*) branchNPU->At(0);
     int nPUvertices_true = (int)NPU->HT;

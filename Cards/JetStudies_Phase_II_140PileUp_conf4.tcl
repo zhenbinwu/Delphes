@@ -43,6 +43,7 @@ set ExecutionPath {
 
   NeutrinoFilter
   GenJetFinderNoNu
+  GenMissingET
 
   EFlowChargedMerger
   RunPUPPI
@@ -73,11 +74,22 @@ set ExecutionPath {
 
   PileUpJetID
 
+  PileUpJetIDMissingET
+
   ConstituentFilter  
   TreeWriter
 }
 
 #PUPPI
+
+module Merger PileUpJetIDMissingET {
+  add InputArray TrackPileUpSubtractor/eflowTracks
+  add InputArray MuonMomentumSmearing/muons
+  add InputArray PileUpJetID/eflowTowers
+  set MomentumOutputArray momentum
+}  
+
+    
 
 module Merger EFlowChargedMerger {
   add InputArray TrackPileUpSubtractor/eflowTracks
@@ -1065,6 +1077,12 @@ module Merger MissingET {
   set MomentumOutputArray momentum
 }
 
+module Merger GenMissingET {
+#  add InputArray Delphes/stableParticles
+  add InputArray NeutrinoFilter/stableParticles
+  set MomentumOutputArray momentum
+}
+
 ##################
 # Scalar HT merger
 ##################
@@ -1201,6 +1219,7 @@ module UniqueObjectFinder UniqueObjectFinderMJ {
 module PileUpJetID PileUpJetID {
   set JetInputArray JetPileUpSubtractor/jets
   set OutputArray jets
+  set NeutralsInPassingJets eflowTowers
 
   # Using constituents does not make sense with Charged hadron subtraction                                                                                                           
   # In 0 mode, dR cut used instead                                                                                                                                                   
@@ -1211,6 +1230,13 @@ module PileUpJetID PileUpJetID {
   set ParameterR 0.4
 
   set JetPTMin 5.0
+
+  set MeanSqDeltaRMinBarrel 0.13
+  set BetaMinBarrel 0.16
+  set MeanSqDeltaRMinEndcap 0.07
+  set BetaMinEndcap 0.06
+  set MeanSqDeltaRMinForward 0.1
+
 }
 
 
@@ -1232,6 +1258,10 @@ module TreeWriter TreeWriter {
   add Branch UniqueObjectFinderEJ/electrons Electron Electron
   add Branch UniqueObjectFinderGJ/photons Photon Photon
   add Branch UniqueObjectFinderMJ/muons Muon Muon
+
+  add Branch PileUpJetIDMissingET/momentum PileUpJetIDMissingET MissingET
+  add Branch GenMissingET/momentum GenMissingET MissingET
+
 
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT

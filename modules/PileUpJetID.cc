@@ -51,9 +51,26 @@ PileUpJetID::~PileUpJetID()
 
 void PileUpJetID::Init()
 {
+
   fJetPTMin = GetDouble("JetPTMin", 20.0);
   fParameterR = GetDouble("ParameterR", 0.5);
   fUseConstituents = GetInt("UseConstituents", 0);
+
+  /*
+  Double_t fMeanSqDeltaRMinBarrel; // |eta| < 1.5
+  Double_t fBetaMinBarrel; // |eta| < 2.5
+  Double_t fMeanSqDeltaRMinEndcap; // 1.5 < |eta| < 4.0
+  Double_t fBetaMinEndcap; // 1.5 < |eta| < 4.0
+  Double_t fMeanSqDeltaRMinForward; // |eta| > 4.0
+  */
+
+  fMeanSqDeltaRMinBarrel = GetDouble("MeanSqDeltaRMinBarrel",0.1);
+  fBetaMinBarrel = GetDouble("BetaMinBarrel",0.1);
+  fMeanSqDeltaRMinEndcap = GetDouble("MeanSqDeltaRMinEndcap",0.1);
+  fBetaMinEndcap = GetDouble("BetaMinEndcap",0.1);
+  fMeanSqDeltaRMinForward = GetDouble("MeanSqDeltaRMinForward",0.1);
+
+
 
   fAverageEachTower = false; // for timing
 
@@ -77,6 +94,9 @@ void PileUpJetID::Init()
   // create output array(s)
 
   fOutputArray = ExportArray(GetString("OutputArray", "jets"));
+
+  fNeutralsInPassingJets = ExportArray(GetString("NeutralsInPassingJets","eflowtowers"));
+
 
   //  cout << " end of INIT " << endl;
 
@@ -261,6 +281,44 @@ void PileUpJetID::Process()
     }
 
     fOutputArray->Add(candidate);
+
+    // New stuff
+    /*
+    fMeanSqDeltaRMinBarrel = GetDouble("MeanSqDeltaRMinBarrel",0.1);
+    fBetaMinBarrel = GetDouble("BetaMinBarrel",0.1);
+    fMeanSqDeltaRMinEndcap = GetDouble("MeanSqDeltaRMinEndcap",0.1);
+    fBetaMinEndcap = GetDouble("BetaMinEndcap",0.1);
+    fMeanSqDeltaRMinForward = GetDouble("MeanSqDeltaRMinForward",0.1);
+    */
+
+    bool passId = false;
+    if (fabs(candidate->Momentum.Eta())<1.5) {
+      passId = ((candidate->Beta > fBetaMinBarrel) && (candidate->MeanSqDeltaR > fMeanSqDeltaRMinBarrel));
+    } else if (fabs(candidate->Momentum.Eta())<4.0) {
+      passId = ((candidate->Beta > fBetaMinEndcap) && (candidate->MeanSqDeltaR > fMeanSqDeltaRMinEndcap));
+    } else {
+      passId = (candidate->MeanSqDeltaR > fMeanSqDeltaRMinForward);
+    }
+
+    if (passId) {
+      if (fUseConstituents) {
+	TIter itConstituents(candidate->GetCandidates());
+	while((constituent = static_cast<Candidate*>(itConstituents.Next()))) {
+	  if (constituent->Charge == 0) {
+	    fNeutralsInPassingJets->Add(constituent);
+	  }
+	}
+      } else { // use DeltaR
+	fItNeutralInputArray->Reset();
+	while ((constituent = static_cast<Candidate*>(fItNeutralInputArray->Next()))) {
+	  if (constituent->Momentum.DeltaR(candidate->Momentum) < fParameterR) {
+	    fNeutralsInPassingJets->Add(constituent);
+	  }
+	}
+      }
+    }
+
+
   }
 }
 
