@@ -250,7 +250,7 @@ double var_within_R(int iId, const vector<fastjet::PseudoJet> & particles, const
     if(pDPhi > 2.*3.14159265-pDPhi) pDPhi =  2.*3.14159265-pDPhi;
     double pDR = sqrt(pDEta*pDEta+pDPhi*pDPhi);
     if(pDR  < 0.001) continue;
-    if(pDR  <  0.05) pDR = 0.05;
+    if(pDR  <  0.01) pDR = 0.01;
     if(pDR == 0) continue;
     if(iId == 0) var += pDR;
     if(iId == 1) var += near_particles[i].pt();
@@ -261,8 +261,9 @@ double var_within_R(int iId, const vector<fastjet::PseudoJet> & particles, const
     if(iId == 6) var += log(near_particles[i].pt()/pDR);
     if(iId == 7) var += log(near_particles[i].pt()/pDR);
     if(iId == 8) var += log(near_particles[i].pt()/pDR)*log(near_particles[i].pt()/pDR);
-    if(iId == 9) var += near_particles[i].pt()/pDR;
+    if(iId == 9) var += (near_particles[i].pt()/pDR)*(near_particles[i].pt()/pDR);
     if(iId == 10) var += near_particles[i].pt();
+    if(iId == 11) var += (1./pDR)*(1./pDR);
   }
   return var;
 }

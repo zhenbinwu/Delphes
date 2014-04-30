@@ -12,7 +12,7 @@ using namespace std;
 class puppiCleanContainer{
 public:
     // default ctor
-    puppiCleanContainer(std::vector<RecoObj> inParticles,double iTracker=2.5, bool iExperiment=false,bool iTuned=true);
+  puppiCleanContainer(std::vector<RecoObj> inParticles,double iTracker=2.5, bool iExperiment=false,bool iTuned=true);
     ~puppiCleanContainer(); 
     std::vector<fastjet::PseudoJet> genParticles(){ return _genParticles; }
     std::vector<fastjet::PseudoJet> pfParticles(){ return _pfParticles; }    
@@ -32,7 +32,10 @@ protected:
     double  goodVar  (fastjet::PseudoJet &iPart,std::vector<fastjet::PseudoJet> &iParts, int iOpt);    
     void    getRMSAvg(int iOpt,std::vector<fastjet::PseudoJet> &iConstits,std::vector<fastjet::PseudoJet> &iParticles,double iQuant,double iPtRMS);
     double  compute  (int iOpt,double iVal,double iMed,double iRMS,double iChi2Exp);
+    double  compute2 (int iOpt,double iVal,double iMed,double iRMS,double iChi2Exp,double iVal1,double iMed1,double iRMS1);
+    double  compute3 (int iOpt,double iVal,double iMed,double iRMS,double iChi2Exp,double iVal1,double iMed1,double iRMS1,double iVal2,double iMed2,double iRMS2);    
     double  getChi2FromdZ(double iDZ);
+    int     getEtaId(float iEta);
     std::vector<RecoObj> _recoParticles;
     std::vector<fastjet::PseudoJet> _pfParticles;
     std::vector<fastjet::PseudoJet> _pfchsParticles;    
@@ -40,8 +43,9 @@ protected:
     std::vector<fastjet::PseudoJet> _chargedPV;
     std::vector<fastjet::PseudoJet> _chargedNoPV;
     std::vector<double> _vals;
-    double fMed;
-    double fRMS;
+    int    fNEta;
+    double* fMed;
+    double* fRMS;
     double fMedHEta;
     double fRMSHEta;
     double fNeutralMinE;
