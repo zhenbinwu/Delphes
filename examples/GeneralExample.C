@@ -27,6 +27,7 @@ void GeneralExample(const char *inputFile)
   TClonesArray *branchJet = treeReader->UseBranch("Jet");
   TClonesArray *branchPuppiJet = treeReader->UseBranch("PuppiJet");
   TClonesArray *branchRho = treeReader->UseBranch("Rho");
+  TClonesArray *branchGlobalRho = treeReader->UseBranch("GlobalRho");
   TClonesArray *branchNPU = treeReader->UseBranch("NPU");
   
   TClonesArray *branchElectron = treeReader->UseBranch("Electron");
@@ -49,6 +50,7 @@ void GeneralExample(const char *inputFile)
   bool verbose = false;
   bool listJetTowers = false;
   bool listMET = true;
+  bool listRho = true;
 
   // Loop over all events
   for(Int_t entry = 0; entry < numberOfEntries; ++entry)
@@ -76,8 +78,14 @@ void GeneralExample(const char *inputFile)
 
     for (int i = 0 ; i < branchRho->GetEntries() ; i++) {
       Rho *rho = (Rho*) branchRho->At(i);
-      if (verbose) cout << "  Rho (" << rho->Edges[0] << "-" << rho->Edges[1] << "): " << rho->Rho << endl;
+      if (verbose || listRho) cout << "  Rho (" << rho->Edges[0] << "-" << rho->Edges[1] << "): " << rho->Rho << endl;
     }
+
+    for (int i = 0 ; i < branchGlobalRho->GetEntries() ; i++) {
+      Rho *rho = (Rho*) branchGlobalRho->At(i);
+      if (verbose || listRho) cout << "  GlobalRho (" << rho->Edges[0] << "-" << rho->Edges[1] << "): " << rho->Rho << endl;
+    }
+
 
     //    cout << "before scalarHT" << endl;
     // I have cheated and recorded the true number of pileup vertices in a "ScalarHT" object!

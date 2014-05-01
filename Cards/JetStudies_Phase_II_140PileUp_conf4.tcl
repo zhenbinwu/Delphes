@@ -36,6 +36,7 @@ set ExecutionPath {
   TrackPileUpSubtractor
   EFlowMerger
 
+  GlobalRho
   Rho
   FastJetFinder
   GenJetFinder
@@ -781,6 +782,28 @@ module FastJetFinder Rho {
   set JetPTMin 0.0
 }
 
+module FastJetFinder GlobalRho {
+#  set InputArray Calorimeter/towers
+  set InputArray EFlowMerger/eflow
+
+  set ComputeRho true
+  set RhoOutputArray rho
+
+  # area algorithm: 0 Do not compute area, 1 Active area explicit ghosts, 2 One ghost passive area, 3 Passive area, 4 Voronoi, 5 Active area
+  set AreaAlgorithm 5
+  
+  # jet algorithm: 1 CDFJetClu, 2 MidPoint, 3 SIScone, 4 kt, 5 Cambridge/Aachen, 6 antikt
+  set JetAlgorithm 4
+  set ParameterR 0.4
+  set GhostEtaMax 5.0
+  set RhoEtaMax 5.0
+  
+  add RhoEtaRange 0.0 5.0
+
+  set JetPTMin 0.0
+}
+
+
 #####################
 # MC truth jet finder
 #####################
@@ -1229,7 +1252,7 @@ module PileUpJetID PileUpJetID {
 ##################
 
 module TreeWriter TreeWriter {
-#  add Branch StatusPid/filteredParticles Particle GenParticle
+  add Branch StatusPid/filteredParticles Particle GenParticle
   add Branch GenBeamSpotFilter/beamSpotParticles BeamSpotParticle GenParticle
 
   add Branch FastJetFinder/jets RawJet Jet
@@ -1249,18 +1272,19 @@ module TreeWriter TreeWriter {
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
   add Branch Rho/rho Rho Rho
+  add Branch GlobalRho/rho GlobalRho Rho
   add Branch PileUpMerger/NPU NPU ScalarHT
 
   set OffsetFromModifyBeamSpot 1
 
-  add Branch RunPUPPI/weightedparticles PuppiWeightedParticles GenParticle
-  add Branch Delphes/allParticles Particle GenParticle
-  add Branch Calorimeter/eflowTracks EFlowTrack Track
-  add Branch Calorimeter/eflowTowers EFlowTower Tower
-  add Branch MuonMomentumSmearing/muons EFlowMuon Muon
-  add Branch PuppiJetFinder/jets PuppiJet Jet
-  add Branch PuppiJetPileUpSubtractor/jets SubtractedPuppiJet Jet
-  add Branch PuppiRho/rho PuppiRho Rho
+#  add Branch RunPUPPI/weightedparticles PuppiWeightedParticles GenParticle
+#  add Branch Delphes/allParticles Particle GenParticle
+#  add Branch Calorimeter/eflowTracks EFlowTrack Track
+#  add Branch Calorimeter/eflowTowers EFlowTower Tower
+#  add Branch MuonMomentumSmearing/muons EFlowMuon Muon
+#  add Branch PuppiJetFinder/jets PuppiJet Jet
+#  add Branch PuppiJetPileUpSubtractor/jets SubtractedPuppiJet Jet
+#  add Branch PuppiRho/rho PuppiRho Rho
 }
 
 # # add Branch InputArray BranchName BranchClass

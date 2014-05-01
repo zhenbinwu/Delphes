@@ -301,7 +301,7 @@ void PileUpJetID::Process()
     */
 
     bool passId = false;
-    if (candidate->Momentum.Pt() > fJetPTMinForNeutrals) {
+    if (candidate->Momentum.Pt() > fJetPTMinForNeutrals && candidate->MeanSqDeltaR > -0.1) {
       if (fabs(candidate->Momentum.Eta())<1.5) {
 	passId = ((candidate->Beta > fBetaMinBarrel) && (candidate->MeanSqDeltaR < fMeanSqDeltaRMaxBarrel));
       } else if (fabs(candidate->Momentum.Eta())<4.0) {
@@ -311,8 +311,8 @@ void PileUpJetID::Process()
       }
     }
 
-    cout << " Pt Eta MeanSqDeltaR Beta PassId " << candidate->Momentum.Pt() 
-	 << " " << candidate->Momentum.Eta() << " " << candidate->MeanSqDeltaR << " " << candidate->Beta << " " << passId << endl;
+    //    cout << " Pt Eta MeanSqDeltaR Beta PassId " << candidate->Momentum.Pt() 
+	// << " " << candidate->Momentum.Eta() << " " << candidate->MeanSqDeltaR << " " << candidate->Beta << " " << passId << endl;
 
     if (passId) {
       if (fUseConstituents) {
