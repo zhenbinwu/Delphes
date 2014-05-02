@@ -10,7 +10,7 @@ N.B. you must touch GeneralExample.cpp in order to convince Make that there is a
 
 //------------------------------------------------------------------------------
 
-void GeneralExample(const char *inputFile)
+void GeneralExample(const char *inputFile, const char *outputFile)
 {
   //  gSystem->Load("libDelphes");
 
