@@ -63,7 +63,7 @@ void GeneralExample(const char *inputFile, const char *outputFile)
   float genmet, met, puppimet, pujidmet;
 
   if (treeMET) {
-    f = new TFile("out.root","RECREATE");
+    f = new TFile(outputFile,"RECREATE");
     t = new TTree("t","t");
     t->Branch("genmet",&genmet,"genmet/F");
     t->Branch("met",&met,"met/F");

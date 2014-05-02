@@ -51,12 +51,13 @@ int main(int argc, char *argv[])
   TApplication app(appName, &appargc, appargv);
 
   TString inputFile(argv[1]);
+  TString outputFile(argv[2]);
 
 //------------------------------------------------------------------------------
 
 // Here you call your macro's main function 
 
-  GeneralExample(inputFile);
+  GeneralExample(inputFile,outputFile);
 
 //------------------------------------------------------------------------------
 
