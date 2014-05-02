@@ -53,6 +53,24 @@ void GeneralExample(const char *inputFile, const char *outputFile)
   bool listMET = true;
   bool listRho = false;
 
+  bool treeMET = true;
+
+  TFile *f;
+  TTree *t;
+    //  TH1F *hdmet, hdpujidmet, hdpuppimet;
+    //  TH1F *hfdmet, hfdpujidmet, hfdpuppimet;
+    //  TH2F *h2met, h2pujidmet, h2puppimet;
+  float genmet, met, puppimet, pujidmet;
+
+  if (treeMET) {
+    f = new TFile("out.root","RECREATE");
+    t = new TTree("t","t");
+    t->Branch("genmet",&genmet,"genmet/F");
+    t->Branch("met",&met,"met/F");
+    t->Branch("pujidmet",&pujidmet,"pujidmet/F");
+    t->Branch("puppimet",&puppimet,"puppimet/F");
+  }
+
   // Loop over all events
   for(Int_t entry = 0; entry < numberOfEntries; ++entry)
   {
@@ -62,25 +80,30 @@ void GeneralExample(const char *inputFile, const char *outputFile)
     if (listMET||verbose||entry%5000==0) cout << "Event " << entry << " / " << numberOfEntries << endl;
     
     for (int i = 0 ;  i < branchGenMissingET->GetEntries() ; i++) {
-      MissingET *met = (MissingET*) branchGenMissingET->At(i);
-      if (verbose || listMET) cout << "Gen MissingET: " << met->MET << endl;
+      MissingET *m = (MissingET*) branchGenMissingET->At(i);
+      if (verbose || listMET) cout << "Gen MissingET: " << m->MET << endl;
+      genmet = m->MET;
     }
 
     for (int i = 0 ;  i < branchMissingET->GetEntries() ; i++) {
-      MissingET *met = (MissingET*) branchMissingET->At(i);
-      if (verbose || listMET) cout << "MissingET: " << met->MET << endl;
+      MissingET *m = (MissingET*) branchMissingET->At(i);
+      if (verbose || listMET) cout << "MissingET: " << m->MET << endl;
+      met = m->MET;
     }
 
     for (int i = 0 ;  i < branchPileUpJetIDMissingET->GetEntries() ; i++) {
-      MissingET *met = (MissingET*) branchPileUpJetIDMissingET->At(i);
-      if (verbose || listMET) cout << "MissingET using PileUpJetID: " << met->MET << endl;
+      MissingET *m = (MissingET*) branchPileUpJetIDMissingET->At(i);
+      if (verbose || listMET) cout << "MissingET using PileUpJetID: " << m->MET << endl;
+      pujidmet = m->MET;
     }
 
     for (int i = 0 ;  i < branchPuppiMissingET->GetEntries() ; i++) {
-      MissingET *met = (MissingET*) branchPuppiMissingET->At(i);
-      if (verbose || listMET) cout << "Puppi MissingET: " << met->MET << endl;
+      MissingET *m = (MissingET*) branchPuppiMissingET->At(i);
+      if (verbose || listMET) cout << "Puppi MissingET: " << m->MET << endl;
+      puppimet = m->MET;
     }
 
+    if (treeMET) t->Fill();
 
     for (int i = 0 ; i < branchRho->GetEntries() ; i++) {
       Rho *rho = (Rho*) branchRho->At(i);
@@ -190,5 +213,11 @@ void GeneralExample(const char *inputFile, const char *outputFile)
     } // verbose 
 
   } // event
+
+  if (treeMET) {
+    f->cd();
+    t->Write();
+    f->Close();
+  }
 
 }
