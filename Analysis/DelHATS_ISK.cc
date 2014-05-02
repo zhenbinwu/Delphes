@@ -19,6 +19,7 @@
 #include <iostream>  
 #include <string>
 #include <vector>
+#include <cassert>
 
 // Classes from ROOT
 #include "TH1.h"
@@ -141,28 +142,27 @@ int main ( int argc, char *argv[] )
   //TH1 *histJetEta2 = new TH1F("histJetEta2 ", "Jet Resolution with eta (2.5, 4)", 200, 4, 4);
   //TH1 *histJetEta3 = new TH1F("histJetEta3 ", "Jet Resolution with eta (4, 5)", 200, 4, 4);
 
+
+//----------------------------------------------------------------------------
+//  1st index: had, lep, 1lep, 2lep
+//  2nd index: original, +lepton veto, +tau veto, +isotrack veto
+//----------------------------------------------------------------------------
+  double EventCount[4][4];
+  for (int i = 0; i < 4; ++i)
+  {
+    for (int j = 0; j < 4; ++j)
+    {
+      EventCount[i][j] = 0;
+    }
+  }
 //----------------------------------------------------------------------------
 //   Loop over all events
 //----------------------------------------------------------------------------
-  int lept=0;
   for(Int_t entry = 0; entry < numberOfEntries; ++entry)
   {
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
   
-    // If event contains at least 1 jet
-    if(branchJet->GetEntries() > 0)
-    {
-      // Take first jet
-      Jet *jet = (Jet*) branchJet->At(0);
-      
-      // Plot jet transverse momentum
-      histJetPT->Fill(jet->PT);
-      
-      // Print jet transverse momentum
-      //std::cout << jet->PT << std::endl;
-    }
-
     //if (entry > 500 ) break;
     if (entry % 500 == 0)
       std::cout << "--------------------" << entry << std::endl;
@@ -175,11 +175,56 @@ int main ( int argc, char *argv[] )
     std::map<int, int> MatchIskm = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 13);
     std::map<int, int> MatchIskt = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 15);
 
-    if (MatchIske.size() + MatchIskm.size() +  MatchIskt.size()== 0) continue;
-    lept++;
-    //std::cout << " ele " << MatchIske.size() <<"  muon " << MatchIskm.size()  << " tau " << MatchIskt.size() << std::endl;
-    //
-    //
+
+
+//----------------------------------------------------------------------------
+//  Filling in the number of events after vetoes
+//----------------------------------------------------------------------------
+    int lepcount = MatchIske.size() + MatchIskm.size() + MatchIskt.size();
+
+    assert(lepcount < 3);
+    //if (lepcount >= 3)
+
+    // Original count
+    EventCount[lepcount][0]++;
+    if (lepcount > 0) EventCount[3][0]++;
+    
+    int vetocount[3] = {0, 0, 0};
+    // after lepton veto
+    if (branchElectron->GetEntries() + branchMuon->GetEntries() == 0 )
+      vetocount[0]=1;
+    
+    if (vetocount[0])
+    {
+      bool hastau = false;
+      for (int jit = 0; jit < branchJet->GetEntries(); ++jit)
+      {
+        Jet *jet = (Jet*) branchJet->At(jit);
+        if (jet->TauTag) 
+        {
+          hastau = true;
+          break;
+        }
+      }
+
+      if (hastau == false) vetocount[1] = 1;
+    }
+
+    if (vetocount[1])
+    {
+      if (branchIsoTrk->GetEntries() == 0)
+        vetocount[2] = 1;
+    }
+
+    // Fill in the matrix
+
+    for (int i = 0; i < 3; ++i)
+    {
+      EventCount[lepcount][i+1] += vetocount[i];
+      if (lepcount > 0) EventCount[3][i+1] += vetocount[i];
+    }
+
+
     std::vector<int> EIsk;
     std::vector<int> MIsk;
     std::vector<int> TIsk;
@@ -253,7 +298,6 @@ int main ( int argc, char *argv[] )
 
     //if (TIsk.size() != 0)
     //{
-    //std::cout<<"Run to \033[0;31m"<<__func__<<"\033[0m at \033[1;36m"<< __FILE__<<"\033[0m, line \033[0;34m"<< __LINE__<<"\033[0m"<< std::endl; 
       //for (int i = 0; i < branchParticle->GetEntries(); ++i)
       //{
         //GenParticle *p = (GenParticle*) branchParticle->At(i);
@@ -263,22 +307,23 @@ int main ( int argc, char *argv[] )
       //}
     //}
 
-    if ((branchElectron->GetEntries() + branchMuon->GetEntries()) == 0) 
-    {
-      lepveto++;
-      int NISK = 0;
-      for (int k = 0; k < branchIsoTrk->GetEntries(); ++k)
-      {
-        Muon *trk = (Muon*) branchIsoTrk->At(k);
-        if (trk->PT > 10) NISK++;
-      }
-      if (NISK == 0) isoveto++;
-    }
-
   } // End of looping events
 
-  std::cout <<"Total " <<  lept << "Lepton Veto " << lepveto << " with ISOTRK "  << isoveto<< std::endl;
+
+
+  std::cout << "[table border=\"1\"]" << std::endl;
+
+  std::cout << "[b][center]Cut[/center][/b]            | [b][center]Hadronic[/center][/b] | [b][center]1 lepton[/center][/b] | [b][center]2 lepton[/center][/b] | [b][center]leptonic[/center][/b] |- " << std::endl;
+
+  std::cout << "[b][center]Original[/center][/b]       | " << EventCount[0][0] << "       | " << EventCount[1][0] << "    | " << EventCount[2][0] << "    | " << EventCount[3][0] << "    |- "<< std::endl;
+  std::cout << "[b][center]+Lepton veto[/center][/b]   | " << EventCount[0][1] << "       | " << EventCount[1][1] << "    | " << EventCount[2][1] << "    | " << EventCount[3][1] << "    |- "<< std::endl;
+  std::cout << "[b][center]+Tau veto[/center][/b]      | " << EventCount[0][2] << "       | " << EventCount[1][2] << "    | " << EventCount[2][2] << "    | " << EventCount[3][2] << "    |- "<< std::endl;
+  std::cout << "[b][center]+Isotrack veto[/center][/b] | " << EventCount[0][3] << "       | " << EventCount[1][3] << "    | " << EventCount[2][3] << "    | " << EventCount[3][3] << "    |- "<< std::endl;
+
+  std::cout << "[/table]" << std::endl;
+
  
+  std::cout << " Total number of Events: " << numberOfEntries  << std::endl;
   histLepEffEta = (TH1*)histMatchGenLepEta->Clone("histLepEffEta");
   histLepEffEta->SetTitle("Lepton Efficiency");
   histLepEffEta->Divide(histGenLepEta);
@@ -378,8 +423,8 @@ std::map<int, int> MatchingLepton(TClonesArray *branchParticle, TClonesArray *br
   {
     GenParticle *p = (GenParticle*) branchParticle->At(i);
     //std::cout << "i " << i << " p " << p->PID << " status " << p->Status  << std::endl;
-    //if (p->Status != 1 ) //Only select stable particle
-      //continue;
+    if (p->Status != 3 ) //Only select stable particle
+      continue;
     if ( (p->M1 != -1 && fabs(((GenParticle*)branchParticle->At(p->M1))->PID) != 24) && 
         (p->M2 != -1 && fabs(((GenParticle*)branchParticle->At(p->M2))->PID) != 24 ))
         continue;  //Making sure the lepton from W decay 
