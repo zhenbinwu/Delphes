@@ -109,8 +109,8 @@ void puppiCleanContainer::getRMSAvg(int iOpt,std::vector<fastjet::PseudoJet> &iC
   for(unsigned int i0 = 0; i0 < iConstits.size(); i0++ ) { 
     double pVal = goodVar(iConstits[i0],iParticles,iOpt);
     _vals.push_back(pVal);
-    if(isnan(pVal) || isinf(pVal)) cout << "====> Crap " << pVal << " == " << iConstits[i0].pt() << " -- " << iConstits[i0].eta() << endl;
-    if(isnan(pVal) || isinf(pVal)) continue;
+    if(std::isnan(pVal) || std::isinf(pVal)) cout << "====> Crap " << pVal << " == " << iConstits[i0].pt() << " -- " << iConstits[i0].eta() << endl;
+    if(std::isnan(pVal) || std::isinf(pVal)) continue;
     lNCount[getEtaId(iConstits[i0].eta())]++;
     if(pVal == 0) continue;
     if(iConstits[i0].pt() < iPtRMS) continue;
@@ -225,7 +225,7 @@ std::vector<fastjet::PseudoJet> puppiCleanContainer::puppiEvent     (int iOpt,do
         if(_pfParticles[i0].user_index() == 3 ) pWeight = 0;
         
 	//Basic Cuts
-	if(isnan(pWeight)) continue;
+	if(std::isinf(pWeight)||std::isnan(pWeight)) continue;
 	if(pWeight*_pfParticles[i0].pt()  < 0.05) continue;  //==> Elminate the low pT stuff 
 	if(pWeight*_pfParticles[i0].pt()   < fNeutralMinE && _recoParticles[i0].pfType > 3 ) continue;  //threshold cut on the neutral E
         

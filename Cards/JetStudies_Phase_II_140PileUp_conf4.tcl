@@ -51,6 +51,7 @@ set ExecutionPath {
   PuppiJetFinder
   PuppiRho
   PuppiJetPileUpSubtractor
+  PuppiMissingET
 
   PhotonEfficiency
   PhotonIsolation
@@ -80,8 +81,6 @@ set ExecutionPath {
   ConstituentFilter  
   TreeWriter
 }
-
-#PUPPI
 
 module Merger PileUpJetIDMissingET {
   add InputArray TrackPileUpSubtractor/eflowTracks
@@ -1089,6 +1088,11 @@ module Merger GenMissingET {
   set MomentumOutputArray momentum
 }
 
+module Merger PuppiMissingET {
+  add InputArray RunPUPPI/weightedparticles
+  set MomentumOutputArray momentum
+}
+
 ##################
 # Scalar HT merger
 ##################
@@ -1267,6 +1271,7 @@ module TreeWriter TreeWriter {
 
   add Branch PileUpJetIDMissingET/momentum PileUpJetIDMissingET MissingET
   add Branch GenMissingET/momentum GenMissingET MissingET
+  add Branch PuppiMissingET/momentum PuppiMissingET MissingET
 
 
   add Branch MissingET/momentum MissingET MissingET

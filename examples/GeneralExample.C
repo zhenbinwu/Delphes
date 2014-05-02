@@ -45,12 +45,13 @@ void GeneralExample(const char *inputFile)
   TClonesArray *branchMissingET = treeReader->UseBranch("MissingET");
   TClonesArray *branchGenMissingET = treeReader->UseBranch("GenMissingET");
   TClonesArray *branchPileUpJetIDMissingET = treeReader->UseBranch("PileUpJetIDMissingET");
+  TClonesArray *branchPuppiMissingET = treeReader->UseBranch("PuppiMissingET");
 
 
   bool verbose = false;
   bool listJetTowers = false;
   bool listMET = true;
-  bool listRho = true;
+  bool listRho = false;
 
   // Loop over all events
   for(Int_t entry = 0; entry < numberOfEntries; ++entry)
@@ -60,6 +61,11 @@ void GeneralExample(const char *inputFile)
   
     if (listMET||verbose||entry%5000==0) cout << "Event " << entry << " / " << numberOfEntries << endl;
     
+    for (int i = 0 ;  i < branchGenMissingET->GetEntries() ; i++) {
+      MissingET *met = (MissingET*) branchGenMissingET->At(i);
+      if (verbose || listMET) cout << "Gen MissingET: " << met->MET << endl;
+    }
+
     for (int i = 0 ;  i < branchMissingET->GetEntries() ; i++) {
       MissingET *met = (MissingET*) branchMissingET->At(i);
       if (verbose || listMET) cout << "MissingET: " << met->MET << endl;
@@ -70,9 +76,9 @@ void GeneralExample(const char *inputFile)
       if (verbose || listMET) cout << "MissingET using PileUpJetID: " << met->MET << endl;
     }
 
-    for (int i = 0 ;  i < branchGenMissingET->GetEntries() ; i++) {
-      MissingET *met = (MissingET*) branchGenMissingET->At(i);
-      if (verbose || listMET) cout << "Gen MissingET: " << met->MET << endl;
+    for (int i = 0 ;  i < branchPuppiMissingET->GetEntries() ; i++) {
+      MissingET *met = (MissingET*) branchPuppiMissingET->At(i);
+      if (verbose || listMET) cout << "Puppi MissingET: " << met->MET << endl;
     }
 
 

@@ -300,6 +300,7 @@ void PileUpJetID::Process()
     fMeanSqDeltaRMaxForward = GetDouble("MeanSqDeltaRMaxForward",0.1);
     */
 
+    float fNeutralPTMin = 2.;
     bool passId = false;
     if (candidate->Momentum.Pt() > fJetPTMinForNeutrals && candidate->MeanSqDeltaR > -0.1) {
       if (fabs(candidate->Momentum.Eta())<1.5) {
@@ -311,22 +312,24 @@ void PileUpJetID::Process()
       }
     }
 
-    //    cout << " Pt Eta MeanSqDeltaR Beta PassId " << candidate->Momentum.Pt() 
-	// << " " << candidate->Momentum.Eta() << " " << candidate->MeanSqDeltaR << " " << candidate->Beta << " " << passId << endl;
+    cout << " Pt Eta MeanSqDeltaR Beta PassId " << candidate->Momentum.Pt() 
+	 << " " << candidate->Momentum.Eta() << " " << candidate->MeanSqDeltaR << " " << candidate->Beta << " " << passId << endl;
 
     if (passId) {
       if (fUseConstituents) {
 	TIter itConstituents(candidate->GetCandidates());
 	while((constituent = static_cast<Candidate*>(itConstituents.Next()))) {
-	  if (constituent->Charge == 0) {
+	  if (constituent->Charge == 0 && constituent->Momentum.Pt() > fNeutralPTMin) {
 	    fNeutralsInPassingJets->Add(constituent);
+	    cout << "    Constitutent added Pt Eta Charge " << constituent->Momentum.Pt() << " " << constituent->Momentum.Eta() << " " << constituent->Charge << endl;
 	  }
 	}
       } else { // use DeltaR
 	fItNeutralInputArray->Reset();
 	while ((constituent = static_cast<Candidate*>(fItNeutralInputArray->Next()))) {
-	  if (constituent->Momentum.DeltaR(candidate->Momentum) < fParameterR) {
+	  if (constituent->Momentum.DeltaR(candidate->Momentum) < fParameterR && constituent->Momentum.Pt() > fNeutralPTMin) {
 	    fNeutralsInPassingJets->Add(constituent);
+            cout << "    Constitutent added Pt Eta Charge " << constituent->Momentum.Pt() << " " << constituent->Momentum.Eta() << " " << constituent->Charge << endl;
 	  }
 	}
       }
