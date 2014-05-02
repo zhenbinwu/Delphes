@@ -39,6 +39,7 @@ private:
   Double_t fBetaMinEndcap; // 1.5 < |eta| < 4.0
   Double_t fMeanSqDeltaRMaxForward; // |eta| > 4.0
 
+  Double_t fNeutralPTMin;
   Double_t fJetPTMinForNeutrals;
 
   /*
