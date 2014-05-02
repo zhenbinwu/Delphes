@@ -106,7 +106,7 @@ void IsoTrack::Init()
 
   // import input array(s)
 
-  fIsoTrackInputArray = ImportArray(GetString("IsoTrackInputArray", "Delphes/partons"));
+  fIsoTrackInputArray = ImportArray(GetString("IsolationInputArray", "Delphes/partons"));
   fItIsoTrackInputArray = fIsoTrackInputArray->MakeIterator();
 
   fIsolationFilter = new ExRootFilter(fIsoTrackInputArray);
