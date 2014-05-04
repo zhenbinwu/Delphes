@@ -61,6 +61,9 @@ void GeneralExample(const char *inputFile, const char *outputFile)
     //  TH1F *hfdmet, hfdpujidmet, hfdpuppimet;
     //  TH2F *h2met, h2pujidmet, h2puppimet;
   float genmet, met, puppimet, pujidmet;
+  float genmetx, metx, puppimetx, pujidmetx;
+  float genmety, mety, puppimety, pujidmety;
+
 
   if (treeMET) {
     f = new TFile(outputFile,"RECREATE");
@@ -69,6 +72,15 @@ void GeneralExample(const char *inputFile, const char *outputFile)
     t->Branch("met",&met,"met/F");
     t->Branch("pujidmet",&pujidmet,"pujidmet/F");
     t->Branch("puppimet",&puppimet,"puppimet/F");
+    t->Branch("genmetx",&genmetx,"genmetx/F");
+    t->Branch("metx",&metx,"metx/F");
+    t->Branch("pujidmetx",&pujidmetx,"pujidmetx/F");
+    t->Branch("puppimetx",&puppimetx,"puppimetx/F");
+    t->Branch("genmety",&genmety,"genmety/F");
+    t->Branch("mety",&mety,"mety/F");
+    t->Branch("pujidmety",&pujidmety,"pujidmety/F");
+    t->Branch("puppimety",&puppimety,"puppimety/F");
+
   }
 
   // Loop over all events
@@ -83,24 +95,33 @@ void GeneralExample(const char *inputFile, const char *outputFile)
       MissingET *m = (MissingET*) branchGenMissingET->At(i);
       if (verbose || listMET) cout << "Gen MissingET: " << m->MET << endl;
       genmet = m->MET;
+      genmetx = m->MET*cos(m->Phi);
+      genmety = m->MET*sin(m->Phi);
     }
 
     for (int i = 0 ;  i < branchMissingET->GetEntries() ; i++) {
       MissingET *m = (MissingET*) branchMissingET->At(i);
       if (verbose || listMET) cout << "MissingET: " << m->MET << endl;
       met = m->MET;
+      metx = m->MET*cos(m->Phi);
+      mety = m->MET*sin(m->Phi);
+
     }
 
     for (int i = 0 ;  i < branchPileUpJetIDMissingET->GetEntries() ; i++) {
       MissingET *m = (MissingET*) branchPileUpJetIDMissingET->At(i);
       if (verbose || listMET) cout << "MissingET using PileUpJetID: " << m->MET << endl;
       pujidmet = m->MET;
+      pujidmetx = m->MET*cos(m->Phi);
+      pujidmety = m->MET*sin(m->Phi);
     }
 
     for (int i = 0 ;  i < branchPuppiMissingET->GetEntries() ; i++) {
       MissingET *m = (MissingET*) branchPuppiMissingET->At(i);
       if (verbose || listMET) cout << "Puppi MissingET: " << m->MET << endl;
       puppimet = m->MET;
+      puppimetx = m->MET*cos(m->Phi);
+      puppimety = m->MET*sin(m->Phi);
     }
 
     if (treeMET) t->Fill();

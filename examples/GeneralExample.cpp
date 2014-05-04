@@ -37,9 +37,9 @@ int main(int argc, char *argv[])
 {
   char *appName = "GeneralExample";
 
-  if(argc != 2)
+  if(argc != 3)
   {
-    cout << " Usage: " << appName << " input_file" << endl;
+    cout << " Usage: " << appName << " input_file output_file" << endl;
     cout << " input_file - input file in ROOT format ('Delphes' tree)," << endl;
     return 1;
   }

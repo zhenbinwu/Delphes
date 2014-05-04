@@ -1245,7 +1245,7 @@ module PileUpJetID PileUpJetID {
   set BetaMinBarrel 0.16
   set MeanSqDeltaRMaxEndcap 0.07
   set BetaMinEndcap 0.06
-  set MeanSqDeltaRMaxForward 0.1
+  set MeanSqDeltaRMaxForward 0.01
 
 }
 
