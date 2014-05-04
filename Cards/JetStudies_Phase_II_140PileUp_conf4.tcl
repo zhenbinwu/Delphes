@@ -1280,6 +1280,8 @@ module TreeWriter TreeWriter {
   add Branch GlobalRho/rho GlobalRho Rho
   add Branch PileUpMerger/NPU NPU ScalarHT
 
+  add Branch PuppiJetFinder/jets PuppiJet Jet
+
   set OffsetFromModifyBeamSpot 1
 
 #  add Branch RunPUPPI/weightedparticles PuppiWeightedParticles GenParticle
@@ -1287,7 +1289,6 @@ module TreeWriter TreeWriter {
 #  add Branch Calorimeter/eflowTracks EFlowTrack Track
 #  add Branch Calorimeter/eflowTowers EFlowTower Tower
 #  add Branch MuonMomentumSmearing/muons EFlowMuon Muon
-#  add Branch PuppiJetFinder/jets PuppiJet Jet
 #  add Branch PuppiJetPileUpSubtractor/jets SubtractedPuppiJet Jet
 #  add Branch PuppiRho/rho PuppiRho Rho
 }
