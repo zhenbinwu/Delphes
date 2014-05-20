@@ -8,7 +8,9 @@ LIBS = $(shell root-config --glibs)
 LIBS += -L../ -lDelphes
 
 
-PROGRAM       = DelHATS_ISK
+PROGRAM       = DelHATS_Gran
+#PROGRAM       = DelHATS_ISK
+#PROGRAM       = DelHATS_Tau
 OBJS          = $(PROGRAM).o
 
 ifneq (, $(findstring cmslpc, $(shell hostname)))

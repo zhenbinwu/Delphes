@@ -478,6 +478,7 @@ module IsoTrack IsoTrack {
   set OutputArray IsoTrack
 
   ### Cone 0.3
+  #set DeltaRMax 0.4
   set DeltaRMax 0.3
 
   ## PTmin of isolation 
@@ -488,13 +489,13 @@ module IsoTrack IsoTrack {
   # From primary vertex, not in the 0Pu case
   #set ZVertexResolution 0.0001
 
-  set PTRatioMax 1.0
-  #set PTRatioMax 0.05
+  #set PTRatioMax 1000
+  set PTRatioMax 0.05
 
-  set IsoTrackPTMin 2
-  #set IsoTrackPTMin 15
-  set IsoTrackEtaMax 5
-  #set IsoTrackEtaMax 2.4
+  #set IsoTrackPTMin 2
+  set IsoTrackPTMin 15
+  #set IsoTrackEtaMax 5
+  set IsoTrackEtaMax 2.4
 }
 
 

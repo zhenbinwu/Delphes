@@ -47,7 +47,11 @@ bool TauVeto(TClonesArray* branchJet);
 bool IsoTrackVeto(TClonesArray* branchIsoTrk);
 int FindTauDecays(int Wtau, TClonesArray *branchParticle );
 int EventCategory(TClonesArray* branchParticle);
+std::vector<int> GetFinalHad(std::vector<int> VGenHad, TClonesArray *branchParticle);
 
+
+std::map<int, int> MatchingMuon(TClonesArray *branchParticle, TClonesArray *branchMuon);
+std::map<int, int> MatchingElectron(TClonesArray *branchParticle, TClonesArray *branchElectron);
 // ===  FUNCTION  ============================================================
 //         Name:  main
 //  Description:  Wrap up of Example1.C
@@ -131,6 +135,11 @@ int main ( int argc, char *argv[] )
   TH1 *histLostElePT      = new TH1F("histLostElePT", "Lost Electron PT", 100, 0, 200);
   TH1 *histLostMuonEta      = new TH1F("histLostMuonEta ", "Lost Muon Eta", 120, -6, 6);
   TH1 *histLostMuonPT      = new TH1F("histLostMuonPT", "Lost Muon PT", 100, 0, 200);
+
+  TH1 *histLostEleISKEta      = new TH1F("histLostEleISKEta ", "Lost Electron Eta", 120, -6, 6);
+  TH1 *histLostEleISKPT      = new TH1F("histLostEleISKPT", "Lost Electron PT", 100, 0, 200);
+  TH1 *histLostMuonISKEta      = new TH1F("histLostMuonISKEta ", "Lost Muon Eta", 120, -6, 6);
+  TH1 *histLostMuonISKPT      = new TH1F("histLostMuonISKPT", "Lost Muon PT", 100, 0, 200);
 //----------------------------------------------------------------------------
 //  JEtMET execise
 //----------------------------------------------------------------------------
@@ -171,6 +180,8 @@ int main ( int argc, char *argv[] )
       EventCount[i][j] = 0;
     }
   }
+
+  int lepevent = 0;
 //----------------------------------------------------------------------------
 //   Loop over all events
 //----------------------------------------------------------------------------
@@ -191,11 +202,83 @@ int main ( int argc, char *argv[] )
     //----------------------------------------------------------------------------
     //  Lepton Efficiency Exercise
     //----------------------------------------------------------------------------
-    std::map<int, int> MatchIdxe = MatchingLepton<Electron>(branchParticle, branchElectron, 11);
-    std::map<int, int> MatchIdxm = MatchingLepton<Muon>(branchParticle, branchMuon, 13);
+    std::map<int, int> MatchIdxe = MatchingElectron(branchParticle, branchElectron);
+    std::map<int, int> MatchIdxm = MatchingMuon(branchParticle, branchMuon);
     std::map<int, int> MatchIske = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 11);
     std::map<int, int> MatchIskm = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 13);
     std::map<int, int> MatchIskt = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 15);
+
+
+    if (MatchIdxe.size() + MatchIdxm.size() != 0) lepevent++;
+
+    //----------------------------------------------------------------------------
+    //  Plot lost lepton
+    //----------------------------------------------------------------------------
+
+    for(std::map<int, int>::iterator it=MatchIdxe.begin();
+        it!=MatchIdxe.end(); it++)
+    {
+      assert(MatchIske.find(it->first) != MatchIske.end());
+
+      GenParticle *genall = (GenParticle*) branchParticle->At(it->first);
+      histGenEleEta->Fill(genall->Eta);
+      histGenElePt->Fill(genall->PT);
+
+      if (it->second == -1)
+      {
+        GenParticle *gen = (GenParticle*) branchParticle->At(it->first);
+        histLostEleEta->Fill(gen->Eta);
+        histLostElePT->Fill(gen->PT);
+
+        if (MatchIske[it->first] == -1)
+        {
+          histLostEleISKEta->Fill(gen->Eta);
+          histLostEleISKPT->Fill(gen->PT);
+        }
+      } else {
+        histMatchGenEleEta->Fill(genall->Eta);
+        histMatchGenElePt->Fill(genall->PT);
+      }
+
+    }
+
+
+    for(std::map<int, int>::iterator it=MatchIdxm.begin();
+        it!=MatchIdxm.end(); it++)
+    {
+      assert(MatchIskm.find(it->first) != MatchIskm.end());
+      //if (it->second == -1 && MatchIskm[it->first] == -1)
+      //
+      //
+      GenParticle *genall = (GenParticle*) branchParticle->At(it->first);
+      histGenMuonEta->Fill(genall->Eta);
+      histGenMuonPt->Fill(genall->PT);
+
+      if (it->second == -1 )
+      {
+        GenParticle *gen = (GenParticle*) branchParticle->At(it->first);
+        histLostMuonEta->Fill(gen->Eta);
+        histLostMuonPT->Fill(gen->PT);
+
+        if (MatchIskm[it->first] == -1)
+        {
+
+          histLostMuonISKEta->Fill(gen->Eta);
+          histLostMuonISKPT->Fill(gen->PT);
+        }
+      }else{
+        histMatchGenMuonEta->Fill(genall->Eta);
+        histMatchGenMuonPt->Fill(genall->PT);
+      }
+    }
+
+
+
+
+
+
+
+
 
 
 
@@ -203,13 +286,16 @@ int main ( int argc, char *argv[] )
     //  Filling in the number of events after vetoes
     //----------------------------------------------------------------------------
     int lepcount = MatchIske.size() + MatchIskm.size() + MatchIskt.size();
-    assert(lepcount < 3);
+    //assert(lepcount < 3);
 
     // Ignore dilepton events
     if (lepcount >1) continue;
 
+
+    //int category =1;
     int category = EventCategory( branchParticle);
-    std::cout << "category : " << category << std::endl;
+    //std::cout << "category : " << category << std::endl;
+    if (category == -1) continue;
     // Only consider single lepton events?
 
     // Original count
@@ -228,46 +314,11 @@ int main ( int argc, char *argv[] )
     EventCount[category][3]++;
 
 
-    //----------------------------------------------------------------------------
-    //  Plot lost lepton
-    //----------------------------------------------------------------------------
-
-    for(std::map<int, int>::iterator it=MatchIske.begin();
-        it!=MatchIske.end(); it++)
-    {
-      //assert(MatchIske.find(it->first) != MatchIske.end());
-      //if (it->second == -1 && MatchIske[it->first] == -1)
-      if (it->second == -1)
-      {
-        GenParticle *gen = (GenParticle*) branchParticle->At(it->first);
-        histLostEleEta->Fill(gen->Eta);
-        histLostElePT->Fill(gen->PT);
-      }
-    }
-
-
-    for(std::map<int, int>::iterator it=MatchIskm.begin();
-        it!=MatchIskm.end(); it++)
-    {
-      //assert(MatchIskm.find(it->first) != MatchIskm.end());
-      //if (it->second == -1 && MatchIskm[it->first] == -1)
-      if (it->second == -1 )
-      {
-        GenParticle *gen = (GenParticle*) branchParticle->At(it->first);
-        histLostMuonEta->Fill(gen->Eta);
-        histLostMuonPT->Fill(gen->PT);
-      }
-    }
-
-
-
-
-
-
 
   } // End of looping events
 
 
+  std::cout << " total lep vevent : " << lepevent << std::endl;
 
   std::cout << "[table border=\"1\"]" << std::endl;
 
@@ -351,6 +402,12 @@ int main ( int argc, char *argv[] )
   histLostElePT->Write();
   histLostMuonEta->Write();
   histLostMuonPT->Write();
+
+  histLostEleISKEta->Write();
+  histLostEleISKPT->Write();
+  histLostMuonISKEta->Write();
+  histLostMuonISKPT->Write();
+
   //histJetEta->Write();
   //histMET->Write();
   //histMET_X->Write();
@@ -406,15 +463,21 @@ std::map<int, int> MatchingLepton(TClonesArray *branchParticle, TClonesArray *br
   for (int i = 0; i < branchLep->GetEntries(); ++i)
   {
     T *lep = (T*)branchLep->At(i);
-    for(std::map<int, int>::iterator it=MatchIdx.begin();
-      it!=MatchIdx.end(); it++)
+
+    if (std::fabs(lep->Eta) < 2.5 && lep->PT > 10
+        && lep->IsolationVar < 0.1) 
     {
-      GenParticle *p = (GenParticle*) branchParticle->At(it->first);
-      if (p->P4().DeltaR(lep->P4())<0.5)
+      for(std::map<int, int>::iterator it=MatchIdx.begin();
+          it!=MatchIdx.end(); it++)
       {
-        it->second = i;
-        break;
+        GenParticle *p = (GenParticle*) branchParticle->At(it->first);
+        if (p->P4().DeltaR(lep->P4())<0.3)
+        {
+          it->second = i;
+          break;
+        }
       }
+
     }
   }
 
@@ -665,8 +728,8 @@ int FindTauDecays(int Wtau, TClonesArray *branchParticle )
     {
       //std::cout << "M 1 " << p->M1 <<"  M2 " << p->M2 << std::endl;
       TempDau[j] = p->PID;
-      std::cout << "i " << j << " p " << p->PID << " status " << p->Status
-      << " m1 " << p->M1 << " m2 " << p->M2 <<" eta " << p->Eta << " PT " << p->PT<< std::endl;
+      //std::cout << "i " << j << " p " << p->PID << " status " << p->Status
+      //<< " m1 " << p->M1 << " m2 " << p->M2 <<" eta " << p->Eta << " PT " << p->PT<< std::endl;
     }
   }
 
@@ -693,8 +756,170 @@ int FindTauDecays(int Wtau, TClonesArray *branchParticle )
 //----------------------------------------------------------------------------
 //  For  hadronic , find out how many prongs?
 //----------------------------------------------------------------------------
+  std::vector<int> Nhads =  GetFinalHad(VHad, branchParticle);
 
+  if (Nhads.size() == 1) return 4;
+  if (Nhads.size() == 3) return 5;
 
   return -1;
 }       // -----  end of function FindTauDecays  -----
 
+
+// ===  FUNCTION  ============================================================
+//         Name:  GetFinalHad
+//  Description:  
+// ===========================================================================
+std::vector<int> GetFinalHad(std::vector<int> VGenHad, TClonesArray *branchParticle)
+{
+
+  std::vector<int> VFinalHad;
+  std::vector<int> VNotFinalHad;
+
+  for (int i = 0; i < VGenHad.size(); ++i)
+  {
+    GenParticle *p1 = (GenParticle*) branchParticle->At(VGenHad.at(i));
+    for (int j = VGenHad.at(i); j < branchParticle->GetEntries(); ++j)
+    {
+      GenParticle *p = (GenParticle*) branchParticle->At(j);
+      if (p->M1 == VGenHad.at(i) || p->M2 == VGenHad.at(i))
+      {
+        if (p->Status == 1)
+          VFinalHad.push_back(j);
+        else
+          VNotFinalHad.push_back(j);
+      }
+    }
+  }
+
+  // Now, loop until all finals
+  while (VNotFinalHad.size() != 0)
+  {
+    std::vector<int> VTempNotFinalHad = VNotFinalHad;
+    VNotFinalHad.clear();
+
+    for (int i = 0; i < VTempNotFinalHad.size(); ++i)
+    {
+      for (int j = VTempNotFinalHad.at(i); j < branchParticle->GetEntries(); ++j)
+      {
+        GenParticle *p = (GenParticle*) branchParticle->At(j);
+        if (p->M1 == VTempNotFinalHad.at(i) || p->M2 == VTempNotFinalHad.at(i))
+        {
+          if (p->Status == 1)
+            VFinalHad.push_back(j);
+          else
+            VNotFinalHad.push_back(j);
+        }
+      }
+    }
+
+  }
+
+  return  VFinalHad;
+}       // -----  end of function GetFinalHad  -----
+
+
+std::map<int, int> MatchingElectron(TClonesArray *branchParticle, TClonesArray *branchElectron)
+{
+  //Mapping the GenParticle index with Lepton index
+  std::map<int, int> MatchIdx;
+
+//----------------------------------------------------------------------------
+//  Getting the Gen Lepton
+//----------------------------------------------------------------------------
+  int GenSize = branchParticle->GetEntries(); 
+  for (int i = 0; i < GenSize; ++i)
+  {
+    GenParticle *p = (GenParticle*) branchParticle->At(i);
+    //std::cout << "i " << i << " p " << p->PID << " status " << p->Status  << std::endl;
+    if (p->Status != 3 ) //Only select stable particle
+      continue;
+    if ( (p->M1 != -1 && fabs(((GenParticle*)branchParticle->At(p->M1))->PID) != 24) && 
+        (p->M2 != -1 && fabs(((GenParticle*)branchParticle->At(p->M2))->PID) != 24 ))
+        continue;  //Making sure the lepton from W decay 
+    if (std::fabs(p->PID) == 11) //Matched to the wanted lepton
+    {
+      std::cout << p->PID << std::endl;
+      MatchIdx[i] = -1;
+    }
+  }
+
+//----------------------------------------------------------------------------
+//  Getting the matched lepton, simply take deltaR < 0.3 as matched
+//----------------------------------------------------------------------------
+  for (int i = 0; i < branchElectron->GetEntries(); ++i)
+  {
+    Electron *ele = (Electron*)branchElectron->At(i);
+    if (std::fabs(ele->Eta) < 1.442 || 1.566 < std::fabs(ele->Eta) < 2.4)
+    {
+      if (ele->PT > 10 && ele->IsolationVar < 0.15 && ele->EhadOverEem < 0.15)
+      {
+        for(std::map<int, int>::iterator it=MatchIdx.begin();
+            it!=MatchIdx.end(); it++)
+        {
+          GenParticle *p = (GenParticle*) branchParticle->At(it->first);
+          if (p->P4().DeltaR(ele->P4())<0.3)
+          {
+            it->second = i;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  return MatchIdx;
+}       // -----  end of function MatchingElectron  -----
+
+std::map<int, int> MatchingMuon(TClonesArray *branchParticle, TClonesArray *branchMuon)
+{
+  //Mapping the GenParticle index with Lepton index
+  std::map<int, int> MatchIdx;
+
+//----------------------------------------------------------------------------
+//  Getting the Gen Lepton
+//----------------------------------------------------------------------------
+  int GenSize = branchParticle->GetEntries(); 
+  for (int i = 0; i < GenSize; ++i)
+  {
+    GenParticle *p = (GenParticle*) branchParticle->At(i);
+    //std::cout << "i " << i << " p " << p->PID << " status " << p->Status  << std::endl;
+    if (p->Status != 3 ) //Only select stable particle
+      continue;
+    if ( (p->M1 != -1 && fabs(((GenParticle*)branchParticle->At(p->M1))->PID) != 24) && 
+        (p->M2 != -1 && fabs(((GenParticle*)branchParticle->At(p->M2))->PID) != 24 ))
+        continue;  //Making sure the lepton from W decay 
+    if (std::fabs(p->PID) == 13) //Matched to the wanted lepton
+    {
+      //std::cout << p->PID << std::endl;
+      MatchIdx[i] = -1;
+    }
+  }
+
+//----------------------------------------------------------------------------
+//  Getting the matched lepton, simply take deltaR < 0.3 as matched
+//----------------------------------------------------------------------------
+  for (int i = 0; i < branchMuon->GetEntries(); ++i)
+  {
+    Muon *muon = (Muon*)branchMuon->At(i);
+
+    if (std::fabs(muon->Eta) < 2.4) //Excluding 1.442 < |eta|< 1.566 
+    {
+      if (muon->PT > 10 && muon->IsolationVar < 0.5 )
+      {
+
+        for(std::map<int, int>::iterator it=MatchIdx.begin();
+            it!=MatchIdx.end(); it++)
+        {
+          GenParticle *p = (GenParticle*) branchParticle->At(it->first);
+          if (p->P4().DeltaR(muon->P4())<0.3)
+          {
+            it->second = i;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  return MatchIdx;
+}       // -----  end of function MatchingMuon  -----

@@ -115,6 +115,11 @@ int main ( int argc, char *argv[] )
 
   TH1 *histMissIsKEta      = new TH1F("histMissISKEta ", "MissISK Eta", 120, -6, 6);
   TH1 *histMissIsKPT      = new TH1F("histMissISKPT", "MissISK PT", 100, 0, 200);
+
+  TH1 *histLostEleEta      = new TH1F("histLostEleEta ", "Lost Electron Eta", 120, -6, 6);
+  TH1 *histLostElePT      = new TH1F("histLostElePT", "Lost Electron PT", 100, 0, 200);
+  TH1 *histLostMuonEta      = new TH1F("histLostMuonEta ", "Lost Muon Eta", 120, -6, 6);
+  TH1 *histLostMuonPT      = new TH1F("histLostMuonPT", "Lost Muon PT", 100, 0, 200);
 //----------------------------------------------------------------------------
 //  JEtMET execise
 //----------------------------------------------------------------------------
@@ -169,8 +174,8 @@ int main ( int argc, char *argv[] )
 //----------------------------------------------------------------------------
 //  Lepton Efficiency Exercise
 //----------------------------------------------------------------------------
-    //std::map<int, int> MatchIdxe = MatchingLepton<Electron>(branchParticle, branchElectron, 11);
-    //std::map<int, int> MatchIdxm = MatchingLepton<Muon>(branchParticle, branchMuon, 13);
+    std::map<int, int> MatchIdxe = MatchingLepton<Electron>(branchParticle, branchElectron, 11);
+    std::map<int, int> MatchIdxm = MatchingLepton<Muon>(branchParticle, branchMuon, 13);
     std::map<int, int> MatchIske = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 11);
     std::map<int, int> MatchIskm = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 13);
     std::map<int, int> MatchIskt = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 15);
@@ -223,6 +228,42 @@ int main ( int argc, char *argv[] )
       EventCount[lepcount][i+1] += vetocount[i];
       if (lepcount > 0) EventCount[3][i+1] += vetocount[i];
     }
+
+
+//----------------------------------------------------------------------------
+//  Plot lost lepton
+//----------------------------------------------------------------------------
+
+    for(std::map<int, int>::iterator it=MatchIdxe.begin();
+      it!=MatchIdxe.end(); it++)
+    {
+      assert(MatchIske.find(it->first) != MatchIske.end());
+      if (it->second == -1 && MatchIske[it->first] == -1)
+      //if (it->second == -1)
+      {
+        GenParticle *gen = (GenParticle*) branchParticle->At(it->first);
+        histLostEleEta->Fill(gen->Eta);
+        histLostElePT->Fill(gen->PT);
+      }
+    }
+
+
+    for(std::map<int, int>::iterator it=MatchIdxm.begin();
+      it!=MatchIdxm.end(); it++)
+    {
+      assert(MatchIskm.find(it->first) != MatchIskm.end());
+      if (it->second == -1 && MatchIskm[it->first] == -1)
+      //if (it->second == -1 )
+      {
+        GenParticle *gen = (GenParticle*) branchParticle->At(it->first);
+        histLostMuonEta->Fill(gen->Eta);
+        histLostMuonPT->Fill(gen->PT);
+      }
+    }
+
+
+
+
 
 
     std::vector<int> EIsk;
@@ -386,6 +427,10 @@ int main ( int argc, char *argv[] )
   histMissIsKEta->Write();
   histMissIsKPT->Write();
 
+  histLostEleEta->Write();
+  histLostElePT->Write();
+  histLostMuonEta->Write();
+  histLostMuonPT->Write();
   //histJetEta->Write();
   //histMET->Write();
   //histMET_X->Write();
