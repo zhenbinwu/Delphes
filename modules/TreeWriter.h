@@ -48,6 +48,7 @@ private:
   void ProcessTauJets(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessJets(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessMissingET(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessIsoTracks(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessScalarHT(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessRho(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessWeight(ExRootTreeBranch *branch, TObjArray *array);

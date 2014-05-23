@@ -1,5 +1,5 @@
 
-/** \class IsoTrack
+/** \class IsoTrackFilter
  *
  *  Sums transverse momenta of Track objects within a DeltaR cone around a
  *  candidate and calculates fraction of this sum to the candidate's
@@ -14,7 +14,7 @@
  *
  */
 
-#include "modules/IsoTrack.h"
+#include "modules/IsoTrackFilter.h"
 
 #include "classes/DelphesClasses.h"
 #include "classes/DelphesFactory.h"
@@ -67,23 +67,22 @@ Int_t IsoTrackClassifier::GetCategory(TObject *object)
 
 //------------------------------------------------------------------------------
 
-IsoTrack::IsoTrack() :
+IsoTrackFilter::IsoTrackFilter() :
   fClassifier(0), 
-  fIsolationFilter(0), fCandidateFilter(0),
-  fItIsoTrackInputArray(0), fItCandidateInputArray(0)
+  fEleFilter(0),fMuonFilter(0),fHADFilter(0)
 {
   fClassifier = new IsoTrackClassifier;
 }
 
 //------------------------------------------------------------------------------
 
-IsoTrack::~IsoTrack()
+IsoTrackFilter::~IsoTrackFilter()
 {
 }
 
 //------------------------------------------------------------------------------
 
-void IsoTrack::Init()
+void IsoTrackFilter::Init()
 {
 
   fDeltaRMax = GetDouble("DeltaRMax", 0.5);
@@ -96,81 +95,95 @@ void IsoTrack::Init()
 
 
   fIsoTrackPTMin = GetDouble("IsoTrackPTMin", 10);
-  fIsoTrackEtaMax = GetDouble("IsoTrackEtaMax", 2.4);
 
   fClassifier->fPTMin = GetDouble("PTMin", 0.5);
 
   // import input array(s)
+  
+  // Electron Input Array
+  fEleInputArray = ImportArray(GetString("ElectronInputArray", "ElectronEnergySmearing/electrons"));
+  fEleFilter = new ExRootFilter(fEleInputArray);
 
-  fIsoTrackInputArray = ImportArray(GetString("IsolationInputArray", "TrackMerger/tracks"));
-  fItIsoTrackInputArray = fIsoTrackInputArray->MakeIterator();
+  // Muon Input Array
+  fMuonInputArray = ImportArray(GetString("MuonInputArray", "MuonMomentumSmearing/muons"));
+  fMuonFilter = new ExRootFilter(fMuonInputArray);
 
-  fIsolationFilter = new ExRootFilter(fIsoTrackInputArray);
+  // Charged Hadron Input Array
+  fHADInputArray = ImportArray(GetString("HADInputArray", "ChargedHadronMomentumSmearing/chargedHadrons"));
+  fHADFilter = new ExRootFilter(fHADInputArray);
 
-  fCandidateInputArray = ImportArray(GetString("CandidateInputArray", "Calorimeter/electrons"));
-  fItCandidateInputArray = fCandidateInputArray->MakeIterator();
-
-  fCandidateFilter = new ExRootFilter(fCandidateInputArray);
+  // All tracks used for isolation calculation
+  fAllInputList.push_back(fEleInputArray->MakeIterator());
+  fAllInputList.push_back(fMuonInputArray->MakeIterator());
+  fAllInputList.push_back(fHADInputArray->MakeIterator());
 
   // create output array
-
-  fOutputArray = ExportArray(GetString("OutputArray", "electrons"));
+  fOutputArray = ExportArray(GetString("OutputArray", "IsoTrack"));
 }
 
 //------------------------------------------------------------------------------
 
-void IsoTrack::Finish()
+void IsoTrackFilter::Finish()
 {
-  if(fIsolationFilter) delete fIsolationFilter;
-  if(fCandidateFilter) delete fCandidateFilter;
-  if(fItCandidateInputArray) delete fItCandidateInputArray;
-  if(fItIsoTrackInputArray) delete fItIsoTrackInputArray;
+  //if(fIsolationFilter) delete fIsolationFilter;
+  //if(fCandidateFilter) delete fCandidateFilter;
+  //if(fItCandidateInputArray) delete fItCandidateInputArray;
+  //if(fItIsoTrackInputArray) delete fItIsoTrackInputArray;
 }
 
 //------------------------------------------------------------------------------
 
-void IsoTrack::Process()
+void IsoTrackFilter::Process()
+{
+  IsoTrackSelector(fAllInputList, fEleFilter, true);
+  IsoTrackSelector(fAllInputList, fMuonFilter, true);
+  IsoTrackSelector(fAllInputList, fHADFilter, false);
+}
+
+//------------------------------------------------------------------------------
+//
+void IsoTrackFilter::IsoTrackSelector(std::vector< TIterator * >& fAllInputList, ExRootFilter*  fCandidateFilter, bool IsEM)
 {
   Candidate *candidate, *IsoTrack;
-  TObjArray *IsoTrackArray;
   TObjArray *CanTrackArray;
-  Double_t sum, ratio;
-  Int_t counter;
-  Double_t eta = 0.0;
 
-  // select IsoTrack objects
-  fIsolationFilter->Reset();
-  IsoTrackArray = fIsolationFilter->GetSubArray(fClassifier, 0);
-
+  // Prepare the candidate array
   fCandidateFilter->Reset();
   CanTrackArray = fCandidateFilter->GetSubArray(fClassifier, 0);
 
-  if(IsoTrackArray == 0) return;
+  if(fAllInputList.size() == 0) return;
 
-  TIter itIsoTrackArray(IsoTrackArray);
+  Double_t sum, ratio;
+  Int_t counter;
+
+  // loop over all input candidates
   TIter itCanTrackArray(CanTrackArray);
-
-  // loop over all input jets
-  //fItCandidateInputArray->Reset();
   itCanTrackArray.Reset();
   while((candidate = static_cast<Candidate*>(itCanTrackArray.Next())))
   {
     const TLorentzVector &candidateMomentum = candidate->Momentum;
-    eta = TMath::Abs(candidateMomentum.Eta());
-
-    // loop over all input tracks
     sum = 0.0;
     counter = 0;
-    itIsoTrackArray.Reset();
-    while((IsoTrack = static_cast<Candidate*>(itIsoTrackArray.Next())))
-    {
-      const TLorentzVector &IsoTrackMomentum = IsoTrack->Momentum;
 
-      if(candidateMomentum.DeltaR(IsoTrackMomentum) <= fDeltaRMax &&
-         !candidate->Overlaps(IsoTrack))
+    // loop over all input tracks
+    for(std::vector< TIterator * >::iterator itInputList = fAllInputList.begin(); itInputList != fAllInputList.end(); ++itInputList)
+    {
+      TIterator *iterator = *itInputList;
+      // loop over all candidates
+      iterator->Reset();
+
+      while((IsoTrack = static_cast<Candidate*>(iterator->Next())))
       {
-        sum += IsoTrackMomentum.Pt();
-        ++counter;
+        if (fClassifier->GetCategory(IsoTrack) == -1) continue;
+
+        const TLorentzVector &IsoTrackMomentum = IsoTrack->Momentum;
+
+        if(candidateMomentum.DeltaR(IsoTrackMomentum) <= fDeltaRMax &&
+            !candidate->Overlaps(IsoTrack))
+        {
+          sum += IsoTrackMomentum.Pt();
+          ++counter;
+        }
       }
     }
 
@@ -178,14 +191,14 @@ void IsoTrack::Process()
 
     candidate->IsolationVar = ratio;
 
+    if (IsEM) candidate->IsEMCand = 1;
+
     if((fUsePTSum && sum > fPTSumMax) || ratio > fPTRatioMax) continue;
 
-    if (candidate->Momentum.Pt() > fIsoTrackPTMin && 
-        std::fabs(candidate->Momentum.Eta() < fIsoTrackEtaMax))
+    if (candidate->Momentum.Pt() > fIsoTrackPTMin )
     {
       fOutputArray->Add(candidate);
     }
   }
 }
 
-//------------------------------------------------------------------------------

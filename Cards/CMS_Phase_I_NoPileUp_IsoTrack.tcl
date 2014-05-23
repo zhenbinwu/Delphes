@@ -34,12 +34,7 @@ set ExecutionPath {
   FastJetFinder
   CAJetFinder
 
-  IsoTrackMerger
-  IsoTrackEMMerger
-  IsoTrackEM
-  IsoTrackHAD
-
-  IsoTrackOutMerger
+  IsoTrackFilter
 
   UniqueObjectFinderGJ
   UniqueObjectFinderEJ
@@ -434,49 +429,14 @@ module Isolation MuonIsolation {
   set PTRatioMax 0.4
 }
 
-##########################
-# Track pile-up subtractor
-##########################
-
-module TrackPileUpSubtractor TrackPVSubtractor {
-# add InputArray InputArray OutputArray
-  add InputArray Calorimeter/eflowTracks eflowTracks
-  #add InputArray ElectronEnergySmearing/electrons electrons
-  #add InputArray MuonMomentumSmearing/muons muons
-
-  set PVInputArray ModifyBeamSpot/PV
-
-  # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
-  # Z vertex resolution in m
-  set ZVertexResolution 0.0005
-}
-
-##############
-# Track merger used for IsoTrack
-##############
-
-module Merger IsoTrackMerger {
-# add InputArray InputArray
-  add InputArray ChargedHadronMomentumSmearing/chargedHadrons
-  add InputArray ElectronEnergySmearing/electrons
-  add InputArray MuonMomentumSmearing/muons
-  set OutputArray tracks
-}
-
-module Merger IsoTrackEMMerger {
-  add InputArray ElectronEnergySmearing/electrons
-  add InputArray MuonMomentumSmearing/muons
-  set OutputArray tracks
-}
-
-
 ################
-# Isolated Tracks for E/M PFCand
+# Isolated Tracks
 ################
-module IsoTrack IsoTrackEM {
+module IsoTrackFilter IsoTrackFilter {
   ## Isolation using all the tracks
-  set CandidateInputArray IsoTrackEMMerger/tracks 
-  set IsolationInputArray IsoTrackMerger/tracks 
+  set ElectronInputArray ElectronEnergySmearing/electrons
+  set MuonInputArray MuonMomentumSmearing/muons
+  set HADInputArray ChargedHadronMomentumSmearing/chargedHadrons
 
   set OutputArray IsoTrack
 
@@ -486,48 +446,11 @@ module IsoTrack IsoTrackEM {
   ## PTmin of isolation 
   set PTMin 1
 
-  #set PTRatioMax 1000
   set PTRatioMax 0.2
 
-  #set IsoTrackPTMin 2
   set IsoTrackPTMin 5
-
-  #set IsoTrackEtaMax 5
-  set IsoTrackEtaMax 2.5
 }
 
-
-################
-# Isolated Tracks for Had
-################
-module IsoTrack IsoTrackHAD {
-  ## Isolation using all the tracks
-  set CandidateInputArray ChargedHadronMomentumSmearing/chargedHadrons
-  set IsolationInputArray IsoTrackMerger/tracks 
-
-  set OutputArray IsoTrack
-
-  ### Cone 0.3
-  set DeltaRMax 0.3
-
-  ## PTmin of isolation 
-  set PTMin 1
-
-  #set PTRatioMax 1000
-  set PTRatioMax 0.1
-
-  #set IsoTrackPTMin 2
-  set IsoTrackPTMin 10
-
-  #set IsoTrackEtaMax 5
-  set IsoTrackEtaMax 2.5
-}
-
-module Merger IsoTrackOutMerger {
-  add InputArray IsoTrackEM/IsoTrack
-  add InputArray IsoTrackHAD/IsoTrack
-  set OutputArray IsoTrack
-}
 
 
 ###################
@@ -765,8 +688,7 @@ module TreeWriter TreeWriter {
   add Branch UniqueObjectFinderEJ/electrons Electron Electron
   add Branch UniqueObjectFinderGJ/photons Photon Photon
   add Branch UniqueObjectFinderMJ/muons Muon Muon
-  #add Branch IsoTrack/IsoTrack IsoTrack Muon
-  add Branch IsoTrackOutMerger/IsoTrack IsoTrack Muon
+  add Branch IsoTrackFilter/IsoTrack IsoTrack IsoTrack
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT
 }
