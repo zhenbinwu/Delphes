@@ -197,7 +197,6 @@ int main ( int argc, char *argv[] )
     //----------------------------------------------------------------------------
     //  Event selections
     //----------------------------------------------------------------------------
-    //if (! PassSelection(branchJet, branchMet)) continue;
 
     //----------------------------------------------------------------------------
     //  Lepton Efficiency Exercise
@@ -247,9 +246,7 @@ int main ( int argc, char *argv[] )
         it!=MatchIdxm.end(); it++)
     {
       assert(MatchIskm.find(it->first) != MatchIskm.end());
-      //if (it->second == -1 && MatchIskm[it->first] == -1)
-      //
-      //
+
       GenParticle *genall = (GenParticle*) branchParticle->At(it->first);
       histGenMuonEta->Fill(genall->Eta);
       histGenMuonPt->Fill(genall->PT);
@@ -273,14 +270,7 @@ int main ( int argc, char *argv[] )
     }
 
 
-
-
-
-
-
-
-
-
+    //if (! PassSelection(branchJet, branchMet)) continue;
 
     //----------------------------------------------------------------------------
     //  Filling in the number of events after vetoes
@@ -289,7 +279,7 @@ int main ( int argc, char *argv[] )
     //assert(lepcount < 3);
 
     // Ignore dilepton events
-    if (lepcount >1) continue;
+    if (lepcount >= 2) continue;
 
 
     //int category =1;
@@ -314,7 +304,6 @@ int main ( int argc, char *argv[] )
     EventCount[category][3]++;
 
 
-
   } // End of looping events
 
 
@@ -327,10 +316,10 @@ int main ( int argc, char *argv[] )
     << " | [b][center]1-prong Tau[/center][/b] | [b][center]2-prong tau[/center][/b] "
     <<" |- " << std::endl;
 
-  std::cout << "[b][center]Original[/center][/b]       | " << EventCount[0][0] << "       | " << EventCount[1][0] << "    | " << EventCount[2][0] << "    | " << EventCount[3][0] << "    |- "<< std::endl;
-  std::cout << "[b][center]+Lepton veto[/center][/b]   | " << EventCount[0][1] << "       | " << EventCount[1][1] << "    | " << EventCount[2][1] << "    | " << EventCount[3][1] << "    |- "<< std::endl;
-  std::cout << "[b][center]+Tau veto[/center][/b]      | " << EventCount[0][2] << "       | " << EventCount[1][2] << "    | " << EventCount[2][2] << "    | " << EventCount[3][2] << "    |- "<< std::endl;
-  std::cout << "[b][center]+Isotrack veto[/center][/b] | " << EventCount[0][3] << "       | " << EventCount[1][3] << "    | " << EventCount[2][3] << "    | " << EventCount[3][3] << "    |- "<< std::endl;
+  std::cout << "[b][center]Original[/center][/b]       | " << EventCount[0][0] << "       | " << EventCount[1][0] << "    | " << EventCount[2][0] << "    | " << EventCount[3][0] << "  | " << EventCount[4][0] << "  | " << EventCount[5][0] << "  |- "<< std::endl;
+  std::cout << "[b][center]+Lepton veto[/center][/b]   | " << EventCount[0][1] << "       | " << EventCount[1][1] << "    | " << EventCount[2][1] << "    | " << EventCount[3][1] << "  | " << EventCount[4][1] << "  | " << EventCount[5][1] << "  |- "<< std::endl;
+  std::cout << "[b][center]+Tau veto[/center][/b]      | " << EventCount[0][2] << "       | " << EventCount[1][2] << "    | " << EventCount[2][2] << "    | " << EventCount[3][2] << "  | " << EventCount[4][2] << "  | " << EventCount[5][2] << "  |- "<< std::endl;
+  std::cout << "[b][center]+Isotrack veto[/center][/b] | " << EventCount[0][3] << "       | " << EventCount[1][3] << "    | " << EventCount[2][3] << "    | " << EventCount[3][3] << "  | " << EventCount[4][3] << "  | " << EventCount[5][3] << "  |- "<< std::endl;
 
   std::cout << "[/table]" << std::endl;
 
@@ -633,11 +622,11 @@ bool IsoTrackVeto(TClonesArray* branchIsoTrk)
   for (int i = 0; i < branchIsoTrk->GetEntries(); ++i)
   {
     Muon *isk = (Muon*)branchIsoTrk->At(i);
-    if (std::fabs(isk->Eta) < 2.5 && isk->PT > 10
-        && isk->IsolationVar < 0.1) 
-    {
-        iskcount++;
-    }
+    //if (std::fabs(isk->Eta) < 2.5 && isk->PT > 10
+        //&& isk->IsolationVar < 0.1) 
+    //{
+    //}
+    iskcount++;
   }
 
   return iskcount > 0 ? true : false;
@@ -657,12 +646,13 @@ int EventCategory(TClonesArray* branchParticle)
   for (int i = 0; i < branchParticle->GetEntries(); ++i)
   {
     GenParticle *p = (GenParticle*) branchParticle->At(i);
+
+
     if (p->Status != 3 ) //Only select stable particle
       continue;
     if ( (p->M1 != -1 && fabs(((GenParticle*)branchParticle->At(p->M1))->PID) != 24) && 
         (p->M2 != -1 && fabs(((GenParticle*)branchParticle->At(p->M2))->PID) != 24 ))
         continue;  //Making sure the lepton from W decay 
-
     if (std::fabs(p->PID) == 11) // Electron 
     {
       lepcount ++;
@@ -682,6 +672,7 @@ int EventCategory(TClonesArray* branchParticle)
     }
   }
 
+  if (lepcount == 0) cat = 0;
 
   return cat;
 }       // -----  end of function EventCategory  -----
@@ -748,11 +739,13 @@ int FindTauDecays(int Wtau, TClonesArray *branchParticle )
     {
       VHad.push_back(fit->first);
     }
-    if (std::fabs(p->PID) == 11 || std::fabs(p->PID) == 13 )
+    //BUG:: yes, I countting W as leptonic decay directlyy.. really not that
+    //important for this study anyway
+    if (std::fabs(p->PID) == 11 || std::fabs(p->PID) == 13 || std::fabs(p->PID) == 24)
       return 3;
+
   }
 
- 
 //----------------------------------------------------------------------------
 //  For  hadronic , find out how many prongs?
 //----------------------------------------------------------------------------
@@ -783,8 +776,8 @@ std::vector<int> GetFinalHad(std::vector<int> VGenHad, TClonesArray *branchParti
       GenParticle *p = (GenParticle*) branchParticle->At(j);
       if (p->M1 == VGenHad.at(i) || p->M2 == VGenHad.at(i))
       {
-        if (p->Status == 1)
-          VFinalHad.push_back(j);
+        if (p->Status == 1 && p->PID != 22)
+          VFinalHad.push_back(p->PID);
         else
           VNotFinalHad.push_back(j);
       }
@@ -804,8 +797,8 @@ std::vector<int> GetFinalHad(std::vector<int> VGenHad, TClonesArray *branchParti
         GenParticle *p = (GenParticle*) branchParticle->At(j);
         if (p->M1 == VTempNotFinalHad.at(i) || p->M2 == VTempNotFinalHad.at(i))
         {
-          if (p->Status == 1)
-            VFinalHad.push_back(j);
+          if (p->Status == 1 && p->PID != 22)
+            VFinalHad.push_back(p->PID);
           else
             VNotFinalHad.push_back(j);
         }
@@ -813,6 +806,21 @@ std::vector<int> GetFinalHad(std::vector<int> VGenHad, TClonesArray *branchParti
     }
 
   }
+
+//----------------------------------------------------------------------------
+//  Print out the prongs of tau decays
+//----------------------------------------------------------------------------
+/*
+ *  std::cout << " Final tau: ";
+ *  for (int i = 0; i < VFinalHad.size(); ++i)
+ *  {
+ *    
+ *    std::cout << " " << VFinalHad.at(i);
+ *  }
+ *
+ *  std::cout  << std::endl;
+ */
+
 
   return  VFinalHad;
 }       // -----  end of function GetFinalHad  -----
@@ -838,7 +846,7 @@ std::map<int, int> MatchingElectron(TClonesArray *branchParticle, TClonesArray *
         continue;  //Making sure the lepton from W decay 
     if (std::fabs(p->PID) == 11) //Matched to the wanted lepton
     {
-      std::cout << p->PID << std::endl;
+      //std::cout << p->PID << std::endl;
       MatchIdx[i] = -1;
     }
   }

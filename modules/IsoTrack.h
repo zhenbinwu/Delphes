@@ -12,7 +12,7 @@
  *  $Revision: 1317 $
  *
  *
- *  \author P. Demin - UCL, Louvain-la-Neuve
+ *  \author Z. Wu - Baylor
  *
  */
 

@@ -487,7 +487,7 @@ module IsoTrack IsoTrackEM {
   set PTMin 1
 
   #set PTRatioMax 1000
-  set PTRatioMax 0.1
+  set PTRatioMax 0.2
 
   #set IsoTrackPTMin 2
   set IsoTrackPTMin 5
@@ -514,7 +514,7 @@ module IsoTrack IsoTrackHAD {
   set PTMin 1
 
   #set PTRatioMax 1000
-  set PTRatioMax 0.2
+  set PTRatioMax 0.1
 
   #set IsoTrackPTMin 2
   set IsoTrackPTMin 10
