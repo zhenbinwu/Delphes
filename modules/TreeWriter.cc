@@ -63,6 +63,7 @@ void TreeWriter::Init()
   fClassMap[MissingET::Class()] = &TreeWriter::ProcessMissingET;
   fClassMap[ScalarHT::Class()] = &TreeWriter::ProcessScalarHT;
   fClassMap[Rho::Class()] = &TreeWriter::ProcessRho;
+  fClassMap[IsoTrack::Class()] = &TreeWriter::ProcessIsoTracks;
 
   TBranchMap::iterator itBranchMap;
   map< TClass *, TProcessMethod >::iterator itClassMap;
@@ -441,6 +442,46 @@ void TreeWriter::ProcessMuons(ExRootTreeBranch *branch, TObjArray *array)
     entry->IsolationVar = candidate->IsolationVar;
 
     entry->Charge = candidate->Charge;
+
+    entry->Particle = candidate->GetCandidates()->At(fOffsetFromModifyBeamSpot);
+  }
+}
+
+//------------------------------------------------------------------------------
+
+void TreeWriter::ProcessIsoTracks(ExRootTreeBranch *branch, TObjArray *array)
+{
+  TIter iterator(array);
+  Candidate *candidate = 0;
+  IsoTrack *entry = 0;
+  Double_t pt, signPz, cosTheta, eta, rapidity;
+
+  array->Sort();
+
+  // loop over all IsoTracks
+  iterator.Reset();
+  while((candidate = static_cast<Candidate*>(iterator.Next())))
+  {
+    const TLorentzVector &momentum = candidate->Momentum;
+
+    pt = momentum.Pt();
+    cosTheta = TMath::Abs(momentum.CosTheta());
+    signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
+    eta = (cosTheta == 1.0 ? signPz*999.9 : momentum.Eta());
+    rapidity = (cosTheta == 1.0 ? signPz*999.9 : momentum.Rapidity());
+
+    entry = static_cast<IsoTrack*>(branch->NewEntry());
+
+    entry->SetBit(kIsReferenced);
+    entry->SetUniqueID(candidate->GetUniqueID());
+
+    entry->Eta = eta;
+    entry->Phi = momentum.Phi();
+    entry->PT = pt;
+    entry->IsolationVar = candidate->IsolationVar;
+
+    entry->Charge = candidate->Charge;
+    entry->IsEMCand = candidate->IsEMCand;
 
     entry->Particle = candidate->GetCandidates()->At(fOffsetFromModifyBeamSpot);
   }
