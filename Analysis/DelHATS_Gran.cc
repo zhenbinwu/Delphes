@@ -47,6 +47,7 @@ bool TauVeto(TClonesArray* branchJet);
 bool IsoTrackVeto(TClonesArray* branchIsoTrk);
 int FindTauDecays(int Wtau, TClonesArray *branchParticle );
 int EventCategory(TClonesArray* branchParticle);
+bool IsoTrackVeto(const IsoTrack* isk);
 std::vector<int> GetFinalHad(std::vector<int> VGenHad, TClonesArray *branchParticle);
 
 
@@ -203,9 +204,9 @@ int main ( int argc, char *argv[] )
     //----------------------------------------------------------------------------
     std::map<int, int> MatchIdxe = MatchingElectron(branchParticle, branchElectron);
     std::map<int, int> MatchIdxm = MatchingMuon(branchParticle, branchMuon);
-    std::map<int, int> MatchIske = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 11);
-    std::map<int, int> MatchIskm = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 13);
-    std::map<int, int> MatchIskt = MatchingLepton<Muon>(branchParticle, branchIsoTrk, 15);
+    std::map<int, int> MatchIske = MatchingLepton<IsoTrack>(branchParticle, branchIsoTrk, 11);
+    std::map<int, int> MatchIskm = MatchingLepton<IsoTrack>(branchParticle, branchIsoTrk, 13);
+    std::map<int, int> MatchIskt = MatchingLepton<IsoTrack>(branchParticle, branchIsoTrk, 15);
 
 
     if (MatchIdxe.size() + MatchIdxm.size() != 0) lepevent++;
@@ -270,7 +271,7 @@ int main ( int argc, char *argv[] )
     }
 
 
-    //if (! PassSelection(branchJet, branchMet)) continue;
+    if (! PassSelection(branchJet, branchMet)) continue;
 
     //----------------------------------------------------------------------------
     //  Filling in the number of events after vetoes
@@ -453,8 +454,7 @@ std::map<int, int> MatchingLepton(TClonesArray *branchParticle, TClonesArray *br
   {
     T *lep = (T*)branchLep->At(i);
 
-    if (std::fabs(lep->Eta) < 2.5 && lep->PT > 10
-        && lep->IsolationVar < 0.1) 
+    if (IsoTrackVeto(lep))
     {
       for(std::map<int, int>::iterator it=MatchIdx.begin();
           it!=MatchIdx.end(); it++)
@@ -621,17 +621,37 @@ bool IsoTrackVeto(TClonesArray* branchIsoTrk)
   
   for (int i = 0; i < branchIsoTrk->GetEntries(); ++i)
   {
-    Muon *isk = (Muon*)branchIsoTrk->At(i);
-    //if (std::fabs(isk->Eta) < 2.5 && isk->PT > 10
-        //&& isk->IsolationVar < 0.1) 
-    //{
-    //}
-    iskcount++;
+    IsoTrack *isk = (IsoTrack*)branchIsoTrk->At(i);
+    if(IsoTrackVeto(isk)) iskcount++;
   }
 
   return iskcount > 0 ? true : false;
   
 }       // -----  end of function IsoTrackVeto  -----
+
+
+// ===  FUNCTION  ============================================================
+//         Name:  IsoTrackVeto
+//  Description:  
+// ===========================================================================
+bool IsoTrackVeto(const IsoTrack* isk)
+{
+  if (isk->IsEMCand)
+  {
+    
+    if (std::fabs(isk->Eta) < 2.5 && isk->PT > 5
+        && isk->IsolationVar < 0.2) 
+      return true;
+  } else {
+    if (std::fabs(isk->Eta) < 2.5 && isk->PT > 10
+        && isk->IsolationVar < 0.1) 
+      return true;
+  }
+
+  return false;
+  
+}       // -----  end of function IsoTrackVeto  -----
+
 
 // ===  FUNCTION  ============================================================
 //         Name:  EventCategory
