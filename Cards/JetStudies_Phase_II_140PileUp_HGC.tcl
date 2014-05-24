@@ -2,6 +2,8 @@
 # Order of execution of various modules
 #######################################
 
+set MaxEvents 10
+
 set ExecutionPath {
 
   PileUpMerger
@@ -67,6 +69,9 @@ set ExecutionPath {
   BTagging
   BTaggingLoose
   TauTagging
+
+  TrackPVSubtractor  
+  IsoTrackFilter
 
   UniqueObjectFinderGJ
   UniqueObjectFinderEJ
@@ -196,7 +201,8 @@ module PileUpMerger PileUpMerger {
   set OutputBSY 0.39
 
   # pre-generated minbias input file
-  set PileUpFile MinBias.pileup
+  #set PileUpFile MinBias.pileup
+  set PileUpFile /data/nbay04/a/benwu/Delphes/Cards/MinBias100K_14TeV.pileup
 
   # average expected pile up
   set MeanPileUp 140
@@ -1233,6 +1239,46 @@ module BTagging BTaggingLoose {
 
 }
 
+##########################
+# Track pile-up subtractor
+##########################
+
+module TrackPileUpSubtractor TrackPVSubtractor {
+# add InputArray InputArray OutputArray
+  add InputArray ChargedHadronMomentumSmearing/chargedHadrons chargedHadrons
+  add InputArray ElectronEnergySmearing/electrons electrons
+  add InputArray MuonMomentumSmearing/muons muons
+
+  set PVInputArray  ModifyBeamSpot/PV
+
+  # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
+  # Z vertex resolution in m
+  set ZVertexResolution 0.0005
+}
+
+
+################
+# Isolated Tracks 
+################
+module IsoTrackFilter IsoTrackFilter {
+  ## Isolation using all the tracks
+  set ElectronInputArray TrackPVSubtractor/electrons
+  set MuonInputArray TrackPVSubtractor/muons
+  set HADInputArray TrackPVSubtractor/chargedHadrons
+
+  set OutputArray IsoTrack
+
+  ### Cone 0.3
+  set DeltaRMax 0.3
+
+  ## PTmin of isolation 
+  set PTMin 1
+
+  set PTRatioMax 0.2
+
+  set IsoTrackPTMin 5
+}
+
 
 module TauTagging TauTagging {
   set ParticleInputArray Delphes/allParticles
@@ -1338,6 +1384,7 @@ module TreeWriter TreeWriter {
   add Branch Rho/rho Rho Rho
   add Branch GlobalRho/rho GlobalRho Rho
   add Branch PileUpMerger/NPU NPU ScalarHT
+  add Branch IsoTrackFilter/IsoTrack IsoTrack IsoTrack
 
   add Branch PuppiJetFinder/jets PuppiJet Jet
 
