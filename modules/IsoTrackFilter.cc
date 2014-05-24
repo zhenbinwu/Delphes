@@ -125,10 +125,12 @@ void IsoTrackFilter::Init()
 
 void IsoTrackFilter::Finish()
 {
-  //if(fIsolationFilter) delete fIsolationFilter;
-  //if(fCandidateFilter) delete fCandidateFilter;
-  //if(fItCandidateInputArray) delete fItCandidateInputArray;
-  //if(fItIsoTrackInputArray) delete fItIsoTrackInputArray;
+  // delete Filter
+  if(fEleFilter) delete fEleFilter;
+  if(fMuonFilter) delete fMuonFilter;
+  if(fHADFilter) delete fHADFilter;
+
+  if (fClassifier) delete fClassifier;
 }
 
 //------------------------------------------------------------------------------
