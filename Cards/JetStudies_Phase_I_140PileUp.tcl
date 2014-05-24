@@ -118,8 +118,7 @@ module PileUpMerger PileUpMerger {
   set OutputBSY 0.39  
 
   # pre-generated minbias input file
-  #set PileUpFile MinBias.pileup
-  set PileUpFile /data/nbay04/a/benwu/Delphes/Cards/MinBias100K_14TeV.pileup
+  set PileUpFile MinBias.pileup
 
   # average expected pile up
   set MeanPileUp 140
