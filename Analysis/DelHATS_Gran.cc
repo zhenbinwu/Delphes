@@ -59,21 +59,27 @@ std::map<int, int> MatchingElectron(TClonesArray *branchParticle, TClonesArray *
 // ===========================================================================
 int main ( int argc, char *argv[] )
 {
-  if(argc != 3)
+  if(argc < 3)
   {
-    std::cout << " Usage: DelHATS input_file output_file" << std::endl;
-    std::cout << " input_file - input file in ROOT format ('Delphes' tree)," << std::endl;
+    std::cout << " Usage: DelHATS output_file input_file" << std::endl;
     std::cout << " output_file - output file in ROOT format" << std::endl;
+    std::cout << " input_file - input file in ROOT format ('Delphes' tree)," << std::endl;
     return EXIT_FAILURE;
   }
 
   // Getting the input filename
-  const std::string inputFile_name  = argv[1];
-  const std::string outputFile_name = argv[2];
+  const std::string outputFile_name = argv[1];
 
+  int i = 2;
   // Create chain of root trees
   TChain chain("Delphes");
-  chain.Add(inputFile_name.c_str());
+  do
+  {
+    chain.Add(argv[i]);
+    std::cout << " Adding file : " << argv[i]  << std::endl;
+    i++;
+  }
+  while (i < argc);
 
   // Create the output file
   TFile outputfile(outputFile_name.c_str(), "RECREATE");
@@ -129,8 +135,8 @@ int main ( int argc, char *argv[] )
   TH1 *histMatchGenTauPt = new TH1F("histMatchGenTauPt", "Matched GenTautron Pt", 100, 0, 200);
   TH1 *histTauISKEffPt      = new TH1F("histTauISKEffPt", "Tauctron Isotrak Efficiency", 100, 0, 200);
 
-  TH1 *histMissIsKEta      = new TH1F("histMissISKEta ", "MissISK Eta", 120, -6, 6);
-  TH1 *histMissIsKPT      = new TH1F("histMissISKPT", "MissISK PT", 100, 0, 200);
+  TH1 *histIsoTrackEta      = new TH1F("histIsoTrackEta ", "IsoTrack Eta", 120, -6, 6);
+  TH1 *histIsoTrackPT      = new TH1F("histIsoTrackPT", "IsoTrack PT", 100, 0, 200);
 
   TH1 *histLostEleEta      = new TH1F("histLostEleEta ", "Lost Electron Eta", 120, -6, 6);
   TH1 *histLostElePT      = new TH1F("histLostElePT", "Lost Electron PT", 100, 0, 200);
@@ -141,33 +147,6 @@ int main ( int argc, char *argv[] )
   TH1 *histLostEleISKPT      = new TH1F("histLostEleISKPT", "Lost Electron PT", 100, 0, 200);
   TH1 *histLostMuonISKEta      = new TH1F("histLostMuonISKEta ", "Lost Muon Eta", 120, -6, 6);
   TH1 *histLostMuonISKPT      = new TH1F("histLostMuonISKPT", "Lost Muon PT", 100, 0, 200);
-//----------------------------------------------------------------------------
-//  JEtMET execise
-//----------------------------------------------------------------------------
-  //TH1 *histJetPT = new TH1F("jet_pt", "jet P_{T}", 500, 0.0, 1000);
-  //TH1 *histJetEta = new TH1F("jet_eta", "jet Eta", 120, -6, 6);
-
-  ////  MET and MET resolution
-  //TH1 *histMET = new TH1F("MET", "MET", 100, 0.0, 1000);
-  //TH1 *histMET_X = new TH1F("MET_X", "MET_X", 300, -300.0, 300.0);
-  //TH1 *histMET_Y = new TH1F("MET_Y", "MET_Y", 300, -300.0, 300.0);
-
-  //// MHT and MHT resolution
-  //TH1 *histMHT = new TH1F("MHT", "MHT", 100, 0.0, 1000);
-  //TH1 *histMHT_X = new TH1F("MHT_X", "MHT_X", 300, -300.0, 300.0);
-  //TH1 *histMHT_Y = new TH1F("MHT_Y", "MHT_Y", 300, -300.0, 300.0);
-
-  //// Jet response: approximate by TProfile
-  //TProfile *histJetResPT = new TProfile("histJetResPT ", 
-      //"Jet response as a fucntion of GenJet Pt", 100, 0, 500);
-  //TProfile *histJetResEta = new TProfile("histJetResEta ", 
-      //"Jet response as a function of GenJet Eta", 100, -5, 5);
-
-  //// Jet resolution for Eta (0, 2.5, 4, 5) and Pt (30, 50);
-  //TH1 *histJetEta1 = new TH1F("histJetEta1 ", "Jet Resolution with eta (0, 2.5)", 200, 4, 4);
-  //TH1 *histJetEta2 = new TH1F("histJetEta2 ", "Jet Resolution with eta (2.5, 4)", 200, 4, 4);
-  //TH1 *histJetEta3 = new TH1F("histJetEta3 ", "Jet Resolution with eta (4, 5)", 200, 4, 4);
-
 
 //----------------------------------------------------------------------------
 //  1st index: had, electron, muon, leptonic tau, 1-prong tau, 3-prong tau
@@ -186,18 +165,33 @@ int main ( int argc, char *argv[] )
 //----------------------------------------------------------------------------
 //   Loop over all events
 //----------------------------------------------------------------------------
-  for(Int_t entry = 0; entry < numberOfEntries; ++entry)
+  Int_t entry = 0;
+  while (true) //Using the break from treeReader 
   {
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
+
+    // Load selected branches with data from specified event
+    if (! treeReader->ReadEntry(entry)) break;
+    entry++;
 
     //if (entry > 500 ) break;
     if (entry % 500 == 0)
       std::cout << "--------------------" << entry << std::endl;
 
+
     //----------------------------------------------------------------------------
-    //  Event selections
+    //  Fill basic kinematics
     //----------------------------------------------------------------------------
+    for (int i = 0; i < branchIsoTrk->GetEntries(); ++i)
+    {
+      IsoTrack *isk = (IsoTrack*)branchIsoTrk->At(i);
+      if(IsoTrackVeto(isk)) 
+      {
+        histIsoTrackEta->Fill(isk->Eta);
+        histIsoTrackPT->Fill(isk->PT);
+      }
+    }
 
     //----------------------------------------------------------------------------
     //  Lepton Efficiency Exercise
@@ -271,6 +265,9 @@ int main ( int argc, char *argv[] )
     }
 
 
+    //----------------------------------------------------------------------------
+    //  Event selections
+    //----------------------------------------------------------------------------
     if (! PassSelection(branchJet, branchMet)) continue;
 
     //----------------------------------------------------------------------------
@@ -385,8 +382,8 @@ int main ( int argc, char *argv[] )
   histTauISKEffEta->Write();
   histTauISKEffPt->Write();
 
-  histMissIsKEta->Write();
-  histMissIsKPT->Write();
+  histIsoTrackEta->Write();
+  histIsoTrackPT->Write();
 
   histLostEleEta->Write();
   histLostElePT->Write();
