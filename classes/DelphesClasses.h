@@ -267,6 +267,31 @@ public:
   ClassDef(Muon, 2)
 };
 
+
+//---------------------------------------------------------------------------
+
+class IsoTrack: public SortableObject
+{
+public:
+
+  Float_t PT; // IsoTrack transverse momentum
+  Float_t Eta; // IsoTrack pseudorapidity
+  Float_t Phi; // IsoTrack azimuthal angle
+
+  Int_t Charge; // IsoTrack charge
+  Float_t IsolationVar; 
+  Int_t IsEMCand; // Whether it is a Electron/Muon candidate
+
+  TRef Particle; // reference to generated particle
+
+  static CompBase *fgCompare; //!
+  const CompBase *GetCompare() const { return fgCompare; }
+
+  TLorentzVector P4();
+
+  ClassDef(IsoTrack, 3)
+};
+
 //---------------------------------------------------------------------------
 
 class Jet: public SortableObject
@@ -419,6 +444,7 @@ public:
   Int_t IsRecoPU; // Assigned by charged hadron subtractor where applicable
                   // Reflects decision ncoprorating z vertex resolution
   Int_t IsConstituent;
+  Int_t IsEMCand; // Whether it is a Electron/Muon candidate
   
   UInt_t BTag;
   UInt_t TauTag;

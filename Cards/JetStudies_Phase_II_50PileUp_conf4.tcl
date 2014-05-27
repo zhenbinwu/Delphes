@@ -68,10 +68,6 @@ set ExecutionPath {
   BTaggingLoose
   TauTagging
 
-
-  TrackPVSubtractor  
-  IsoTrackFilter
-
   UniqueObjectFinderGJ
   UniqueObjectFinderEJ
   UniqueObjectFinderMJ
@@ -107,7 +103,7 @@ module RunPUPPI RunPUPPI {
   set TrackInputArray Calorimeter/eflowTracks
   set NeutralInputArray Calorimeter/eflowTowers
 
-  set TrackerEta 2.5
+  set TrackerEta 4.0
 
   set OutputArray weightedparticles
 }
@@ -179,7 +175,7 @@ module PileUpMerger PileUpMerger {
   set PileUpFile MinBias.pileup
 
   # average expected pile up
-  set MeanPileUp 140
+  set MeanPileUp 50
   # spread in the beam direction in m (assumes gaussian)
   set ZVertexSpread 0.053
 }
@@ -284,7 +280,9 @@ module Efficiency ChargedHadronTrackingEfficiency {
 (abs(eta) <= 1.2) * (pt > 1.0) * (0.97) + \
 (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.85) + \
 (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0) * (0.87) + \
-(abs(eta) > 2.5) * (0.00)}
+(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.8) + \
+(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0) * (0.82) + \
+(abs(eta) > 4.0) * (0.00)}
 }
 
 module Efficiency ChargedHadronTrackingEfficiencyNoPU {
@@ -297,7 +295,9 @@ module Efficiency ChargedHadronTrackingEfficiencyNoPU {
 (abs(eta) <= 1.2) * (pt > 1.0) * (0.97) + \
 (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.85) + \
 (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0) * (0.87) + \
-    (abs(eta) > 2.5) * (0.00)}
+(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.8) + \
+(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0) * (0.82) + \
+    (abs(eta) > 4.0) * (0.00)}
 }
 
 
@@ -318,7 +318,10 @@ module Efficiency ElectronTrackingEfficiency {
 (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.85) + \
 (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0 && pt <= 10.0) * (0.82+pt*0.01) + \
 (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 10.0) * (0.90) + \
-(abs(eta) > 2.5) * (0.00)}
+(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.8) + \
+(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0 && pt <= 10.0) * (0.8+pt*0.01) + \
+(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 10.0) * (0.85) + \
+(abs(eta) > 4.0) * (0.00)}
 }
 
 module Efficiency ElectronTrackingEfficiencyNoPU {
@@ -334,7 +337,10 @@ module Efficiency ElectronTrackingEfficiencyNoPU {
 (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.85) + \
 (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0 && pt <= 10.0) * (0.82+pt*0.01) + \
 (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 10.0) * (0.90) + \
-    (abs(eta) > 2.5) * (0.00)}
+(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.8) + \
+(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0 && pt <= 10.0) * (0.8+pt*0.01) + \
+(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 10.0) * (0.85) + \
+    (abs(eta) > 4.0) * (0.00)}
 }
 
 
@@ -355,7 +361,9 @@ module Efficiency MuonTrackingEfficiency {
 (abs(eta) <= 1.2) * (pt > 1.0) * (0.998) + \
 (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.99) + \
 (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0) * (0.99) + \
-(abs(eta) > 2.5) * (0.00)}
+(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.95) + \
+(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0) * (0.95) + \
+(abs(eta) > 4.0) * (0.00)}
 }
 
 module Efficiency MuonTrackingEfficiencyNoPU {
@@ -371,7 +379,9 @@ module Efficiency MuonTrackingEfficiencyNoPU {
 (abs(eta) <= 1.2) * (pt > 1.0) * (0.998) + \
 (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 0.2 && pt <= 1.0) * (pt*0.99) + \
 (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 1.0) * (0.99) + \
-    (abs(eta) > 2.5) * (0.00)}
+(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 0.2 && pt <= 1.0) * (pt*0.95) + \
+(abs(eta) > 2.5 && abs(eta) <= 4.0) * (pt > 1.0) * (0.95) + \
+    (abs(eta) > 4.0) * (0.00)}
 }
 
 
@@ -995,12 +1005,12 @@ module Efficiency ElectronEfficiency {
                          (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 30.0 && pt <= 50.0)  * (0.95) + \                          
                          (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 50.0 && pt <= 70.0)  * (0.95) + \          
                          (abs(eta) >= 1.55 && abs(eta) <= 2.0 ) * (pt > 70.0 )  * (1.0) + \   
-                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt >  4.0 && pt <= 10.0)  * (0.65) + \
-                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 10.0 && pt <= 30.0)  * (0.75) + \                                                      
-                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 30.0 && pt <= 50.0)  * (0.90) + \                          
-                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 50.0 && pt <= 70.0)  * (0.90) + \          
-                         (abs(eta) >= 2.0 && abs(eta) <= 2.5 ) * (pt > 70.0 )  * (0.90) + \                                                                                               
-                          (abs(eta) > 2.5)                              * (0.00)}
+                         (abs(eta) >= 2.0 && abs(eta) <= 4.0 ) * (pt >  4.0 && pt <= 10.0)  * (0.65) + \
+                         (abs(eta) >= 2.0 && abs(eta) <= 4.0 ) * (pt > 10.0 && pt <= 30.0)  * (0.75) + \                                                      
+                         (abs(eta) >= 2.0 && abs(eta) <= 4.0 ) * (pt > 30.0 && pt <= 50.0)  * (0.90) + \                          
+                         (abs(eta) >= 2.0 && abs(eta) <= 4.0 ) * (pt > 50.0 && pt <= 70.0)  * (0.90) + \          
+                         (abs(eta) >= 2.0 && abs(eta) <= 4.0 ) * (pt > 70.0 )  * (0.90) + \                                                                                               
+                          (abs(eta) > 4.0)                              * (0.00)}
 
 }
 
@@ -1034,13 +1044,13 @@ module Efficiency MuonEfficiency {
 
   # efficiency formula for muons
     set EfficiencyFormula {                                    (pt <= 2.0)  * (0.00) + \  
-                         (abs(eta) <= 2.50) * (pt >  2.0 && pt <= 3.0)  * (0.51) + \
-                         (abs(eta) <= 2.50) * (pt >  3.0 && pt <= 4.0)  * (0.85) + \ 
-                         (abs(eta) <= 2.50) * (pt >  4.0 && pt <= 11.0) * (0.93) + \               
-                         (abs(eta) <= 2.50) * (pt >  11. && pt <= 50.)  * (0.96) + \   
-                         (abs(eta) <= 2.50) * (pt >  50. && pt <= 70.)  * (0.98) + \                      
-                         (abs(eta) <= 2.50) * (pt > 70.0 )  * (1.00) + \   
-                         (abs(eta) > 2.50)  * (0.00)}
+                         (abs(eta) <= 4.00) * (pt >  2.0 && pt <= 3.0)  * (0.51) + \
+                         (abs(eta) <= 4.00) * (pt >  3.0 && pt <= 4.0)  * (0.85) + \ 
+                         (abs(eta) <= 4.00) * (pt >  4.0 && pt <= 11.0) * (0.93) + \               
+                         (abs(eta) <= 4.00) * (pt >  11. && pt <= 50.)  * (0.96) + \   
+                         (abs(eta) <= 4.00) * (pt >  50. && pt <= 70.)  * (0.98) + \                      
+                         (abs(eta) <= 4.00) * (pt > 70.0 )  * (1.00) + \   
+                         (abs(eta) > 4.00)  * (0.00)}
 
 }
 
@@ -1108,7 +1118,7 @@ module BTagging BTagging {
   set BitNumber 0
   set DeltaR 0.4
   set PartonPTMin 1.0
-  set PartonEtaMax 2.5
+  set PartonEtaMax 4.0
 
   # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
   # PDG code = the highest PDG code of a quark or gluon inside DeltaR cone around jet axis
@@ -1121,14 +1131,14 @@ module BTagging BTagging {
   # efficiency formula for c-jets (misidentification rate)
   add EfficiencyFormula {4} {                                      (pt <= 15.0) * (0.000) + \
                                                 (abs(eta) <= 1.2) * (pt > 15.0) * (0.1873*tanh(pt*0.0183 - 0.2196)) + \
-                              (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.1898*tanh(pt*0.00997 - 0.143)) + \
-                              (abs(eta) > 2.5)                                  * (0.000)}
+                              (abs(eta) > 1.2 && abs(eta) <= 4.0) * (pt > 15.0) * (0.1898*tanh(pt*0.00997 - 0.143)) + \
+                              (abs(eta) > 4.0)                                  * (0.000)}
 
   # efficiency formula for b-jets
     add EfficiencyFormula {5} {                                      (pt <= 15.0) * (0.000) + \
                                                 (abs(eta) <= 1.2) * (pt > 15.0) * (0.629858*tanh(pt*0.0166188 + 0.300119)) + \
-                              (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.584522*tanh(pt*0.0144387 + 0.397034)) + \
-									 (abs(eta) > 2.5)                                  * (0.000)}
+                              (abs(eta) > 1.2 && abs(eta) <= 4.0) * (pt > 15.0) * (0.584522*tanh(pt*0.0144387 + 0.397034)) + \
+									 (abs(eta) > 4.0)                                  * (0.000)}
 }
 
 module BTagging BTaggingLoose {
@@ -1139,7 +1149,7 @@ module BTagging BTaggingLoose {
   set BitNumber 1
   set DeltaR 0.4
   set PartonPTMin 1.0
-  set PartonEtaMax 2.5
+  set PartonEtaMax 4.0
 
   # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
   # PDG code = the highest PDG code of a quark or gluon inside DeltaR cone around jet axis
@@ -1152,56 +1162,16 @@ module BTagging BTaggingLoose {
   # efficiency formula for c-jets (misidentification rate)
   add EfficiencyFormula {4} {                                      (pt <= 15.0) * (0.000) + \
                                                 (abs(eta) <= 1.2) * (pt > 15.0) * (0.29*tanh(pt*0.0183 - 0.2196)) + \
-                              (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.29*tanh(pt*0.00997 - 0.143)) + \
-                              (abs(eta) > 2.5)                                  * (0.000)}
+                              (abs(eta) > 1.2 && abs(eta) <= 4.0) * (pt > 15.0) * (0.29*tanh(pt*0.00997 - 0.143)) + \
+                              (abs(eta) > 4.0)                                  * (0.000)}
 
   # efficiency formula for b-jets
 
     add EfficiencyFormula {5} {                                      (pt <= 15.0) * (0.000) + \
                                                 (abs(eta) <= 1.2) * (pt > 15.0) * (0.629858*tanh(pt*0.0166188 + 0.300119)) + \
-                              (abs(eta) > 1.2 && abs(eta) <= 2.5) * (pt > 15.0) * (0.584522*tanh(pt*0.0144387 + 0.397034)) + \
-									 (abs(eta) > 2.5)                                  * (0.000)}
+                              (abs(eta) > 1.2 && abs(eta) <= 4.0) * (pt > 15.0) * (0.584522*tanh(pt*0.0144387 + 0.397034)) + \
+									 (abs(eta) > 4.0)                                  * (0.000)}
 
-}
-
-##########################
-# Track pile-up subtractor
-##########################
-
-module TrackPileUpSubtractor TrackPVSubtractor {
-# add InputArray InputArray OutputArray
-  add InputArray ChargedHadronMomentumSmearing/chargedHadrons chargedHadrons
-  add InputArray ElectronEnergySmearing/electrons electrons
-  add InputArray MuonMomentumSmearing/muons muons
-
-  set PVInputArray  ModifyBeamSpot/PV
-
-  # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
-  # Z vertex resolution in m
-  set ZVertexResolution 0.0005
-}
-
-
-################
-# Isolated Tracks 
-################
-module IsoTrackFilter IsoTrackFilter {
-  ## Isolation using all the tracks
-  set ElectronInputArray TrackPVSubtractor/electrons
-  set MuonInputArray TrackPVSubtractor/muons
-  set HADInputArray TrackPVSubtractor/chargedHadrons
-
-  set OutputArray IsoTrack
-
-  ### Cone 0.3
-  set DeltaRMax 0.3
-
-  ## PTmin of isolation 
-  set PTMin 1
-
-  set PTRatioMax 0.2
-
-  set IsoTrackPTMin 5
 }
 
 
@@ -1215,7 +1185,7 @@ module TauTagging TauTagging {
 
   set TauPTMin 1.0
 
-  set TauEtaMax 2.5
+  set TauEtaMax 4.0
 
   # add EfficiencyFormula {abs(PDG code)} {efficiency formula as a function of eta and pt}
 
@@ -1274,7 +1244,7 @@ module PileUpJetID PileUpJetID {
   set MeanSqDeltaRMaxBarrel 0.13
   set BetaMinBarrel 0.16
   set MeanSqDeltaRMaxEndcap 0.07
-  set BetaMinEndcap -1000.0
+  set BetaMinEndcap 0.06
   set MeanSqDeltaRMaxForward 0.01
 
 }
@@ -1309,9 +1279,8 @@ module TreeWriter TreeWriter {
   add Branch Rho/rho Rho Rho
   add Branch GlobalRho/rho GlobalRho Rho
   add Branch PileUpMerger/NPU NPU ScalarHT
-  add Branch IsoTrackFilter/IsoTrack IsoTrack IsoTrack
 
-#  add Branch PuppiJetFinder/jets PuppiJet Jet
+  add Branch PuppiJetFinder/jets PuppiJet Jet
 
   set OffsetFromModifyBeamSpot 1
 
