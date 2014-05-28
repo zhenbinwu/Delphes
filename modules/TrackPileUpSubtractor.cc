@@ -38,14 +38,16 @@ using namespace std;
 
 //------------------------------------------------------------------------------
 
-TrackPileUpSubtractor::TrackPileUpSubtractor()
+TrackPileUpSubtractor::TrackPileUpSubtractor():fZVertexResolutionFormula(0)
 {
+  fZVertexResolutionFormula = new DelphesFormula;
 }
 
 //------------------------------------------------------------------------------
 
 TrackPileUpSubtractor::~TrackPileUpSubtractor()
 {
+  if(fZVertexResolutionFormula) delete fZVertexResolutionFormula;
 }
 
 //------------------------------------------------------------------------------
@@ -53,6 +55,7 @@ TrackPileUpSubtractor::~TrackPileUpSubtractor()
 void TrackPileUpSubtractor::Init()
 {
   fZVertexResolution  = GetDouble("ZVertexResolution", 0.005)*1.0E3;
+  fZVertexResolutionFormula->Compile(GetString("ZVertexResolutionFormula", "1.0"));
 
   // import arrays with output from other modules
 
@@ -121,14 +124,14 @@ void TrackPileUpSubtractor::Process()
 
       // apply pile-up subtraction
       // assume perfect pile-up subtraction for tracks outside fZVertexResolution
-      if(candidate->IsPU && TMath::Abs(z-PVZ) > fZVertexResolution) {
-	candidate->IsRecoPU = 1;
+      //if(candidate->IsPU && TMath::Abs(z-PVZ) > fZVertexResolution) {
+      if(TMath::Abs(z-PVZ) > fZVertexResolutionFormula->Eval(0, particle->Position.Eta())) {
+        candidate->IsRecoPU = 1;
       } else {
-	candidate->IsRecoPU = 0;
-	array->Add(candidate);
+        candidate->IsRecoPU = 0;
+        array->Add(candidate);
       }
     }
   }
 }
 
-//------------------------------------------------------------------------------

@@ -19,6 +19,7 @@
 
 class TIterator;
 class TObjArray;
+class DelphesFormula;
 
 class TrackPileUpSubtractor: public DelphesModule
 {
@@ -34,6 +35,7 @@ public:
 private:
 
   Double_t fZVertexResolution;
+  DelphesFormula *fZVertexResolutionFormula; //!
 
   std::map< TIterator *, TObjArray * > fInputMap; //!
 

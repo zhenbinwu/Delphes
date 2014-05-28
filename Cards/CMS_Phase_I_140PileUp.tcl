@@ -347,6 +347,8 @@ module TrackPileUpSubtractor TrackPileUpSubtractor {
   # assume perfect pile-up subtraction for tracks with |z| > fZVertexResolution
   # Z vertex resolution in m
   set ZVertexResolution 0.0001
+  set ZVertexResolutionFormula {                  (abs(eta) <= 2.0) * 0.005 + \
+                             (abs(eta) > 2.0) * expo(abs(eta) -2.6) )}
 }
 
 ####################
