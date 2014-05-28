@@ -36,6 +36,7 @@ private:
 
   Double_t fZVertexResolution;
   DelphesFormula *fZVertexResolutionFormula; //!
+  bool PassSubtraction(double dz, double Eta) const;
 
   std::map< TIterator *, TObjArray * > fInputMap; //!
 

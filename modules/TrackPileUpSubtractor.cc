@@ -54,7 +54,7 @@ TrackPileUpSubtractor::~TrackPileUpSubtractor()
 
 void TrackPileUpSubtractor::Init()
 {
-  fZVertexResolution  = GetDouble("ZVertexResolution", 0.005)*1.0E3;
+  fZVertexResolution  = GetDouble("ZVertexResolution", -1)*1.0E3;
   fZVertexResolutionFormula->Compile(GetString("ZVertexResolutionFormula", "1.0"));
 
   // import arrays with output from other modules
@@ -125,7 +125,8 @@ void TrackPileUpSubtractor::Process()
       // apply pile-up subtraction
       // assume perfect pile-up subtraction for tracks outside fZVertexResolution
       //if(candidate->IsPU && TMath::Abs(z-PVZ) > fZVertexResolution) {
-      if(TMath::Abs(z-PVZ) > fZVertexResolutionFormula->Eval(0, particle->Position.Eta())) {
+      //if(TMath::Abs(z-PVZ) > fZVertexResolutionFormula->Eval(0, particle->Position.Eta())) {
+      if(PassSubtraction(TMath::Abs(z-PVZ) , particle->Position.Eta())) {
         candidate->IsRecoPU = 1;
       } else {
         candidate->IsRecoPU = 0;
@@ -135,3 +136,17 @@ void TrackPileUpSubtractor::Process()
   }
 }
 
+// ===  FUNCTION  ============================================================
+//         Name:  TrackPileUpSubtractor::PassSubtraction
+//  Description:  
+// ===========================================================================
+bool TrackPileUpSubtractor::PassSubtraction(double dz, double Eta) const
+{
+  if (fZVertexResolution < 0) // Use fZVertexResolutionFormula
+  {
+    return dz > fZVertexResolutionFormula->Eval(0, Eta);
+  } else {
+    return dz > fZVertexResolution;
+  }
+  return false;
+}       // -----  end of function TrackPileUpSubtractor::PassSubtraction  -----
