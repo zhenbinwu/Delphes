@@ -47,7 +47,6 @@ private:
 
   Bool_t fUsePTSum;
 
-  IsoTrackClassifier *fClassifier; //!
 
 
   ExRootFilter *fEleFilter;
@@ -65,6 +64,8 @@ private:
 
   // Isolation using all input list
   std::vector< TIterator * > fAllInputList; //!
+
+  IsoTrackClassifier *fClassifier; //!
 
   /// Output Array
   TObjArray *fOutputArray; //!

@@ -67,9 +67,12 @@ Int_t IsoTrackClassifier::GetCategory(TObject *object)
 
 //------------------------------------------------------------------------------
 
-IsoTrackFilter::IsoTrackFilter() :
-  fClassifier(0), 
-  fEleFilter(0),fMuonFilter(0),fHADFilter(0)
+IsoTrackFilter::IsoTrackFilter():
+  fEleFilter(0),fMuonFilter(0),fHADFilter(0),
+  fItEleInputArray(0), fItMuonInputArray(0), fItHADInputArray(0),
+  fEleInputArray(0), fMuonInputArray(0), fHADInputArray(0),
+  fClassifier(0), fOutputArray(0)
+
 {
   fClassifier = new IsoTrackClassifier;
 }
