@@ -111,7 +111,7 @@ TLorentzVector Tower::P4()
 
 Candidate::Candidate() :
   PID(0), Status(0), M1(-1), M2(-1), D1(-1), D2(-1),
-  IsolationVar(0),
+  IsolationVar(0), TrackIsolationVar(0),
   Charge(0), Mass(0.0),
   IsPU(0), IsRecoPU(0), IsEMCand(0), IsConstituent(0),
   BTag(0), TauTag(0), Eem(0.0), Ehad(0.0),
@@ -209,6 +209,7 @@ void Candidate::Copy(TObject &obj) const
   object.PID = PID;
   object.Status = Status;
   object.IsolationVar = IsolationVar;
+  object.TrackIsolationVar = TrackIsolationVar;
   object.M1 = M1;
   object.M2 = M2;
   object.D1 = D1;
@@ -286,6 +287,7 @@ void Candidate::Clear(Option_t* option)
   PID = 0;
   Status = 0;
   IsolationVar =0.;
+  TrackIsolationVar =0.;
   M1 = -1; M2 = -1; D1 = -1; D2 = -1;
   Charge = 0;
   Mass = 0.0;

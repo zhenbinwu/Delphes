@@ -438,6 +438,7 @@ public:
 
   Float_t Mass;
   Float_t IsolationVar;
+  Float_t TrackIsolationVar;
 
   
   Int_t IsPU;
