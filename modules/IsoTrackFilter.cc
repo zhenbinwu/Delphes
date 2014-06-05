@@ -191,7 +191,7 @@ void IsoTrackFilter::IsoTrackSelector(std::vector< TIterator * >& fAllInputList,
 
     ratio = sum/candidateMomentum.Pt();
 
-    candidate->IsolationVar = ratio;
+    candidate->TrackIsolationVar = ratio;
 
     if (IsEM) candidate->IsEMCand = 1;
 

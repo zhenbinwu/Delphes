@@ -478,7 +478,7 @@ void TreeWriter::ProcessIsoTracks(ExRootTreeBranch *branch, TObjArray *array)
     entry->Eta = eta;
     entry->Phi = momentum.Phi();
     entry->PT = pt;
-    entry->IsolationVar = candidate->IsolationVar;
+    entry->IsolationVar = candidate->TrackIsolationVar;
 
     entry->Charge = candidate->Charge;
     entry->IsEMCand = candidate->IsEMCand;
